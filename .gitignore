@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.DS_Store
+build/
+dist/
+
+# generated benchmark output (bench/footprint.py writes this on run)
+bench/footprint.json

@@ -1,0 +1,9 @@
+# Core: the filter and ROM need only numpy.
+numpy>=1.21
+
+# Baseline reproduction (reproduce/solver_comparison.py): the embedded QP.
+# Pinned: OSQP's ADMM iteration counts are version-sensitive, so reproducing the solver
+# comparison to the digit needs this version (the qualitative result holds across versions).
+osqp==1.1.3
+scipy>=1.9
+
