@@ -64,7 +64,7 @@ def part1():
     print(f"{'true s_R':>10}{'SOH':>8}{'within bound':>15}{'SOC':>9}{'peak T':>9}"
           f"{'peak V':>9}{'safe':>7}")
     first_unsafe = None
-    for sr in (1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.5, 3.0, 3.5, 4.0):
+    for sr in (1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.5, 4.0):
         soh = 1.0 - 0.2*(sr - 1.0)/0.8
         plant = dict(R=sr, Q=max(soh, 0.4), plate=1.0 + 0.6*(sr - 1.0)/0.8)
         soc, mT, mV, ok = run(plant, dict(R=SR_BOUND, Q=1.0, plate=1.0))
@@ -96,7 +96,7 @@ def part1():
 def part2():
     print("\nPart 2 -- what the filter is anchored to, over the same aged cells")
     print(f"{'SOH':>6}{'anchor':>22}{'SOC':>9}{'peak T':>9}{'peak V':>9}{'safe':>7}")
-    for soh in (1.0, 0.9, 0.85, 0.8):
+    for soh in (1.0, 0.95, 0.9, 0.85, 0.8):
         plant = soh_to_scale(soh)
         for lab, filt, dT in (
                 ("fresh model (s_R=1.0)", dict(R=1.0, Q=1.0, plate=1.0), DT0),
@@ -113,12 +113,12 @@ def part2():
 
 def part3():
     print("\nPart 3 -- margin gains (K, f) over aged and cooling-faulted cells")
-    cells = [(soh, cl) for soh in (1.0, 0.95, 0.9, 0.85, 0.8)
-                       for cl in (0.0, 0.10, 0.20, 0.33)]
+    cells = [(soh, cl) for soh in (1.0, 0.975, 0.95, 0.925, 0.9, 0.875, 0.85, 0.825, 0.8)
+                       for cl in (0.0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.33)]
     print(f"{'K':>4}{'f':>7}{'viol':>8}{'worst T':>10}{'worst V':>10}{'mean SOC':>10}")
     total = 0
-    for K in (5, 10, 15, 20, 25):
-        for f in (0.1, 0.2, 0.25, 0.3, 0.4):
+    for K in (5, 8, 10, 12, 15, 18, 20, 22, 25):
+        for f in (0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40):
             bad = 0; wT = wV = 0.0; socs = []
             for (soh, cl) in cells:
                 soc, mT, mV, ok = run(soh_to_scale(soh), dict(R=SR_BOUND, Q=1.0, plate=1.0),
@@ -127,9 +127,9 @@ def part3():
             total += bad
             print(f"{K:>4}{f:>7.2f}{f'{bad}/{len(cells)}':>8}{wT:>10.2f}{wV:>10.3f}"
                   f"{np.mean(socs):>10.4f}")
-    print(f"\n  {total} violations across the whole {5*5} gain grid on {len(cells)} aged,")
-    print("  cooling-faulted cells, so the deployed point (K=15, f=0.25) sits inside a safe")
-    print("  region rather than on a tuned edge.")
+    print(f"\n  {total} violations in {9*7*len(cells)} runs: every one of the {9*7} gain")
+    print(f"  settings against every one of the {len(cells)} aged, cooling-faulted cells. The")
+    print("  deployed point (K=15, f=0.25) sits inside a safe region, not on a tuned edge.")
     print("\n  Read the SOC column alongside it, though: safety here is not scarce, charge is.")
     print("  Both gains cost delivered charge monotonically, and by K=25 the thermal margin")
     print("  (0.5 + 25*0.8 = 20.5 C) pushes the effective limit below ambient, so the filter")
