@@ -298,6 +298,11 @@ requirements.txt          numpy (core) + osqp/scipy (solver baseline)
   QP solves), a couple of minutes on `--full`.
 - `bash run_all.sh` runs the whole set end to end.
 
+## Paper
+
+The write-up this code accompanies lives in [`paper/`](paper/), source and compiled PDF. The numbers in
+its text are produced by the experiments here; see [`paper/README.md`](paper/README.md) to build it.
+
 ## Author and license
 
 Keshav Krishnan.

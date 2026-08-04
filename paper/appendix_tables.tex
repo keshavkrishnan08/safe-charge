@@ -1,0 +1,171 @@
+% ROM param table body
+\newcommand{\romparamrows}{%
+Nominal capacity $Q_\mathrm{nom}$ & 5.00 & Ah\\
+Ohmic activation $E_a/R$ & 2435 & K\\
+RC time constant $\tau_1$ & 30 & s\\
+Lumped heat capacity $C_\mathrm{th}$ & 101.6 & J/K\\
+Heat-transfer coeff.\ $hA$ & 0.0799 & W/K\\
+Entropic coeff.\ $dU/dT$ & -0.112 & mV/K\\
+Plating margin $\phi_\mathrm{marg}$ & 19.0 & mV\\
+}
+
+\newcommand{\calibrows}{%
+Voltage RMSE (train / hold-out) & 20.3 / 21.3 & mV\\
+Voltage max err (hold-out) & 51.8 & mV\\
+Temperature RMSE (train / hold-out) & 1.32 / 1.44 & \degC\\
+Plating-potential RMSE & 8.2 & mV\\
+}
+
+\newcommand{\estoraclerows}{%
+1.00 & 0 & 0.772 & 1.00 & 1.00 & 25.0\\
+0.95 & 0 & 0.751 & 1.00 & 1.20 & 25.0\\
+0.90 & 0 & 0.712 & 1.00 & 1.40 & 25.0\\
+0.85 & 0 & 0.637 & 1.00 & 1.60 & 26.6\\
+0.80 & 0 & 0.542 & 1.00 & 1.80 & 36.6\\
+}
+
+\newcommand{\estnominalrows}{%
+1.00 & 0 & 0.772 & 1.00 & 1.00 & 25.0\\
+0.95 & 0 & 0.776 & 1.00 & 1.20 & 21.8\\
+0.90 & 0 & 0.779 & 1.00 & 1.40 & 19.3\\
+0.85 & 0 & 0.781 & 1.00 & 1.60 & 17.3\\
+0.80 & 100 & 0.781 & 1.00 & 1.80 & 15.6\\
+}
+
+\newcommand{\estfixedrrows}{%
+1.00 & 0 & 0.446 & 1.00 & 1.00 & 61.8\\
+0.95 & 0 & 0.465 & 1.00 & 1.20 & 52.9\\
+0.90 & 0 & 0.486 & 1.00 & 1.40 & 46.0\\
+0.85 & 0 & 0.509 & 1.00 & 1.60 & 40.4\\
+0.80 & 0 & 0.536 & 1.00 & 1.80 & 35.8\\
+}
+
+\newcommand{\estonlinerows}{%
+1.00 & 0 & 0.772 & 0.99 & 1.00 & 25.0\\
+0.95 & 0 & 0.769 & 1.19 & 1.20 & 21.8\\
+0.90 & 0 & 0.748 & 1.38 & 1.40 & 19.3\\
+0.85 & 0 & 0.688 & 1.58 & 1.60 & 20.9\\
+0.80 & 0 & 0.589 & 1.77 & 1.80 & 32.8\\
+}
+
+\newcommand{\boundrows}{%
+1.00 & 44.5 & 43.1 & 0.0 & 13.5\\
+0.95 & 44.5 & 45.6 & 0.6 & 22.0\\
+0.90 & 44.5 & 47.8 & 2.8 & 30.5\\
+0.85 & 44.5 & 49.9 & 4.9 & 37.3\\
+0.80 & 44.5 & 51.8 & 6.8 & 42.3\\
+}
+
+\newcommand{\jointrows}{%
+0.90 & 10/10 & 38.6 & 17.3\\
+0.80 & 10/10 & 36.4 & 14.7\\
+}
+
+\newcommand{\oodrows}{%
+Warm (25\,\degC) & 19/20 & -0.2\\
+Cold (10\,\degC) & 20/20 & 0.8\\
+}
+
+\newcommand{\deadlinerows}{%
+20 & 0.571 & 0.571 & 0.314\\
+25 & 0.678 & 0.678 & 0.360\\
+30 & 0.754 & 0.754 & 0.410\\
+35 & 0.780 & 0.780 & 0.463\\
+40 & 0.785 & 0.785 & 0.519\\
+}
+
+\newcommand{\kthrows}{%
+0 & 0.786 & 44.5 & 0\\
+5 & 0.786 & 41.5 & 0\\
+8 & 0.784 & 39.7 & 0\\
+11 & 0.774 & 37.8 & 0\\
+14 & 0.713 & 35.9 & 0\\
+}
+
+\newcommand{\fullwarmrows}{%
+CC--CV 0.5C & 85.6 & 0.446 & 30.7 & 0\\
+CC--CV 1C & 87.8 & 0.773 & 38.7 & 22\\
+CC--CV 2C & 84.4 & 0.803 & 53.5 & 100\\
+CC--CV 3C & 81.5 & 0.803 & 60.9 & 100\\
+MSCC & 85.0 & 0.802 & 50.5 & 100\\
+Ref.\ governor & 86.5 & 0.773 & 40.7 & 0\\
+MPC (nominal) & 87.4 & 0.782 & 40.6 & 0\\
+Offline opt. & 85.9 & 0.798 & 44.5 & 0\\
+PPO-Lag & 87.3 & 0.734 & 40.1 & 9\\
+Shield & 86.5 & 0.773 & 40.7 & 0\\
+PPO soft & 82.8 & 0.321 & 29.0 & 0\\
+\textbf{Ours} & 86.5 & 0.773 & 40.7 & 0\\
+}
+
+\newcommand{\fullcoldrows}{%
+CC--CV 0.5C & 85.4 & 0.452 & 16.1 & 0\\
+CC--CV 1C & 87.3 & 0.765 & 24.8 & 100\\
+CC--CV 2C & 84.1 & 0.802 & 39.6 & 100\\
+CC--CV 3C & 81.4 & 0.803 & 46.5 & 100\\
+MSCC & 85.2 & 0.799 & 34.3 & 100\\
+Ref.\ governor & 86.9 & 0.707 & 25.1 & 0\\
+MPC (nominal) & 87.1 & 0.754 & 24.7 & 40\\
+Offline opt. & 86.2 & 0.798 & 29.2 & 0\\
+PPO-Lag & 84.8 & 0.426 & 17.0 & 0\\
+Shield & 86.9 & 0.707 & 25.1 & 0\\
+PPO soft & 61.3 & 0.160 & 10.6 & 0\\
+\textbf{Ours} & 86.9 & 0.707 & 25.1 & 0\\
+}
+
+\newcommand{\safetyrows}{%
+CC--CV 1C & 27 & 60 & 39.7\\
+CC--CV 2C & 100 & 60 & 100.0\\
+CC--CV 3C & 100 & 60 & 100.0\\
+MSCC & 100 & 60 & 100.0\\
+PPO-Lag & 14 & 360 & 17.9\\
+Shield & 0 & 360 & 0.8\\
+PPO soft & 0 & 360 & 0.8\\
+\textbf{Ours} & 0 & 360 & 0.8\\
+}
+
+\newcommand{\clrows}{%
+0.90 & Oracle (given $R$) & 35.9 & 36.5 & 0.719 & $\checkmark$\\
+0.90 & No adaptation & 41.2 & 28.0 & 0.778 & $\checkmark$\\
+0.90 & Online est.\ (ours) & 40.9 & 21.5 & 0.776 & $\checkmark$\\
+0.80 & Oracle (given $R$) & 31.1 & 59.0 & 0.533 & $\checkmark$\\
+0.80 & No adaptation & 41.3 & 27.3 & 0.765 & $\checkmark$\\
+0.80 & Online est.\ (ours) & 35.9 & 24.6 & 0.563 & $\checkmark$\\
+}
+
+\newcommand{\monorows}{%
+1.0 & 45.1 & 60.3 & $\times$ & 44.7 & 78.5 & $\checkmark$\\
+1.2 & 41.7 & 61.6 & $\checkmark$ & 41.6 & 77.8 & $\checkmark$\\
+1.4 & 38.7 & 66.3 & $\checkmark$ & 38.6 & 74.2 & $\checkmark$\\
+1.6 & 36.0 & 57.9 & $\checkmark$ & 35.8 & 64.8 & $\checkmark$\\
+1.8 & 33.1 & 48.7 & $\checkmark$ & 32.6 & 54.7 & $\checkmark$\\
+2.0 & 30.1 & 38.1 & $\checkmark$ & 29.5 & 42.8 & $\checkmark$\\
+2.2 & 26.9 & 24.5 & $\checkmark$ & 26.5 & 27.1 & $\checkmark$\\
+}
+
+\newcommand{\monostrueEIGHTY}{1.8}
+
+\newcommand{\monostrueNINETY}{1.4}
+
+\newcommand{\dcirrows}{%
+0.90 & Oracle & 38.7 & 0.764 & 1.40 & 1.40 & $\checkmark$\\
+0.90 & No adapt. & 44.7 & 0.786 & 1.00 & 1.40 & $\checkmark$\\
+0.90 & Differential obs.\ (DCIR) & 43.2 & 0.778 & 1.21 & 1.40 & $\checkmark$\\
+0.80 & Oracle & 33.0 & 0.589 & 1.80 & 1.80 & $\checkmark$\\
+0.80 & No adapt. & 45.2 & 0.786 & 1.00 & 1.80 & $\times$\\
+0.80 & Differential obs.\ (DCIR) & 37.2 & 0.486 & 1.73 & 1.80 & $\checkmark$\\
+}
+
+\newcommand{\dcirref}{31.6}
+
+\newcommand{\causalrows}{%
+Offline opt.\ (non-causal) & 0.798 & 42.0 & 2.4 & $\checkmark$\\
+Ref.\ governor (greedy) & 0.768 & 40.0 & 14.6 & $\checkmark$\\
+\textbf{Ours} (PPO) & 0.768 & 40.0 & 14.5 & $\checkmark$\\
+}
+
+\newcommand{\oodsafetyrows}{%
+Aged-DFN calibration (warm$+$cold) & 40/40 & 39.3\\
+Aged-DFN disjoint (fresh seed) & 156/156 & 41.9\\
+\textbf{Aged-DFN pooled} & \textbf{196/196} & \textbf{41.9}\\
+Joint (noise$+$age$+$DFN) & 20/20 & 38.6\\
+}

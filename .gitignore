@@ -8,3 +8,11 @@ dist/
 
 # generated benchmark output (bench/footprint.py writes this on run)
 bench/footprint.json
+
+# LaTeX build artifacts (keep the .tex, .bib, figures, and the .pdf)
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.synctex.gz
