@@ -12,10 +12,15 @@ Design choices that keep the comparison honest and fair to OSQP:
  - It is handed the SAME fail-safe bound s_R=1.8, the SAME margins, and the SAME plating cap
    the filter uses. Any difference is the solver's, not a handicap.
 
-The point: bounding a QP's worst-case time means capping its iterations, and a capped OSQP
-stops converging at the cold, rated-end-of-life corner and overshoots the 4.20 V limit; the
-full-budget OSQP stays safe but its iteration count is data-dependent; the filter's fixed 18
-bisection iterations are bounded AND safe.
+The point is the COST model, not a "the QP is unsafe" claim: given the same fail-safe bound,
+all three controllers stay T/V-safe. Bounding a QP's worst-case time means capping its
+iterations, and the capped OSQP stops converging at the cold, rated-end-of-life corner and
+applies an unconverged current (it stays under 4.20 V, but by a thinner margin and with no
+convergence guarantee); the full-budget OSQP converges but at a data-dependent iteration
+count that climbs at the corner. The filter's fixed 18 bisection iterations are bounded and
+exact at once. The SOC column prices that simplicity: at the cold corner all three deliver
+the same charge, while on the warmer main population the filter cedes a few points of SOC to
+the foresighted full-budget QP -- the trade reported in Sec. VI-E of the paper.
 
     python reproduce/solver_comparison.py            # quick: corner only, n=15
     python reproduce/solver_comparison.py --full      # full run: main n=100 + corner n=50
@@ -80,7 +85,7 @@ def drive_qp(scale, soc0, T0, max_iter):
         maxT, maxV = max(maxT, o["T"]), max(maxV, o["V"]); x0 = np.concatenate([xs[1:], xs[-1:]])
         if s["soc"] >= SOC_TGT: break
     return dict(safe=int(maxT <= TLIM and maxV <= VLIM), maxV=maxV, iters=iters,
-                nonconv=niter_hit+ninfeas)
+                nonconv=niter_hit+ninfeas, soc=s["soc"])
 
 def drive_filter(scale, soc0, T0):
     plant = BatteryROM(); plant.scale = dict(scale); s = plant.init_state(soc0, T0)
@@ -91,7 +96,7 @@ def drive_filter(scale, soc0, T0):
         s, o = plant.step(s, float(max(0.0, I)), DT, TAMB)
         maxT, maxV = max(maxT, o["T"]), max(maxV, o["V"])
         if s["soc"] >= SOC_TGT: break
-    return dict(safe=int(maxT <= TLIM and maxV <= VLIM), maxV=maxV)
+    return dict(safe=int(maxT <= TLIM and maxV <= VLIM), maxV=maxV, soc=s["soc"])
 
 def main_conditions(n_per_soh):
     rng = np.random.default_rng(MAIN_SEED); conds = []
@@ -115,15 +120,16 @@ def corner_conditions(n):
 
 def run_pop(conds, full_iter):
     BUD = {"QP-full": full_iter, "QP-embedded": 25}
-    agg = {k: dict(n=0, safe=0, iters=[], nonconv=0, worstV=0.0) for k in BUD}
-    agg["filter"] = dict(n=0, safe=0, worstV=0.0)
+    agg = {k: dict(n=0, safe=0, iters=[], nonconv=0, worstV=0.0, soc=[]) for k in BUD}
+    agg["filter"] = dict(n=0, safe=0, worstV=0.0, soc=[])
     for (scale, soc0, T0) in conds:
         for tag, mi in BUD.items():
             r = drive_qp(scale, soc0, T0, mi); a = agg[tag]
             a["n"] += 1; a["safe"] += r["safe"]; a["iters"] += r["iters"]; a["nonconv"] += r["nonconv"]
-            a["worstV"] = max(a["worstV"], r["maxV"])
+            a["worstV"] = max(a["worstV"], r["maxV"]); a["soc"].append(r["soc"])
         f = drive_filter(scale, soc0, T0); a = agg["filter"]
         a["n"] += 1; a["safe"] += f["safe"]; a["worstV"] = max(a["worstV"], f["maxV"])
+        a["soc"].append(f["soc"])
     return agg
 
 def summarize(agg):
@@ -133,10 +139,11 @@ def summarize(agg):
         o[tag] = dict(n=a["n"], safe=a["safe"], viol_pct=round(100*(a["n"]-a["safe"])/a["n"], 1),
                       nonconv_pct=round(100*a["nonconv"]/max(len(a["iters"]), 1), 1),
                       iter_mean=round(float(it.mean()), 1), iter_max=int(it.max()),
-                      worstV=round(a["worstV"], 3))
+                      worstV=round(a["worstV"], 3), soc=round(float(np.mean(a["soc"])), 3))
     a = agg["filter"]
     o["filter"] = dict(n=a["n"], safe=a["safe"], viol_pct=round(100*(a["n"]-a["safe"])/a["n"], 1),
-                       iters_fixed=18, worstV=round(a["worstV"], 3))
+                       iters_fixed=18, worstV=round(a["worstV"], 3),
+                       soc=round(float(np.mean(a["soc"])), 3))
     return o
 
 def run_all(n_main=50, n_corner=50, full_iter=20000):
@@ -153,12 +160,13 @@ if __name__ == "__main__":
         print("Quick: cold, rated-end-of-life corner, n=15 (seed 20260918)\n")
     for pop in pops:
         print(f"--- {pop} population ---")
-        print(f"{'Controller':16}{'Iters mean/max':>16}{'T/V viol %':>12}{'worst V':>10}")
+        print(f"{'Controller':16}{'Iters mean/max':>16}{'T/V viol %':>12}{'worst V':>10}{'mean SOC':>10}")
         for tag in ("QP-full", "QP-embedded", "filter"):
             d = out[pop][tag]
             im = f"{d.get('iter_mean','18.0')}/{d.get('iter_max',18)}" if tag != "filter" else "18/18"
-            print(f"{tag:16}{im:>16}{d['viol_pct']:>11}%{d['worstV']:>10}")
+            print(f"{tag:16}{im:>16}{d['viol_pct']:>11}%{d['worstV']:>10}{d['soc']:>10}")
         print()
     print("All three stay T/V-safe. Bounding the QP's cost (the 25-iteration cap) costs it "
           "convergence, while the full budget converges at a data-dependent iteration count. "
-          "Only the filter is bounded and exact at once.")
+          "Only the filter is bounded and exact at once; the mean-SOC column is what that "
+          "simplicity costs against a QP with foresight.")

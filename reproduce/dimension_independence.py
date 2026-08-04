@@ -21,7 +21,9 @@ DT, NSTEP, TAMB, T0, SOC_TGT = 30.0, 80, 25.0, 25.0, 0.80
 VLIM, TLIM = 4.20, 45.0
 dV, dT, dP = 0.03, 0.5, 0.006          # CTRL_MARGINS
 Qn = BatteryROM().p["Q_nom"]
-MARG = BatteryROM().plating_margin()   # certify the FULL set S = {T, V, plating}, not T/V alone
+# The certificate covers S = {T, V}. We additionally SCORE the plating margin below, so a
+# run counts as safe only if it also held plating -- enforced and checked, not certified.
+MARG = BatteryROM().plating_margin()
 ENV = {"R": (1.0, 1.8), "cool": (1.0, 0.75), "Cth": (1.0, 0.80), "plate": (1.0, 1.6)}
 CORNER = {k: v[1] for k, v in ENV.items()}
 CHANS = ["R", "cool", "Cth", "plate"]
