@@ -1,6 +1,8 @@
 """Control-oriented reduced-order electro-thermal-aging model (ROM) of an LG M50
 cell, calibrated to PyBaMM (Chen2020 electro-thermal; OKane2022 plating) across
-ambients 0/10/25 C. See calibrate_rom.py / results/tables/calibration_report.json.
+ambients 0/10/25 C. The fitted coefficients ship in _data/rom_params.json; the
+calibration harness and its held-out report (voltage RMSE 20.3 mV, temperature RMSE
+1.32 C) are described in Sec. V of the paper and are not part of this release.
 
 State: soc, T[C], V1 (RC overpotential), aging {Qloss, Rfac}.
 Signals: terminal voltage, heat decomposition (ohmic/activation/reversible),
@@ -23,16 +25,38 @@ def load_params():
 
 
 class BatteryROM:
-    """Single-cell ROM. Charge current I>0 charges the cell."""
-    def __init__(self, params=None, cell_scale=None):
+    """Single-cell ROM. Charge current I>0 charges the cell.
+
+    `rc` selects the RC-branch discretization:
+      "euler" (default) explicit Euler, V1 <- V1 + dt*(-V1 + I*R1)/tau1. Valid for
+              dt <= tau1; this is what every published number was produced with.
+      "exact" zero-order-hold, V1 <- a*V1 + (1-a)*I*R1 with a = exp(-dt/tau1).
+              Unconditionally stable, so it is the one to use when studying control
+              steps longer than tau1 (see reproduce/step_size.py).
+    At dt = tau1 the Euler factor is exactly 0 and the exact factor is e^-1 ~ 0.368,
+    so the two agree on the steady state but not on the residual; the certificate's
+    thermal margin is what absorbs that difference.
+    """
+    def __init__(self, params=None, cell_scale=None, rc="euler"):
         self.p = load_params() if params is None else params
         # per-cell multiplicative variation (cell-to-cell / aging)
         self.scale = dict(R=1.0, Q=1.0, plate=1.0) if cell_scale is None else cell_scale
+        if rc not in ("euler", "exact"):
+            raise ValueError(f"rc must be 'euler' or 'exact', got {rc!r}")
+        self.rc = rc
 
     # ----- overpotential (identical form to calibration) -----
+    def R_ohmic(self, soc, T_C):
+        """Ohmic resistance [Ohm]. A property of the cell and its temperature, independent
+        of the applied current, so it stays well defined at I=0 -- which the RC branch's
+        dissipation V1^2/R1 needs, since that term survives after the current is cut."""
+        a0, a3, Ea, _A, _cT, _i0_0, _i0_1 = self.p["eta_params"]
+        return abs(a0 + a3*np.exp(6.0*(soc-1.0))) \
+            * np.exp(Ea*(1.0/(T_C+273.15)-1.0/TREF)) * self.scale["R"]
+
     def eta_irrev(self, soc, T_C, I):
-        a0, a3, Ea, A, cT, i0_0, i0_1 = self.p["eta_params"]
-        Rohm = abs(a0 + a3*np.exp(6.0*(soc-1.0))) * np.exp(Ea*(1.0/(T_C+273.15)-1.0/TREF)) * self.scale["R"]
+        _a0, _a3, _Ea, A, cT, i0_0, i0_1 = self.p["eta_params"]
+        Rohm = self.R_ohmic(soc, T_C)
         i0 = np.clip(i0_0*np.exp(i0_1*soc), 1e-3, 50.0)
         ohm = I*Rohm
         act = A*(1.0 + cT*(T_C-25.0))*np.arcsinh(I/(2.0*i0))
@@ -55,8 +79,9 @@ class BatteryROM:
         CLOSED-LOOP DFN replay (not fixed-C-rate): the instantaneous potential proxy
         under-predicts DFN plating during high-current phases, and the true safe rate
         falls at low temperature. Linear in T between calibrated anchors
-        (25 C -> 2C, 10 C -> 1.0C), clipped to [0.8C, 2C]. This is what makes the
-        realized current profile DFN-plating-safe, closing the gap the proxy misses."""
+        (25 C -> 2C, 10 C -> 1.0C), clipped to [0.70C, 2C]; the 0.70C floor binds only
+        below ~5.5 C. This is what makes the realized current profile DFN-plating-safe,
+        closing the gap the instantaneous potential proxy misses."""
         Qn = self.p["Q_nom"] * self.scale["Q"]
         crate = float(np.clip(1.00 + 0.067*(T_C - 10.0), 0.70, 2.00))
         return crate * Qn
@@ -70,15 +95,35 @@ class BatteryROM:
 
     # ----- one step of dt seconds -----
     def step(self, s, I, dt, T_amb):
+        """Advance one control step.
+
+        With rc="euler" (the default, and what every published number used) the RC branch
+        decays by (1 - dt/tau1), so dt must satisfy dt <= tau1 = 30 s: beyond that the
+        update oscillates, and at dt >= 2*tau1 it diverges. The paper's step dt = tau1
+        makes the factor exactly 0, so the discrete update leaves no RC residual and is
+        at least as conservative as the continuous-time bound exp(-dt/tau1) ~ 0.368 used
+        in the proof of Prop. 1.
+
+        With rc="exact" the branch uses the zero-order-hold factor exp(-dt/tau1), which is
+        stable for every dt. Use it to study control steps longer than tau1."""
         p = self.p
+        if self.rc == "euler" and dt > p["tau1"]:
+            raise ValueError(f"dt={dt}s exceeds the RC time constant tau1={p['tau1']}s; the "
+                             "explicit-Euler RC update is unstable there. Use "
+                             "BatteryROM(rc='exact') for longer control steps.")
         soc, T, V1 = s["soc"], s["T"], s["V1"]
         aging = s.get("aging", {"Qloss": 0.0, "Rfac": 1.0})
         Rfac = aging.get("Rfac", 1.0)
         ohm, act = self.eta_irrev(soc, T, I)
         ohm *= Rfac; act *= Rfac
-        # RC transient on the ohmic part (fast dynamics)
-        R1 = p.get("R1_frac", 0.3) * max(abs(ohm)/max(I, 1e-6), 1e-4)
-        V1n = V1 + dt*(-V1/p["tau1"] + I*R1/p["tau1"])
+        # RC transient on the ohmic part (fast dynamics). R1 is derived from the ohmic
+        # RESISTANCE, not from ohm/I: the two agree for I>0, but only the former stays
+        # finite at I=0, where the RC branch is still dissipating V1^2/R1 into the cell.
+        R1 = p.get("R1_frac", 0.3) * max(self.R_ohmic(soc, T)*Rfac, 1e-4)
+        if self.rc == "exact":
+            a = np.exp(-dt/p["tau1"]); V1n = a*V1 + (1.0-a)*I*R1
+        else:
+            V1n = V1 + dt*(-V1/p["tau1"] + I*R1/p["tau1"])
         eta = ohm + act + V1n
         V = ocv(soc) + eta
         Q_ohm = I*ohm; Q_act = I*act; Q_rc = V1n*V1n/max(R1, 1e-6)
