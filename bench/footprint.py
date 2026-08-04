@@ -41,12 +41,15 @@ report = {
         "runtime_deps": ["numpy"],
         "third_party_solver": None,
         "loop_bound": "static (18 iterations)",
-        "heap_alloc_in_loop": False,
+        # The bisection body allocates nothing; each iteration calls the ROM one-step map,
+        # which builds its observation dict. An allocation-free build inlines that map.
+        "heap_alloc_in_bisection_body": False,
     },
     "embedded_qp_alternative": {
         "runtime_deps": ["numpy", "scipy.sparse", "osqp"],
         "third_party_solver": "OSQP (compiled ADMM QP solver)",
-        "loop_bound": "data-dependent (mean/max ~85/775 iterations at the corner; see reproduce/solver_comparison.py)",
+        "loop_bound": "data-dependent (mean/max ~85/775 iterations at the cold corner; "
+                      "reproduce/solver_comparison.py --full)",
         "heap_alloc_in_loop": True,  # sparse matrix assembly + solver setup each step
     },
 }
@@ -63,7 +66,7 @@ except Exception as e:
 print("== Certified safety path (this package) ==")
 print(f"  source lines: {certified}  ({', '.join(f'{k}={v}' for k,v in filt.items())})")
 print(f"  runtime dependencies: numpy only, no third-party solver")
-print(f"  loop bound: static, 18 iterations  |  heap allocation in loop: none")
+print(f"  loop bound: static, 18 iterations  |  allocation in the bisection body: none")
 print("\n== Embedded-QP alternative (OSQP linearized MPC) ==")
 qp = report["embedded_qp_alternative"]
 print(f"  runtime dependencies: {', '.join(qp['runtime_deps'])}")
@@ -71,6 +74,9 @@ if "osqp_installed_mb" in qp:
     print(f"  adds to the TCB: OSQP solver, {qp['osqp_bundled_c_files']} bundled C/header files, "
           f"{qp['osqp_installed_mb']} MB")
 print(f"  loop bound: {qp['loop_bound']}  |  heap allocation in loop: yes (matrix assembly + setup)")
+print("\n  (Each bisection iteration calls the ROM one-step map, which builds an observation dict;\n"
+      "   an allocation-free deployment inlines it. The bound -- 18 iterations, no convergence\n"
+      "   test -- is what the worst-case-time claim rests on.)")
 print("\nThe entire safety-critical numerics of the filter are elementary arithmetic and a "
       "statically bounded bisection an auditor can read on one screen; the QP path places an "
       "iterative solver whose convergence is the failure mode into the trusted computing base.")
