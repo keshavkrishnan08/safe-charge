@@ -52,14 +52,44 @@ enforced, not proven. We validate against a Doyle--Fuller--Newman plant in simul
 controller's realized current so the ROM never self-reports safety (voltage RMSE \VRMSE~mV). A trivial
 greedy governor matches a trained reinforcement-learning policy on every metric, so the filter, not
 the learner, carries safety. The filter records no observed temperature or voltage violation where
-fast CC--CV overshoots \SI{45}{\degreeCelsius} in every episode, delivers the charge of CC--CV at 1C
-while removing that protocol's plating, and holds temperature and voltage safe on \valSafe/\valN\
-disjoint aged draws and under a full recalibration of the ROM to a second cell chemistry.
+fast CC--CV overshoots \SI{45}{\degreeCelsius} in every episode, peaking at
+\SI{\dfnOursWarmT}{\degreeCelsius} against the \SI{45}{\degreeCelsius} limit; it delivers the charge of
+CC--CV at 1C (SOC \oursWarmSoc) while removing that protocol's \cconeWarmPviol\% plating rate, and
+holds temperature and voltage safe on \valSafe/\valN\ disjoint aged draws (Clopper--Pearson $95\%$
+upper bound \valCP\%) across SOH $1.0$--$0.8$ and under a full recalibration of the ROM to a second
+cell chemistry (\chemTwoSafe/\chemTwoN, voltage RMSE \chemTwoV~mV). Each projection costs at most
+$\filterEvalMax$ model evaluations and \SI{\filterMemB}{B} of state, with no solver and no dynamic
+allocation.
 \end{abstract}
 
 \begin{IEEEkeywords}
 Fast charging, safety filter, control-invariant set.
 \end{IEEEkeywords}
+
+\section*{Nomenclature}
+\vspace{-2pt}
+{\footnotesize\setlength{\tabcolsep}{0pt}\renewcommand{\arraystretch}{0.98}
+\noindent\begin{tabular}{@{}p{1.45cm}@{\hspace{4pt}}p{6.7cm}@{}}
+$T$, $V$ & Cell temperature and terminal voltage; limits $T_{\max}{=}\SI{45}{\degreeCelsius}$,
+$V_{\max}{=}\SI{4.2}{V}$.\\
+$\phi_\mathrm{an}$ & Anode plating overpotential, $\phi_s{-}\phi_e$ at the separator.\\
+$I$ & Applied current; $I_\pi$ proposed, $I_\mathrm{cmd}$ commanded, $I^\star$ largest admissible.\\
+$\mathcal S$ & Certified safe set $\{T\le T_{\max},V\le V_{\max}\}$; $\mathcal S_{-\delta}$ its
+margin-tightened inner approximation.\\
+$g_c$ & One-step peak of constraint $c$ predicted by the ROM.\\
+$\delta_T$, $\delta_V$, $\delta_P$ & Control margins on temperature, voltage, plating;
+$\delta_{T0}$ the base thermal margin.\\
+$s_R$, $\gamma$ & Aging channels: resistance scale and cooling-loss factor; $\hat s_R$ estimated,
+$s_R^\star$ the rated end-of-life bound.\\
+$K$, $f$ & Margin gains: resistance throttle and cooling reserve.\\
+$\Delta t$, $\tau_\mathrm{RC}$ & Control step and RC time constant, both \SI{30}{s}.\\
+$Q_\mathrm{gen}$ & Heat generation; ohmic, activation and reversible parts
+$Q_\mathrm{ohm}$, $Q_\mathrm{act}$, $Q_\mathrm{rev}$.\\
+$C_\mathrm{th}$, $hA$ & Lumped thermal capacity and heat-transfer coefficient.\\
+$R_\Omega$, $R_1$, $V_1$ & Ohmic resistance, RC-branch resistance and its overpotential.\\
+$\epsilon$, $n$ & Bisection current resolution; number of episodes in a stress test.
+\end{tabular}}
+\vspace{1pt}
 
 \section{Introduction}
 A fifteen-minute electric-vehicle charge draws current at rates that push a lithium-ion cell toward
@@ -108,8 +138,8 @@ every step. Our two mechanisms remove both: the $I{=}0$ backup collapses the QP 
 fail-safe prior supplies for free (Prop.~\ref{prop:mono}), a cheaper and more robust route to the same
 safety (Sec.~\ref{sec:solver}).
 
-\begin{figure}[tbp]\centering
-\resizebox{\columnwidth}{!}{%
+\begin{figure*}[!t]\centering
+\resizebox{0.78\textwidth}{!}{%
 \begin{tikzpicture}[
  font=\footnotesize, node distance=0pt,
  >={Stealth[length=6pt,width=5pt]},
@@ -136,7 +166,7 @@ safety (Sec.~\ref{sec:solver}).
 \caption{Control architecture. The policy proposes a target current, the safety filter projects it
 to the largest value that keeps the one-step transition inside the safe set, and the online
 estimator re-anchors the filter to the aging cell. Only the filter carries safety.}
-\label{fig:arch}\end{figure}
+\label{fig:arch}\end{figure*}
 
 \section{Related Work}
 \textbf{Safe reinforcement learning} enforces constraints through soft penalties
@@ -216,9 +246,14 @@ derivation, the full margin derivation, and figure galleries.}
 \end{proof}
 
 Our step ($\Delta t=\tau_\mathrm{RC}=\SI{30}{s}$) meets the condition at one time constant, leaving
-$\sim0.37$ of the RC overpotential energy after the cut, which the margin $\delta_T$ (base
-\SI{0.5}{\degreeCelsius} plus a $\sim$\SI{4.25}{\degreeCelsius} cooling reserve) absorbs, with the
-step-size tradeoff and residual bound detailed in the extended version. The invariance is exact in the
+$\sim0.37$ of the RC overpotential energy after the cut in continuous time, which the margin $\delta_T$
+(base \SI{0.5}{\degreeCelsius} plus a $\sim$\SI{4.25}{\degreeCelsius} cooling reserve) absorbs; the
+discrete update leaves less still, so the bound is conservative. Two opposing requirements pin the step
+rather than tuning: the residual argument wants $\Delta t\gtrsim\tau_\mathrm{RC}$, while the explicit
+discretisation of the RC branch is stable only for $\Delta t\le\tau_\mathrm{RC}$. Safety is not fragile
+in the choice: sweeping $\Delta t$ from \SI{\stepLo}{s} to \SI{\stepHi}{s} yields no violation, moves
+delivered SOC by under $\stepSocSpread$ points, and never lets the residual exceed $\rcResidPct\%$ of
+the base margin. The invariance is exact in the
 \emph{ROM}, and transfer to the DFN plant is bounded by the margins and confirmed by replay
 (Sec.~\ref{sec:results}), not asserted, while the plating potential, carrying diffusion
 memory, stays excluded from $\mathcal S$ and enforced empirically.
@@ -232,7 +267,8 @@ The anode overpotential is affine and decreasing in current, so plating enters t
 bisection as $T$ and $V$ with a certified cap wherever a nonnegative one exists. The $I{=}0$ backup,
 however, does not clear the plating margin at the cold, aged, high-SOC corner, so plating is not
 control-invariant on its own. We keep the trajectory feasible with a temperature-dependent current cap
-(\SI{2}{C} at $\SI{25}{\degreeCelsius}$ tapering to \SI{1.0}{C} at $\SI{10}{\degreeCelsius}$, fit from
+(\SI{2}{C} at $\SI{25}{\degreeCelsius}$ tapering to \SI{1.0}{C} at $\SI{10}{\degreeCelsius}$ with a
+\SI{\platCapFloor}{C} floor, fit from
 closed-loop DFN residuals) and monitor it without claiming a guarantee.
 
 \subsection{Aging without an oracle, and why a bound is enough}
@@ -264,8 +300,9 @@ Both $\partial_I g_T$ and $\partial_I g_V$ are non-negative, since the ohmic and
 with current. Both $\partial_{s_R}g_T$ and $\partial_{s_R}g_V$ are non-negative, since the resistance
 scale multiplies ohmic heat and voltage. And $\partial_\gamma g_T\ge0$ whenever $T\ge T_\mathrm{amb}$,
 since worse cooling adds heat. The endothermic $Q_\mathrm{rev}{=}I\,T\,\mathrm dU/\mathrm dT$ stays below
-$15\%$ of the ohmic term and never overturns $\partial_I g_T\ge0$, verified numerically over $10$--$80\%$
-SOC. Each $g_c$ is thus non-decreasing in $I$ and in each channel, so $I^\star$ is non-increasing in each,
+$\revFrac\%$ of the irreversible heat over the admissible band and never overturns $\partial_I g_T\ge0$,
+which holds for every $I$ above \SI{\monoImin}{C}, an order of magnitude below the cap's
+\SI{\platCapFloor}{C} floor, verified numerically over $10$--$80\%$ SOC. Each $g_c$ is thus non-decreasing in $I$ and in each channel, so $I^\star$ is non-increasing in each,
 and any $(\hat s_R,\hat\gamma)\succeq(s_R^\star,\gamma^\star)$ commands a current the plant admits.
 \end{proof}
 Reducing aging to these two channels drops nothing that matters, because capacity fade, OCV shift,
@@ -285,8 +322,12 @@ The margin realizes both channels of Prop.~\ref{prop:mono},
 $\delta_T{=}\delta_{T0}{+}K(\hat s_R{-}1){+}f(T{-}T_\mathrm{amb})$. The throttle ($K{=}15$) converts
 the resistance bound into thermal headroom, and the reserve ($f{=}0.25$) holds back a fraction $f$ of
 the temperature rise, certifying any cooling loss up to $\hat\gamma{=}1{+}f$, a $20\%$ fault. The
-gains are sized to that $20\%$-loss edge, not fitted to a failure. Sweeping them over $K\in[5,25]$ and
-$f\in[0.1,0.4]$ leaves zero violations in every cell of the aged, cooling-faulted grid, a safe region, not a tuned point. The reserve also proves conservative, holding safety to a $\coolSafeLoss\%$
+gains are sized to that $20\%$-loss edge, not fitted to a failure. Of the design constants,
+$T_{\max}$, $V_{\max}$ and $s_R^\star$ are manufacturer limits and the rated end-of-life envelope,
+$f$ is derived from the cooling fault to be covered, and only $K$ is chosen by simulation. Sweeping
+$K\in[5,25]$ and $f\in[0.1,0.4]$ leaves zero violations in all $\gainRuns$ runs of the aged,
+cooling-faulted grid, a safe region, not a tuned point; $K$ is then set by delivered charge, which it
+costs monotonically, rather than by safety. The reserve also proves conservative, holding safety to a $\coolSafeLoss\%$
 cooling loss where it certifies $20\%$. We freeze the gains and test on a \emph{disjoint} ensemble they never saw, and the filter stays safe on
 every held-out draw, including the joint noise/aging/out-of-model case a real BMS faces
 (Sec.~\ref{sec:results}, Table~\ref{tab:safety}).
@@ -410,15 +451,15 @@ Stress test & $n$ & viol.\ & CP $95\%$ [\%]\\\hline
 \end{tabular}
 \end{table}
 
-\begin{figure}[tbp]\centering
-\includegraphics[width=\columnwidth]{fig3_aging}
+\begin{figure*}[!t]\centering
+\includegraphics[width=\textwidth]{fig3_aging}
 \caption{Deployment across the SOH range. \textbf{(a)}~among the filtered variants, only ``no
 adaptation'' violates, and early
 ($55\%$ of episodes at SOH~0.9, $100\%$ at 0.8). Oracle, worst-case-$R$ prior, and our estimator
 stay at 0\% in model. \textbf{(b)}~the worst-case prior wastes charge on healthy cells while the
 estimator recovers the oracle's charge. \textbf{(c)}~held-out aged-DFN ensemble, where the estimator
 stays safe out of model.}
-\label{fig:aging}\end{figure}
+\label{fig:aging}\end{figure*}
 
 \subsection{Safety needs a bound, not identification}
 Fig.~\ref{fig:mono} closes the entire loop against the DFN and sweeps the resistance scale fed to
@@ -430,8 +471,8 @@ rests on the bound, not on the DFN matching the ROM, and the resistance estimato
 charge speed. The one orthogonal fault, an unmodeled cooling loss, is handled by the margin's second
 channel.
 
-\begin{figure}[tbp]\centering
-\includegraphics[width=\columnwidth]{fig10_monotone}
+\begin{figure*}[!t]\centering
+\includegraphics[width=\textwidth]{fig10_monotone}
 \caption{Closed-loop against the DFN, safety is monotone in the resistance scale the filter is
 told to use (Prop.~\ref{prop:mono}). \textbf{(a)}~peak temperature falls as $\hat s_R$ grows.
 Every value past a boundary near $1.1$, well below the true aged $s_R^\star$ (dotted), is safe,
@@ -439,7 +480,7 @@ so a conservative bound certifies safety without identifying $s_R^\star$.
 \textbf{(b)}~the bound's only price is delivered charge, which is why an online estimate still
 earns its keep, for speed. Under-shooting the bound ($\hat s_R{=}1.0$, $\times$) is the lone
 unsafe point.}
-\label{fig:mono}\end{figure}
+\label{fig:mono}\end{figure*}
 
 The estimate \emph{under}-shoots by end of charge ($\hat s_R{\to}\clRestAged$ vs
 $s_R^\star{=}\clRtrueAged$), which would be unsafe were the final estimate the certificate. It is
@@ -469,13 +510,23 @@ safety follows from the method and not a tuned parameter set.
 
 \subsection{Solver-free feasibility versus MPC}\label{sec:solver}
 The projection is the only online computation carrying safety, a bisection of a few ROM forward maps
-with no matrix factorization. Its safety logic is \filterSloc\ numpy-only source lines a
-functional-safety audit can read in full, where an embedded QP instead places a compiled ADMM solver
-(\qpTcbFiles\ bundled C files) in the trusted computing base. Against a receding-horizon MPC ladder,
+with no matrix factorization. It costs $O(\log(1/\epsilon))$ model evaluations for current resolution
+$\epsilon$, and because the iteration count is fixed rather than convergence-tested, that bound is met
+on every input: at most $\filterEvalMax$ closed-form evaluations, ${\sim}\filterFlops$ flops, and
+\SI{\filterMemB}{B} of state and constants with no dynamic allocation, \SI{\filterWorstMs}{ms}
+worst-case in the reference implementation and orders of magnitude inside the \SI{30}{s} step. The
+tolerance after $k$ halvings is $I_{\max}/2^{k}$, \SI{\tolEpsUA}{$\mu$A} at $k{=}\tolIters$; since
+the bisection maintains $\mathrm{lo}\le I^\star$, a coarser tolerance only under-commands, so safety is
+independent of $k$ and only delivered charge varies, saturating by $k{\approx}\tolKnee$. Its safety
+logic is \filterSloc\ numpy-only source lines a functional-safety audit can read in full, where an embedded QP instead places a compiled ADMM solver
+(\qpTcbFiles\ bundled C source and header files) in the trusted computing base. Against a receding-horizon MPC ladder,
 nominal MPC (fresh $R$) violates \mpcNomViol\% under aging, while an MPC given the \emph{same}
 fail-safe bound is oracle-free and safe (\mpcBoundedViol\%), as is an oracle MPC (\mpcOracleViol\%).
 Oracle-freedom is thus Prop.~\ref{prop:mono}'s doing, shared by any bounded controller, not the
-filter's. Unique to the filter is Prop.~\ref{prop:inv}, replacing the solver with a fixed
+filter's. Because it is a bound and not an estimate, it covers what it bounds and degrades gracefully
+past it: raising the true resistance scale beyond the rated $s_R^\star$ leaves every in-envelope cell
+safe with margin in hand, and the first violation appears only at $s_R{=}\eolBreakSR$,
+$\eolBreakX\times$ the rated bound and far beyond the point a BMS retires the cell. Unique to the filter is Prop.~\ref{prop:inv}, replacing the solver with a fixed
 $18$-iteration bisection of the \emph{exact} constraint, ceding some charge to the foresighted MPC
 (\mpcOursSoc\ vs \mpcBoundedSoc) for that simplicity. The trade is deliberate, buying MPC-class safety
 without a solver in the trusted computing base for a few points of charge.
@@ -498,7 +549,9 @@ safety carrier. The certified path is \filterSloc\ numpy-only source lines, smal
 The certificate is ROM-relative on volume-averaged temperature, the
 evidence is simulation over an aged-DFN distribution and not a hardware rating, and plating is enforced
 and monitored, not certified. Hardware validation, a predictive plating constraint, an age-aware cap,
-and a pack-level extension are the natural next steps. We release the filter, ROM, executable
+and a pack-level extension are the natural next steps, in that order: hardware validation is what
+converts a ROM-relative certificate into a rated one, and a predictive plating constraint is what would
+move plating from enforced to certified. We release the filter, ROM, executable
 proposition checks, and a one-command reproduction as an MIT-licensed reference implementation at
 \url{https://github.com/keshavkrishnan08/safe-charge}.
 

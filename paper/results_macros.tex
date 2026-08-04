@@ -73,12 +73,12 @@
 \newcommand{\gainCells}{15}
 \newcommand{\coolSafeLoss}{33}
 \newcommand{\transferErrT}{0.42}
-\newcommand{\priceTotal}{1.6}
+\newcommand{\priceTotal}{1.3}
 \newcommand{\priceThermal}{0.2}
 \newcommand{\priceBinder}{1.4}
-\newcommand{\dimEnvChan}{4}
-\newcommand{\dimEnvN}{500}
-\newcommand{\dimEnvCP}{0.6}
+\newcommand{\dimEnvChan}{5}
+\newcommand{\dimEnvN}{5000}
+\newcommand{\dimEnvCP}{0.060}
 \newcommand{\dimEnvWorstT}{44.5}
 \newcommand{\dimCertIters}{18}
 \newcommand{\filterSloc}{36}
@@ -203,3 +203,28 @@
 \newcommand{\platCP}{6.7}
 \newcommand{\platNbig}{80}
 \newcommand{\platViolBig}{1}
+
+%% --- added for the IECON revision: reviewer-requested quantities ---
+%% Prop. 2 monotonicity (reproduce/ + tests/test_safety.py)
+\newcommand{\revFrac}{24}          % max |Q_rev|/Q_irr over the admissible 0.7C-2C band [%]
+\newcommand{\monoImin}{0.08}       % dI g_T >= 0 for all I above this C-rate
+\newcommand{\platCapFloor}{0.70}   % floor of the temperature-dependent plating cap [C]
+%% Control step (reproduce/step_size.py)
+\newcommand{\stepLo}{5}            % shortest control step tested [s]
+\newcommand{\stepHi}{120}          % longest control step tested [s]
+\newcommand{\rcResidPct}{10}       % worst RC residual as a fraction of the base margin [%]
+\newcommand{\stepSocSpread}{0.1}   % spread in delivered SOC across the step sweep [points]
+%% Bisection tolerance (reproduce/tolerance_sweep.py)
+\newcommand{\tolIters}{18}
+\newcommand{\tolEpsUA}{38}         % current resolution at 18 iterations [uA]
+\newcommand{\tolKnee}{12}          % iterations beyond which delivered charge saturates
+%% Real-time cost (bench/timing.py)
+\newcommand{\filterEvalMax}{20}    % model evaluations per projection, hard bound
+\newcommand{\filterWorstMs}{0.9}   % worst-case-path latency, reference implementation [ms]
+\newcommand{\filterFlops}{800}
+\newcommand{\filterMemB}{904}      % state + constants, double precision [B]
+%% Robustness beyond the bound (reproduce/robustness.py)
+\newcommand{\eolBreakSR}{3.0}      % first violation as the true resistance scale is raised
+\newcommand{\eolBreakX}{1.7}       % ... as a multiple of the rated bound
+\newcommand{\gainGrid}{63}         % gain settings swept
+\newcommand{\gainRuns}{3969}       % gain settings x aged cooling-faulted cells
