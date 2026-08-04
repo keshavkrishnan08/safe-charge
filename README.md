@@ -7,6 +7,11 @@ its safe set for the next step: temperature under 45 &deg;C and terminal voltage
 optimizer runs in the loop, and the filter never needs to know the cell's state of health. Drop it
 between any charging policy and the cell and the output is hard-limited, whatever the policy asks for.
 
+The **certified** set is exactly `{T <= 45 C, V <= 4.20 V}`. The anode plating potential rides the same
+one-dimensional search and is enforced by a temperature-dependent current cap, but it is *not* certified:
+plating is history-dependent, and the `I=0` backup does not clear its margin at the cold, aged, high-SOC
+corner. That scoping is deliberate and matches the paper (Sec. IV-B).
+
 - **Tiny safety path.** The entire safety-critical code is one function, 36 numpy-only source lines.
 - **No solver.** A fixed 18-iteration bisection, not a quadratic program. Worst-case run time is a constant.
 - **No health oracle.** A conservative datasheet resistance bound replaces per-cell identification.
@@ -40,8 +45,11 @@ safe from any safe state. That single fact collapses the safety problem to a one
 2. So the set of currents that keep the *next* state safe is a single interval `[0, I*]`.
 3. A **bisection** on a reduced-order cell model finds `I*` in a fixed number of steps.
 
-No quadratic program, no matrix solve, no online parameter identification. Because `I=0` is always
-inside the interval, the filter can never paint itself into a corner: recursive feasibility is free.
+No quadratic program, no matrix solve, no online parameter identification. For the certified
+constraints `I=0` is always inside the interval, so the filter can never paint itself into a corner:
+recursive feasibility is free. (For plating the interval can be empty above ~0.82 SOC, where `I=0` no
+longer clears the margin; there the filter commands zero current and flags it. `tests/test_safety.py`
+checks that interval structure and reports the boundary rather than papering over it.)
 
 Aging is handled by the same monotonicity. Higher internal resistance only makes a given current
 hotter, so a **conservative upper bound** on resistance certifies safety without ever measuring the
@@ -76,8 +84,9 @@ pip install numpy                 # enough for the filter, the quickstart, and t
 pip install -r requirements.txt   # adds osqp==1.1.3 + scipy for the solver comparison
 ```
 
-`osqp` is pinned because its ADMM iteration counts are version-sensitive; the qualitative result holds
-across versions, but the exact numbers reproduce on 1.1.3.
+`osqp` is pinned because its ADMM iteration counts are version-sensitive. The qualitative result holds
+across versions; the printed counts are reproducible on 1.1.3 up to your BLAS/platform, which can move
+them by a few iterations.
 
 ## Quick start
 
@@ -117,16 +126,18 @@ I, clipped = project_current(rom, s, I_prop=3.0 * rom.p["Q_nom"], dt=30.0, T_amb
 | `rom` | a `BatteryROM` (the model the filter predicts with; give it your resistance bound via `cell_scale`) |
 | `s` | current state dict from `rom.init_state(...)` or `rom.step(...)` |
 | `I_prop` | the current the policy wants (amps); the return value never exceeds it |
-| `dt`, `T_amb` | control step (s) and ambient temperature (&deg;C) |
+| `dt`, `T_amb` | control step (s) and ambient temperature (&deg;C). With the default `rc="euler"` ROM, `dt` must not exceed the RC time constant (30 s); the model raises if it does. Use `BatteryROM(rc="exact")` for longer steps |
 | `Vlim`, `Tlim` | the hard voltage and temperature limits |
 | `margin` | plating margin, a float or a `margin(soc)` callable; defaults to the ROM's |
 | `dV`, `dT`, `dP` | robustness margins that tighten each limit so the high-fidelity plant stays feasible |
 | `cool_frac` | cooling-fault reserve; reserves `cool_frac*(T-T_amb)` of thermal headroom (default 0.25) |
 | returns | `(I, clipped)`: the safe current and whether it was below `I_prop` |
 
-**`BatteryROM(cell_scale=dict(R=..., Q=..., plate=...))`** &mdash; the reduced-order electro-thermal-plating
-cell model. `cell_scale` scales resistance, capacity, and plating relative to nominal (use it to build a
-worn cell, or to set the filter's conservative bound).
+**`BatteryROM(cell_scale=dict(R=..., Q=..., plate=...), rc="euler")`** &mdash; the reduced-order
+electro-thermal-plating cell model. `cell_scale` scales resistance, capacity, and plating relative to
+nominal (use it to build a worn cell, or to set the filter's conservative bound). `rc` selects the
+RC-branch discretization: `"euler"` is the default and reproduces every published number, and is valid
+for `dt <= 30 s`; `"exact"` uses the zero-order-hold factor `exp(-dt/tau)` and is stable at any step.
 
 | Method | Returns |
 |---|---|
@@ -135,8 +146,11 @@ worn cell, or to set the filter's conservative bound).
 | `plating_margin()` | the default plating potential margin |
 | `plate_current_cap(T_C)` | the temperature-dependent plating-safe current cap |
 | `phi_an(soc, I, T_C)` | anode plating potential (negative signals plating) |
+| `R_ohmic(soc, T_C)` | ohmic resistance; current-independent, so it stays defined at `I=0` |
 | `p` | parameter dict, e.g. `p["Q_nom"]` is the nominal capacity |
 
+`soc_ramp_margin(base, extra, soc0=0.60, soc1=0.85)` builds a `margin(soc)` callable that tightens the
+plating margin at high SOC, where the ROM&ndash;DFN plating gap grows; pass it as `margin=`.
 `ocv(soc)` is also exported for the open-circuit voltage curve.
 
 ## Run everything
@@ -145,7 +159,7 @@ worn cell, or to set the filter's conservative bound).
 bash run_all.sh          # override the interpreter with:  PYTHON=python3.11 bash run_all.sh
 ```
 
-That runs all six pieces in order. Each also runs on its own:
+That runs all nine pieces in order. Each also runs on its own:
 
 | Command | What it does | Needs |
 |---|---|---|
@@ -155,8 +169,14 @@ That runs all six pieces in order. Each also runs on its own:
 | `python reproduce/solver_comparison.py [--full]` | Filter vs a warm-started OSQP on worn cells: cost and safety. | numpy, scipy, osqp |
 | `python reproduce/dimension_independence.py` | One fixed certificate over a 4-channel uncertainty envelope. | numpy |
 | `python reproduce/price_of_oracle_freedom.py` | Charge cost of the fail-safe bound vs a true-cell oracle, per channel. | numpy |
+| `python bench/timing.py` | Latency by code path, operation count, and memory footprint. | numpy |
+| `python reproduce/tolerance_sweep.py` | What the bisection tolerance buys, and why 18 iterations. | numpy |
+| `python reproduce/step_size.py` | Safety and charge vs the control step, above and below the RC time constant. | numpy |
+| `python reproduce/robustness.py` | Behaviour past the aging bound, anchor comparison, margin-gain sweep. | numpy |
 
-Random seeds are fixed, so the reproduce scripts print the same numbers every run.
+Random seeds are fixed, so the numpy-only reproduce scripts print the same numbers every run. The
+solver comparison is deterministic given a fixed OSQP build, but its iteration counts can shift slightly
+across platforms.
 
 ## The experiments, in detail
 
@@ -166,15 +186,18 @@ Turns the filter's guarantees into properties checked on a 12&times;8 grid of st
 them hold. Runs in under a second. Expected output:
 
 ```
-Running 4 safety-property checks...
+Running 7 safety-property checks...
+  interval: admissible set is a single interval [0, I*] anchored at 0 for the certified T/V set on every grid state; adding plating it stays an interval but goes empty above SOC~0.82, where I=0 no longer clears the margin
   plating: phi_an affine everywhere, strictly decreasing for SOC<=0.9 (slope flips only above SOC~0.92, outside the charge envelope)
   invariance: projection safe on all grid states; worst next T=45.000C V=4.1691V
+  backup heat: R1 is continuous through I=0 in both discretizations, so the RC residual injects <0.5 C (the delta_T0 budget) instead of diverging
+  monotonicity (cooling): peak T and the safe current are monotone in gamma too, so Prop. 2 holds in both aging channels
   monotonicity: peak T and the safe current are monotone in s_R (an upper bound suffices, no ID)
-  backup: I=0 adds no self-heating (T -> ambient) and holds V=OCV, so the safe set is invariant
+  backup: I=0 adds no self-heating even with the RC branch charged -- T never exceeds max(T, ambient) (worst excess -0.0034 C) and V returns to OCV, so S is invariant
 ALL SAFETY CHECKS PASSED
 ```
 
-Also runs under pytest (`python -m pytest tests/ -q` &rarr; `4 passed`).
+Also runs under pytest (`python -m pytest tests/ -q` &rarr; `7 passed`).
 
 ### Software footprint &mdash; `bench/footprint.py`
 
@@ -185,13 +208,17 @@ alternative adds. With `osqp` installed you get:
 == Certified safety path (this package) ==
   source lines: 36  (_eff_margin=2, _feasible=5, project_current=29)
   runtime dependencies: numpy only, no third-party solver
-  loop bound: static, 18 iterations  |  heap allocation in loop: none
+  loop bound: static, 18 iterations  |  allocation in the bisection body: none
 
 == Embedded-QP alternative (OSQP linearized MPC) ==
   runtime dependencies: numpy, scipy.sparse, osqp
   adds to the TCB: OSQP solver, 39 bundled C/header files, 1.1 MB
-  loop bound: data-dependent (mean/max ~85/775 iterations at the corner)  |  heap allocation in loop: yes
+  loop bound: data-dependent (mean/max ~85/775 iterations at the cold corner)  |  heap allocation in loop: yes
 ```
+
+The bisection body allocates nothing, but each of its iterations calls `BatteryROM.step`, which builds
+an observation dict; an allocation-free deployment inlines that one-step map. The claim rests on the
+*bound*: 18 iterations of elementary arithmetic, no solver, no convergence test.
 
 ### Solver comparison &mdash; `reproduce/solver_comparison.py`
 
@@ -201,34 +228,60 @@ the solver's. Quick mode (`n=15`, corner only) prints:
 
 ```
 --- corner population ---
-Controller        Iters mean/max  T/V viol %   worst V
-QP-full                 84.2/675        0.0%     4.181
-QP-embedded              25.0/25        0.0%     4.184
-filter                     18/18        0.0%     4.181
+Controller        Iters mean/max  T/V viol %   worst V  mean SOC
+QP-full                 85.3/675        0.0%     4.182     0.779
+QP-embedded              25.0/25        0.0%     4.184     0.779
+filter                     18/18        0.0%     4.181     0.779
 ```
 
 How to read it: all three stay temperature- and voltage-safe, so this is **not** a "the QP is unsafe"
 claim. The point is the cost model. The full-budget OSQP converges but at a data-dependent iteration
 count (mean/max climb at the hard corner). Capping its iterations to bound its run time (the
-`QP-embedded` row, 25 iterations) makes it stop converging there and apply an unconverged current. The
-filter's fixed 18 iterations reach the exact constraint boundary every time &mdash; bounded run time and
-exact at once. Add `--full` for the larger populations (`main n=100 + corner n=50`).
+`QP-embedded` row, 25 iterations) makes it stop converging there and apply an unconverged current &mdash;
+it still lands under 4.20 V here, but with no convergence guarantee behind it. The filter's fixed 18
+iterations reach the exact constraint boundary every time &mdash; bounded run time and exact at once.
+
+The `mean SOC` column prices that simplicity. At this cold corner all three are deadline-limited and
+deliver the same charge. Add `--full` for the larger populations (`main n=100 + corner n=50`), where the
+warmer main population separates them:
+
+```
+--- main population ---
+Controller        Iters mean/max  T/V viol %   worst V  mean SOC
+QP-full                 36.9/550        0.0%     4.148     0.589
+QP-embedded              25.0/25        0.0%     4.172     0.604
+filter                     18/18        0.0%     4.069     0.532
+```
+
+The filter cedes ~5.7 points of SOC to the foresighted full-budget QP &mdash; the same trade the paper
+reports in Sec. VI-E, and the 0.532 figure is the conservative-bound floor quoted in Sec. IV-C.
+
+The exact iteration counts and worst-case voltages depend on your OSQP build (BLAS, platform), so they
+may shift by a few counts even on the pinned 1.1.3; the ordering and the qualitative result do not.
 
 ### Dimension independence &mdash; `reproduce/dimension_independence.py`
 
 Monotone structure makes the worst case of an entire uncertainty box a single corner, so certifying
-against that corner certifies every interior plant. This widens the box from 1 to 4 aging/fault
-channels (resistance, cooling, thermal mass, plating) and shows the certificate stays a fixed
-18-iteration bisection with zero violations. Expected output:
+against that corner certifies every interior plant. This widens the box from 1 to 5 aging/fault
+channels (resistance, cooling, thermal mass, plating, ambient temperature) and shows the certificate
+stays a fixed 18-iteration bisection with zero violations. Expected output:
 
 ```
-dimension sweep (certificate is 18 iterations at every dimension):
-  d=1  ['R']                            safe=150/150  worstT=44.36C  cert=18 iters
-  d=2  ['R', 'cool']                    safe=150/150  worstT=44.49C  cert=18 iters
-  d=3  ['R', 'cool', 'Cth']             safe=150/150  worstT=44.49C  cert=18 iters
-  d=4  ['R', 'cool', 'Cth', 'plate']    safe=150/150  worstT=44.49C  cert=18 iters
+dimension sweep (certificate is 18 iterations at every dimension), n=150:
+  d=1  ['R']                                     safe=150/150  worstT=44.14C  cert=18 iters
+  d=2  ['R', 'cool']                             safe=150/150  worstT=44.27C  cert=18 iters
+  d=3  ['R', 'cool', 'Cth']                      safe=150/150  worstT=44.27C  cert=18 iters
+  d=4  ['R', 'cool', 'Cth', 'plate']             safe=150/150  worstT=44.27C  cert=18 iters
+  d=5  ['R', 'cool', 'Cth', 'plate', 'Tamb']     safe=150/150  worstT=44.49C  cert=18 iters
 
-full 4-channel envelope: 500/500 safe, viol=0.00%, CP95 upper=0.60%, worst 44.49C / 4.141V
+full 5-channel envelope: 500/500 safe, viol=0.00%, CP95 upper=0.597%, worst 44.49C / 4.141V
+corner peakT=44.50C dominates interior worst 44.49C: True
+```
+
+`--full` raises the envelope to `n=5000` and each dimension to `n=500`, tightening the bound tenfold:
+
+```
+full 5-channel envelope: 5000/5000 safe, viol=0.00%, CP95 upper=0.060%, worst 44.49C / 4.141V
 corner peakT=44.50C dominates interior worst 44.49C: True
 ```
 
@@ -242,31 +295,49 @@ much, and shows the cost tracks the *binding* constraint, not the number of unce
 Expected output:
 
 ```
-price of oracle-freedom over the full charge window (mean oracle SOC - corner SOC):
-  d=1 ['R']                            penalty= 0.11% SOC  binding=plating (100%)
-  d=2 ['R', 'cool']                    penalty= 0.16% SOC  binding=plating (100%)
-  d=3 ['R', 'cool', 'Cth']             penalty= 0.23% SOC  binding=plating (100%)
-  d=4 ['R', 'cool', 'Cth', 'plate']    penalty= 1.58% SOC  binding=plating (100%)
-
-Three off-binding thermal channels cost 0.23% total; the binding plating channel adds 1.35%.
+price of oracle-freedom over the full charge window (mean oracle SOC - corner SOC), n=300:
+  d=1 ['R']                                     penalty= 0.11% SOC  binding=plating (100%)
+  d=2 ['R', 'cool']                             penalty= 0.16% SOC  binding=plating (100%)
+  d=3 ['R', 'cool', 'Cth']                      penalty= 0.23% SOC  binding=plating (100%)
+  d=4 ['R', 'cool', 'Cth', 'plate']             penalty= 1.58% SOC  binding=plating (100%)
+  d=5 ['R', 'cool', 'Cth', 'plate', 'Tamb']     penalty= 1.33% SOC  binding=plating (100%)
 ```
 
-The three thermal channels enter safety only through temperature, which is not binding here, so their
+The thermal channels enter safety only through temperature, which is not binding here, so their
 combined cost is negligible (~0.23%). Almost the entire price comes from the one channel that binds
-(plating). Uncertainty off the binding constraint is nearly free.
+(plating). Uncertainty off the binding constraint is nearly free &mdash; adding a fifth channel does not
+even increase the price, it slightly lowers it, because a hotter assumed ambient slows the oracle too.
+`--full` raises each dimension to `n=1000`.
 
 ## The safety guarantees
 
-`tests/test_safety.py` verifies exactly three properties:
+`tests/test_safety.py` turns the paper's two propositions into executable checks:
 
-1. **Invariance.** The projected current always leaves the next-step temperature and voltage inside the
-   safe set, and `I=0` adds no self-heating, so a safe state stays safe. This is what makes the filter
-   sound step after step.
-2. **A bound beats identification.** Peak temperature and the largest safe current are monotone in the
-   resistance scale, so a conservative *upper* bound certifies safety with no per-cell identification.
+1. **Invariance (Prop. 1).** The projected current always leaves the next-step temperature and voltage
+   inside the certified set, and `I=0` adds no self-heating &mdash; checked from states whose RC branch has
+   been charged by prior current, not just from freshly initialized ones, since the RC residual is what
+   the proof turns on.
+2. **A bound beats identification (Prop. 2), both channels.** Peak temperature and the largest safe
+   current are monotone in the resistance scale `s_R` *and* in the cooling-loss factor `gamma` (where
+   `T >= T_amb`, the proposition's hypothesis), so a conservative *upper* bound on each certifies safety
+   with no per-cell identification.
 3. **Plating is monotone.** The anode plating potential is affine in current everywhere and strictly
    decreasing across the fast-charge envelope, so it enters the same one-dimensional search as
    temperature and voltage.
+4. **The search is exact.** The admissible current set is a single interval anchored at 0 for the
+   certified constraints, so the bisection converges to the true boundary rather than to some interior
+   point. The check also reports where adding plating makes that interval empty (~0.82 SOC), which is
+   the concrete reason plating is enforced rather than certified.
+
+## What this repository does and does not contain
+
+It contains the filter, the ROM it predicts with, the executable proposition checks, and the
+solver/dimension/price experiments &mdash; everything that runs on numpy in seconds.
+
+It does **not** contain the high-fidelity validation pipeline behind the paper's Tables I&ndash;III and
+Figs. 3&ndash;5: the PyBaMM DFN plant, the PPO baseline, the online resistance estimator, and the ROM
+calibration harness are outside this release. Numbers here therefore reproduce the propositions and the
+cost model, not the DFN-replayed tables.
 
 ## Repository layout
 
@@ -283,9 +354,13 @@ reproduce/
   solver_comparison.py         filter vs a warm-started embedded QP
   dimension_independence.py    one fixed certificate over a 4-channel envelope
   price_of_oracle_freedom.py   charge cost of the fail-safe bound, per channel
+  tolerance_sweep.py           what the bisection tolerance buys
+  step_size.py                 safety and charge vs the control step
+  robustness.py                past the aging bound, anchors, margin gains
 bench/
   footprint.py            source and dependency footprint vs the QP path
-run_all.sh                run all six in order
+  timing.py               latency, operation count, memory
+run_all.sh                run all nine in order
 requirements.txt          numpy (core) + osqp/scipy (solver baseline)
 ```
 
@@ -303,8 +378,24 @@ requirements.txt          numpy (core) + osqp/scipy (solver baseline)
 The write-up this code accompanies lives in [`paper/`](paper/), source and compiled PDF. The numbers in
 its text are produced by the experiments here; see [`paper/README.md`](paper/README.md) to build it.
 
+## Citation
+
+This is the reference implementation for:
+
+> K. Krishnan, "Safe Fast Charging Robust to Battery Aging: A Solver-Free Safety Filter Without a Health
+> Oracle," in *Proc. IEEE Industrial Electronics Society Annual Conf. (IECON)*, 2026.
+
+```bibtex
+@inproceedings{krishnan2026safecharge,
+  author    = {Krishnan, Keshav},
+  title     = {Safe Fast Charging Robust to Battery Aging: A Solver-Free Safety Filter Without a Health Oracle},
+  booktitle = {Proc. IEEE Industrial Electronics Society Annual Conference (IECON)},
+  year      = {2026}
+}
+```
+
 ## Author and license
 
-Keshav Krishnan.
+Keshav Krishnan, Park Tudor School, Indianapolis, IN, USA.
 
 Released under the MIT License &mdash; see [LICENSE](LICENSE).
