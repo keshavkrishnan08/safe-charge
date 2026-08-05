@@ -35,10 +35,10 @@ def _eff_margin(margin, soc):
     return margin(soc) if callable(margin) else margin
 
 def _feasible(rom, s, I, dt, T_amb, Vlim, Tlim, margin, dV, dT, dP):
-    _, o = rom.step(s, I, dt, T_amb)
-    m = _eff_margin(margin, o["soc"])
-    return (o["V"] <= Vlim - dV + 1e-9) and (o["T"] <= Tlim - dT + 1e-9) \
-        and (o["phi_an"] >= m + dP - 1e-9)
+    V, T, phi, soc = rom.probe(s, I, dt, T_amb)
+    m = _eff_margin(margin, soc)
+    return (V <= Vlim - dV + 1e-9) and (T <= Tlim - dT + 1e-9) \
+        and (phi >= m + dP - 1e-9)
 
 def project_current(rom, s, I_prop, dt, T_amb, Vlim=4.20, Tlim=45.0, margin=None,
                     dV=0.03, dT=0.5, dP=0.0, iters=18, cool_frac=None):

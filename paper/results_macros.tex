@@ -77,8 +77,8 @@
 \newcommand{\priceThermal}{0.2}
 \newcommand{\priceBinder}{1.4}
 \newcommand{\dimEnvChan}{5}
-\newcommand{\dimEnvN}{5000}
-\newcommand{\dimEnvCP}{0.060}
+\newcommand{\dimEnvN}{50000}
+\newcommand{\dimEnvCP}{0.006}
 \newcommand{\dimEnvWorstT}{44.5}
 \newcommand{\dimCertIters}{18}
 \newcommand{\filterSloc}{36}
@@ -220,11 +220,11 @@
 \newcommand{\tolKnee}{12}          % iterations beyond which delivered charge saturates
 %% Real-time cost (bench/timing.py)
 \newcommand{\filterEvalMax}{20}    % model evaluations per projection, hard bound
-\newcommand{\filterMeanUs}{145}    % full-bisection path, median per projection [us] (bench/timing.py)
+\newcommand{\filterMeanUs}{56}     % full-bisection path, median per projection [us] (bench/timing.py)
 \newcommand{\filterFlops}{800}
 \newcommand{\filterMemB}{904}      % state + constants, double precision [B]
 %% Robustness beyond the bound (reproduce/robustness.py)
 \newcommand{\eolBreakSR}{3.0}      % first violation as the true resistance scale is raised
 \newcommand{\eolBreakX}{1.7}       % ... as a multiple of the rated bound
-\newcommand{\gainGrid}{63}         % gain settings swept
-\newcommand{\gainRuns}{3969}       % gain settings x aged cooling-faulted cells
+\newcommand{\gainGrid}{273}         % gain settings swept
+\newcommand{\gainRuns}{27027}       % gain settings x aged cooling-faulted cells

@@ -143,6 +143,7 @@ for `dt <= 30 s`; `"exact"` uses the zero-order-hold factor `exp(-dt/tau)` and i
 |---|---|
 | `init_state(soc0, T0)` | a fresh state dict at the given SOC and temperature |
 | `step(s, I, dt, T_amb)` | `(next_state, obs)`; `obs` has `T`, `V`, `phi_an`, `soc` |
+| `probe(s, I, dt, T_amb)` | `(V, T_next, phi_an, soc_next)`; what the filter calls &mdash; same arithmetic as `step`, bit for bit, but allocates nothing |
 | `plating_margin()` | the default plating potential margin |
 | `plate_current_cap(T_C)` | the temperature-dependent plating-safe current cap |
 | `phi_an(soc, I, T_C)` | anode plating potential (negative signals plating) |
@@ -216,9 +217,10 @@ alternative adds. With `osqp` installed you get:
   loop bound: data-dependent (mean/max ~85/775 iterations at the cold corner)  |  heap allocation in loop: yes
 ```
 
-The bisection body allocates nothing, but each of its iterations calls `BatteryROM.step`, which builds
-an observation dict; an allocation-free deployment inlines that one-step map. The claim rests on the
-*bound*: 18 iterations of elementary arithmetic, no solver, no convergence test.
+The bisection body allocates nothing: each iteration calls `BatteryROM.probe()`, which returns a
+tuple of the four signals the filter tests instead of building an observation dict, and which the test
+suite verifies is bit-identical to `step()`. The claim rests on the *bound*: 18 iterations of
+elementary arithmetic, no solver, no convergence test.
 
 ### Solver comparison &mdash; `reproduce/solver_comparison.py`
 
@@ -278,10 +280,11 @@ full 5-channel envelope: 500/500 safe, viol=0.00%, CP95 upper=0.597%, worst 44.4
 corner peakT=44.50C dominates interior worst 44.49C: True
 ```
 
-`--full` raises the envelope to `n=5000` and each dimension to `n=500`, tightening the bound tenfold:
+`--full` raises the envelope to `n=50000` and each dimension to `n=2000`, tightening the bound a
+hundredfold (about ten minutes):
 
 ```
-full 5-channel envelope: 5000/5000 safe, viol=0.00%, CP95 upper=0.060%, worst 44.49C / 4.141V
+full 5-channel envelope: 50000/50000 safe, viol=0.00%, CP95 upper=0.006%, worst 44.50C / 4.141V
 corner peakT=44.50C dominates interior worst 44.49C: True
 ```
 

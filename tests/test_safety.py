@@ -237,6 +237,32 @@ def test_plating_potential_affine_decreasing_in_current():
           f"(slope flips only above SOC~{flip:.2f}, outside the charge envelope)")
 
 
+def test_probe_matches_step_bit_for_bit():
+    """The filter's inner loop calls ROM.probe() instead of ROM.step() so that it allocates
+    nothing. probe() inlines the same arithmetic on scalars and uses math.exp/math.asinh in
+    place of np.exp/np.arcsinh. Those are the same libm calls, and the operations are
+    associated the same way, so the two must agree EXACTLY -- not approximately. Any drift
+    here would silently move every published number, so this is checked, not assumed."""
+    n = mism = 0
+    for scale in (dict(R=1.0, Q=1.0, plate=1.0), dict(R=1.8, Q=0.8, plate=1.6)):
+        for rc in ("euler", "exact"):
+            for cool in (1.0, 0.75):
+                rom = BatteryROM(cell_scale=scale, rc=rc)
+                rom.p = dict(rom.p); rom.p["hA"] *= cool
+                for soc in np.linspace(0.02, 0.98, 10):
+                    for T in np.linspace(-5.0, 50.0, 8):
+                        for I in np.linspace(0.0, 15.0, 10):
+                            s = rom.init_state(float(soc), float(T)); s["V1"] = 0.031
+                            _, o = rom.step(s, float(I), DT, TAMB)
+                            V, Tn, phi, socn = rom.probe(s, float(I), DT, TAMB)
+                            n += 1
+                            mism += not (V == o["V"] and Tn == o["T"]
+                                         and phi == o["phi_an"] and socn == o["soc"])
+    assert mism == 0, f"probe() drifted from step() on {mism}/{n} states"
+    print(f"  probe: bit-identical to step on all {n} states "
+          f"(2 cell scales x 2 discretizations x 2 cooling faults)")
+
+
 if __name__ == "__main__":
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     print(f"Running {len(tests)} safety-property checks...")

@@ -38,6 +38,11 @@ class _CountingROM(BatteryROM):
         self.n_step += 1
         return super().step(s, I, dt, T_amb)
 
+    def probe(self, s, I, dt, T_amb):
+        # the filter's inner loop calls probe(), not step(); count both
+        self.n_step += 1
+        return super().probe(s, I, dt, T_amb)
+
 
 def classify_states():
     """Group operating states by how many model evaluations the projection actually uses."""
@@ -124,8 +129,9 @@ def main():
     print(f"  OCV table: {ocv_floats} floats ({8*ocv_floats} B)")
     print(f"  => {total} B of state and constants in double precision, {total//2} B in single")
     print(f"  no dynamic allocation, no matrix storage, no solver workspace")
-    print(f"  (this interpreter allocates {peak-base} B of transient Python objects per call,")
-    print(f"   all of it the ROM's observation dict; a C port allocates nothing)")
+    print(f"  (this interpreter allocates {peak-base} B of transient Python objects per call;")
+    print(f"   the bisection body itself allocates nothing, since it calls ROM.probe(), which")
+    print(f"   returns a tuple instead of building an observation dict)")
 
     print("\n== Scaling to a target (ESTIMATE, not a board measurement) ==")
     print(f"  The {2+ITERS} evaluations are the invariant. At roughly 1 flop/cycle without FPU")

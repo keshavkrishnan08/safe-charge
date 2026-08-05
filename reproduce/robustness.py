@@ -130,6 +130,25 @@ def part3():
     print(f"\n  {total} violations in {9*7*len(cells)} runs: every one of the {9*7} gain")
     print(f"  settings against every one of the {len(cells)} aged, cooling-faulted cells. The")
     print("  deployed point (K=15, f=0.25) sits inside a safe region, not on a tuned edge.")
+
+    # Denser sweep on the same box, reported as an aggregate so the table above stays
+    # readable. More gain settings and more cells, so the "safe region" claim rests on
+    # an order of magnitude more evidence than the printed grid alone.
+    Kd = [5 + 1.0*i for i in range(21)]                      # 5..25 step 1
+    fd = [0.10 + 0.025*i for i in range(13)]                 # 0.10..0.40 step 0.025
+    cellsd = [(soh, cl) for soh in [1.0 - 0.02*i for i in range(11)]
+                        for cl in [0.0 + 0.04125*i for i in range(9)]]
+    dense = 0; dense_n = 0
+    for K in Kd:
+        for f in fd:
+            for (soh, cl) in cellsd:
+                _, _, _, ok = run(soh_to_scale(soh), dict(R=SR_BOUND, Q=1.0, plate=1.0),
+                                  cool_loss=cl, dT=DT0 + K*(SR_BOUND-1.0), cool_frac=f)
+                dense += (not ok); dense_n += 1
+    print(f"\n  Dense sweep on the same box: {dense} violations in {dense_n} runs "
+          f"({len(Kd)}x{len(fd)} = {len(Kd)*len(fd)} gain settings against {len(cellsd)} aged,")
+    print(f"  cooling-faulted cells, cooling loss up to {100*cellsd[-1][1]:.0f}% and SOH down to "
+          f"{min(c[0] for c in cellsd):.2f}).")
     print("\n  Read the SOC column alongside it, though: safety here is not scarce, charge is.")
     print("  Both gains cost delivered charge monotonically, and by K=25 the thermal margin")
     print("  (0.5 + 25*0.8 = 20.5 C) pushes the effective limit below ambient, so the filter")

@@ -10,7 +10,7 @@ Channels (each monotone in the operating region, worst-case direction in parenth
   R (high), cooling hA (low), thermal mass C_th (low), plating (high), ambient T_amb (high).
 
     python reproduce/dimension_independence.py           # n=500 on the full envelope
-    python reproduce/dimension_independence.py --full    # n=5000, a 10x tighter bound
+    python reproduce/dimension_independence.py --full    # n=50000, a 100x tighter bound
 """
 import os, sys, argparse
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -57,7 +57,7 @@ def cp_upper(k, N, alpha=0.05):
 
 ap = argparse.ArgumentParser(); ap.add_argument("--full", action="store_true")
 FULL = ap.parse_args().full
-N_DIM, N_ENV = (500, 5000) if FULL else (150, 500)
+N_DIM, N_ENV = (2000, 50000) if FULL else (150, 500)
 
 def nominal():
     return {k: (25.0 if k == "Tamb" else 1.0) for k in CHANS}
@@ -89,4 +89,4 @@ print(f"\nfull {len(CHANS)}-channel envelope: {safe}/{N_ENV} safe, "
 print(f"corner peakT={cornerT:.2f}C dominates interior worst {worstT:.2f}C: {cornerT >= worstT-1e-6}")
 print("Same 18-iteration certificate at every dimension; an identifier needs one state per channel.")
 if not FULL:
-    print("Run with --full for n=5000 on the envelope, a 10x tighter Clopper-Pearson bound.")
+    print("Run with --full for n=50000 on the envelope, a 100x tighter Clopper-Pearson bound.")
