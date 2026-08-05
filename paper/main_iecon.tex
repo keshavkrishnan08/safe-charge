@@ -24,7 +24,31 @@
 \setlength{\intextsep}{6pt plus 2pt minus 2pt}
 \setlength{\dbltextfloatsep}{6pt plus 2pt minus 2pt}
 \setlength{\dblfloatsep}{6pt plus 2pt minus 2pt}
+% Caption and display spacing (typographic only; no content changed).
+\setlength{\abovecaptionskip}{3pt}
+\setlength{\belowcaptionskip}{0pt}
+\setlength{\abovedisplayskip}{4pt plus 1pt minus 1pt}
+\setlength{\belowdisplayskip}{4pt plus 1pt minus 1pt}
+\setlength{\abovedisplayshortskip}{2pt}
+\setlength{\belowdisplayshortskip}{2pt}
+\usepackage[final,protrusion=true,expansion=true]{microtype}
 \setlength{\emergencystretch}{3em}
+% Float packing: let floats fill more of a page top before LaTeX defers them, so
+% wide figures do not leave short columns. Layout only; no content changes.
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\dbltopfraction}{0.92}
+\renewcommand{\bottomfraction}{0.5}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.80}
+\renewcommand{\dblfloatpagefraction}{0.80}
+\setcounter{topnumber}{3}
+\setcounter{dbltopnumber}{3}
+\setcounter{totalnumber}{5}
+% Tighten inter-entry spacing in the reference list (typographic only; no entries changed).
+\let\oldthebibliography\thebibliography
+\renewcommand{\thebibliography}[1]{%
+  \oldthebibliography{#1}%
+  \setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}\setlength{\parskip}{0pt}}
 
 \begin{document}
 \title{Safe Fast Charging Robust to Battery Aging:\\
@@ -53,13 +77,11 @@ controller's realized current so the ROM never self-reports safety (voltage RMSE
 greedy governor matches a trained reinforcement-learning policy on every metric, so the filter, not
 the learner, carries safety. The filter records no observed temperature or voltage violation where
 fast CC--CV overshoots \SI{45}{\degreeCelsius} in every episode, peaking at
-\SI{\dfnOursWarmT}{\degreeCelsius} against the \SI{45}{\degreeCelsius} limit; it delivers the charge of
-CC--CV at 1C (SOC \oursWarmSoc) while removing that protocol's \cconeWarmPviol\% plating rate, and
-holds temperature and voltage safe on \valSafe/\valN\ disjoint aged draws (Clopper--Pearson $95\%$
-upper bound \valCP\%) across SOH $1.0$--$0.8$ and under a full recalibration of the ROM to a second
-cell chemistry (\chemTwoSafe/\chemTwoN, voltage RMSE \chemTwoV~mV). Each projection costs at most
-$\filterEvalMax$ model evaluations and \SI{\filterMemB}{B} of state, with no solver and no dynamic
-allocation.
+\SI{\dfnOursWarmT}{\degreeCelsius}, delivers the charge of CC--CV at 1C (SOC \oursWarmSoc)
+while removing that protocol's \cconeWarmPviol\% plating, and holds temperature and voltage safe on
+\valSafe/\valN\ disjoint aged draws (Clopper--Pearson \valCP\%) and under a full recalibration of the
+ROM to a second cell chemistry (\chemTwoSafe/\chemTwoN, voltage RMSE \chemTwoV~mV). Each projection
+costs at most $\filterEvalMax$ model evaluations and \SI{\filterMemB}{B}, with no solver.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -68,8 +90,8 @@ Fast charging, safety filter, control-invariant set.
 
 \section*{Nomenclature}
 \vspace{-2pt}
-{\footnotesize\setlength{\tabcolsep}{0pt}\renewcommand{\arraystretch}{0.98}
-\noindent\begin{tabular}{@{}p{1.45cm}@{\hspace{4pt}}p{6.7cm}@{}}
+{\footnotesize\setlength{\tabcolsep}{0pt}\renewcommand{\arraystretch}{0.96}
+\noindent\begin{tabular}{@{}p{1.4cm}@{\hspace{3pt}}p{7.35cm}@{}}
 $T$, $V$ & Cell temperature and terminal voltage; limits $T_{\max}{=}\SI{45}{\degreeCelsius}$,
 $V_{\max}{=}\SI{4.2}{V}$.\\
 $\phi_\mathrm{an}$ & Anode plating overpotential, $\phi_s{-}\phi_e$ at the separator.\\
@@ -77,17 +99,17 @@ $I$ & Applied current; $I_\pi$ proposed, $I_\mathrm{cmd}$ commanded, $I^\star$ l
 $\mathcal S$ & Certified safe set $\{T\le T_{\max},V\le V_{\max}\}$; $\mathcal S_{-\delta}$ its
 margin-tightened inner approximation.\\
 $g_c$ & One-step peak of constraint $c$ predicted by the ROM.\\
-$\delta_T$, $\delta_V$, $\delta_P$ & Control margins on temperature, voltage, plating;
-$\delta_{T0}$ the base thermal margin.\\
+$\delta_T$, $\delta_V$, $\delta_P$ & Control margins on temperature, voltage, plating; $\delta_{T0}$
+the base thermal margin.\\
 $s_R$, $\gamma$ & Aging channels: resistance scale and cooling-loss factor; $\hat s_R$ estimated,
 $s_R^\star$ the rated end-of-life bound.\\
 $K$, $f$ & Margin gains: resistance throttle and cooling reserve.\\
 $\Delta t$, $\tau_\mathrm{RC}$ & Control step and RC time constant, both \SI{30}{s}.\\
-$Q_\mathrm{gen}$ & Heat generation; ohmic, activation and reversible parts
-$Q_\mathrm{ohm}$, $Q_\mathrm{act}$, $Q_\mathrm{rev}$.\\
+$Q_\mathrm{gen}$ & Heat generation; ohmic, activation and reversible parts $Q_\mathrm{ohm}$,
+$Q_\mathrm{act}$, $Q_\mathrm{rev}$.\\
 $C_\mathrm{th}$, $hA$ & Lumped thermal capacity and heat-transfer coefficient.\\
 $R_\Omega$, $R_1$, $V_1$ & Ohmic resistance, RC-branch resistance and its overpotential.\\
-$\epsilon$, $n$ & Bisection current resolution; number of episodes in a stress test.
+$\epsilon$, $n$ & Bisection current resolution; episodes in a stress test.
 \end{tabular}}
 \vspace{1pt}
 
