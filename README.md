@@ -187,9 +187,10 @@ Turns the filter's guarantees into properties checked on a 12&times;8 grid of st
 them hold. Runs in under a second. Expected output:
 
 ```
-Running 7 safety-property checks...
+Running 8 safety-property checks...
   interval: admissible set is a single interval [0, I*] anchored at 0 for the certified T/V set on every grid state; adding plating it stays an interval but goes empty above SOC~0.82, where I=0 no longer clears the margin
   plating: phi_an affine everywhere, strictly decreasing for SOC<=0.9 (slope flips only above SOC~0.92, outside the charge envelope)
+  probe: bit-identical to step on all 6400 states (2 cell scales x 2 discretizations x 2 cooling faults)
   invariance: projection safe on all grid states; worst next T=45.000C V=4.1691V
   backup heat: R1 is continuous through I=0 in both discretizations, so the RC residual injects <0.5 C (the delta_T0 budget) instead of diverging
   monotonicity (cooling): peak T and the safe current are monotone in gamma too, so Prop. 2 holds in both aging channels
@@ -198,7 +199,7 @@ Running 7 safety-property checks...
 ALL SAFETY CHECKS PASSED
 ```
 
-Also runs under pytest (`python -m pytest tests/ -q` &rarr; `7 passed`).
+Also runs under pytest (`python -m pytest tests/ -q` &rarr; `8 passed`).
 
 ### Software footprint &mdash; `bench/footprint.py`
 
