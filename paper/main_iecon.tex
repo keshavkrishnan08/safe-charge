@@ -535,8 +535,10 @@ The projection is the only online computation carrying safety, a bisection of a 
 with no matrix factorization. It costs $O(\log(1/\epsilon))$ model evaluations for current resolution
 $\epsilon$, and because the iteration count is fixed rather than convergence-tested, that bound is met
 on every input: at most $\filterEvalMax$ closed-form evaluations, ${\sim}\filterFlops$ flops, and
-\SI{\filterMemB}{B} of state and constants with no dynamic allocation, \SI{\filterWorstMs}{ms}
-worst-case in the reference implementation and orders of magnitude inside the \SI{30}{s} step. The
+\SI{\filterMemB}{B} of state and constants with no dynamic allocation, and
+\SI{\filterMeanUs}{$\mu$s} per projection in the reference implementation, where mean and worst case
+coincide to within host scheduling noise because the work per call is fixed, orders of magnitude
+inside the \SI{30}{s} step. The
 tolerance after $k$ halvings is $I_{\max}/2^{k}$, \SI{\tolEpsUA}{$\mu$A} at $k{=}\tolIters$; since
 the bisection maintains $\mathrm{lo}\le I^\star$, a coarser tolerance only under-commands, so safety is
 independent of $k$ and only delivered charge varies, saturating by $k{\approx}\tolKnee$. Its safety

@@ -220,7 +220,7 @@
 \newcommand{\tolKnee}{12}          % iterations beyond which delivered charge saturates
 %% Real-time cost (bench/timing.py)
 \newcommand{\filterEvalMax}{20}    % model evaluations per projection, hard bound
-\newcommand{\filterWorstMs}{0.9}   % worst-case-path latency, reference implementation [ms]
+\newcommand{\filterMeanUs}{145}    % full-bisection path, median per projection [us] (bench/timing.py)
 \newcommand{\filterFlops}{800}
 \newcommand{\filterMemB}{904}      % state + constants, double precision [B]
 %% Robustness beyond the bound (reproduce/robustness.py)
