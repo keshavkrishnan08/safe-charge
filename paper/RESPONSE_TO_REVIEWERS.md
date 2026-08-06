@@ -7,8 +7,9 @@ raised has been addressed. Section and figure numbers below refer to the revised
 remains within the page limit. All new quantities are produced by scripts in the public repository
 (<https://github.com/keshavkrishnan08/safe-charge>), so each number below can be reproduced.
 
-No previously reported result has changed. One supporting figure in a proof is corrected, and is
-declared explicitly in the final section of this letter.
+No previously reported result has changed. Two corrections are made -- one supporting figure in a
+proof, and one figure caption that disagreed with its own plot -- and both are declared explicitly in
+the final section of this letter.
 
 ---
 
@@ -158,7 +159,7 @@ clearing the plating margin rather than concealing it.
 
 ---
 
-## Declared correction
+## Declared corrections
 
 One number in the proof of Prop. 2 has been corrected. The submitted version stated that the
 endothermic reversible heat *"stays below 15% of the ohmic term."* That comparison does not hold in
@@ -171,6 +172,14 @@ The conclusion the sentence supports is unaffected, and is in fact established m
 revision: we verified numerically that `∂_I g_T ≥ 0` holds for every current above 0.08 C, far below
 the 0.70 C floor imposed by the plating cap, and that the admissible current set is a single interval
 anchored at zero on the whole test grid — which is the property the bisection actually requires.
+
+**Second correction — Fig. 4 caption.** The submitted caption reported *"55% of episodes at SOH 0.9,
+100% at 0.8"* for the non-adaptive filter. The series plotted in Fig. 4(a) is 0, 0, 100, 100, 100
+across SOH 1.00 to 0.80, so the caption and its own figure disagreed. The body text of Sec. VI-B
+("without adaptation it rises to 100.0% at SOH 0.8") agrees with the figure. We have therefore
+corrected the caption to report 100% of episodes from SOH 0.9, which is what the figure shows and
+what the body text supports. No plotted data or reported result changed; only the caption text did.
+
 
 ---
 
