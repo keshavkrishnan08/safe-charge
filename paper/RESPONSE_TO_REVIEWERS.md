@@ -36,8 +36,9 @@ parameters, the resistance terms, and the bisection resolution.
 
 All three are rebuilt or re-typeset:
 
-- **Fig. 1** was redrawn as native vector TikZ, so it is now resolution-independent and its type
-  matches the body text rather than being a scaled raster.
+- **Fig. 1** was enlarged from one column to 0.78 of the text width. It was already native vector
+  TikZ, so the issue was scale rather than resolution: at column width its node labels were set well
+  below body-text size, and they are now legible at the printed size.
 - **Figs. 4 and 5** were previously placed in a single column, which scaled them to 0.49× and
   reduced some labels below 2 pt. Both are now full-text-width floats at 1.0×, roughly doubling
   every label. In Fig. 5 all remaining sub-6 pt text was raised so that the figure's minimum type
