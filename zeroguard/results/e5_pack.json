@@ -1,0 +1,90 @@
+{
+  "e5a_lemma": {
+    "sweep": [
+      {
+        "N": 1,
+        "reps": 24,
+        "max_abs_disagreement": 0.0
+      },
+      {
+        "N": 2,
+        "reps": 24,
+        "max_abs_disagreement": 6.600053836791631e-12
+      },
+      {
+        "N": 4,
+        "reps": 24,
+        "max_abs_disagreement": 1.524558257415265e-12
+      },
+      {
+        "N": 8,
+        "reps": 24,
+        "max_abs_disagreement": 0.0
+      },
+      {
+        "N": 16,
+        "reps": 24,
+        "max_abs_disagreement": 0.0
+      },
+      {
+        "N": 32,
+        "reps": 24,
+        "max_abs_disagreement": 0.0
+      },
+      {
+        "N": 64,
+        "reps": 24,
+        "max_abs_disagreement": 0.0
+      },
+      {
+        "N": 128,
+        "reps": 24,
+        "max_abs_disagreement": 0.0
+      },
+      {
+        "N": 256,
+        "reps": 8,
+        "max_abs_disagreement": 0.0
+      },
+      {
+        "N": 512,
+        "reps": 8,
+        "max_abs_disagreement": 0.0
+      },
+      {
+        "N": 1024,
+        "reps": 8,
+        "max_abs_disagreement": 0.0
+      }
+    ],
+    "lemma_holds": true
+  },
+  "e5b_fault": {
+    "packs": 1200,
+    "cells_per_pack": 100,
+    "fault_scale": 3.4,
+    "per_cell": {
+      "name": "per_cell",
+      "trials": 1200,
+      "violations": 0,
+      "rate_pct": 0.0,
+      "cp95_upper_pct": 0.24933300375187262,
+      "worst_T": 43.039922664802056
+    },
+    "pack_averaged": {
+      "name": "pack_averaged",
+      "trials": 1200,
+      "violations": 1200,
+      "rate_pct": 100.0,
+      "cp95_upper_pct": 100.0,
+      "worst_T": 48.53914383303116
+    },
+    "peakT_wilcoxon": {
+      "n": 1200,
+      "p": 0.0,
+      "hodges_lehmann": 3.236536934422803,
+      "rank_biserial": 1.0,
+      "W": 0.0
+    }
+  }
+}

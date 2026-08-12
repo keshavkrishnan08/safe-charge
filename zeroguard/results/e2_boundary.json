@@ -1,0 +1,34 @@
+{
+  "a1_failure": {
+    "trials": 2000,
+    "violated": 2000,
+    "violation_rate_pct": 100.0,
+    "mean_certified_steps_before_violation": 22.2805,
+    "ci": [
+      22.0374875,
+      22.5215
+    ],
+    "mean_unrecoverable_step": 22.440089585666293,
+    "interpretation": "every step passed the one-step check; the state still became unrecoverable, because (A1) fails so there is no fallback"
+  },
+  "a1_control": {
+    "name": "battery_null_policy",
+    "trials": 2000,
+    "violations": 0,
+    "rate_pct": 0.0,
+    "cp95_upper_pct": 0.14967448951882512
+  },
+  "a2_failure": {
+    "trials": 3000,
+    "always_feasible": true,
+    "unsafe_returns": 0,
+    "mean_optimality_gap_pct": 23.74506222284111,
+    "gap_ci": [
+      22.648292468998992,
+      24.836490061446934
+    ],
+    "max_optimality_gap_pct": 66.02752787535331,
+    "mean_admissible_bands": 3.5696666666666665,
+    "interpretation": "the answer is always feasible -- (A2) failure costs delivered performance, never safety"
+  }
+}

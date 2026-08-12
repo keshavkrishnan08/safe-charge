@@ -1,0 +1,116 @@
+{
+  "e3a_monotonicity": {
+    "samples": 11520,
+    "viol_dTdI": 0,
+    "viol_dTdR": 0,
+    "viol_dTdEpsLoss": 0,
+    "min_dTdI": 0.002167553603271699,
+    "min_dTdR": 0.00014204262942740797,
+    "min_dTdEpsLoss": 0.07364345795490479
+  },
+  "e3b_envelope": {
+    "name": "radiative_envelope",
+    "trials": 20000,
+    "violations": 0,
+    "rate_pct": 0.0,
+    "cp95_upper_pct": 0.014977539622296199,
+    "worst_T": 32.4940173102837,
+    "worst_V": 4.095069209066733,
+    "worst_plating": 0.02503321484137379,
+    "corner_T": 32.49999993747688,
+    "corner_dominates": true,
+    "mean_soc": 0.6498744385520745,
+    "soc_ci": [
+      0.649496460881381,
+      0.6502441558265681
+    ],
+    "seconds": 108.5
+  },
+  "e3c_vacuum_limit": {
+    "sweep": [
+      {
+        "eps_fraction": 1.0,
+        "peak_T": 32.49999996284583,
+        "peak_V": 4.08336928397535,
+        "delivered_soc": 0.6068860371907552,
+        "safe": true
+      },
+      {
+        "eps_fraction": 0.5,
+        "peak_T": 32.49999999353555,
+        "peak_V": 3.9070923049235535,
+        "delivered_soc": 0.436563491821289,
+        "safe": true
+      },
+      {
+        "eps_fraction": 0.25,
+        "peak_T": 32.49999988879077,
+        "peak_V": 3.903472664974388,
+        "delivered_soc": 0.3325103759765624,
+        "safe": true
+      },
+      {
+        "eps_fraction": 0.1,
+        "peak_T": 32.49999995958049,
+        "peak_V": 3.900007784778287,
+        "delivered_soc": 0.25787461598714206,
+        "safe": true
+      },
+      {
+        "eps_fraction": 0.05,
+        "peak_T": 32.49999999298918,
+        "peak_V": 3.8999536642632378,
+        "delivered_soc": 0.2257312774658202,
+        "safe": true
+      },
+      {
+        "eps_fraction": 0.02,
+        "peak_T": 32.49999994039361,
+        "peak_V": 3.899921205006353,
+        "delivered_soc": 0.20003992716471364,
+        "safe": true
+      },
+      {
+        "eps_fraction": 0.01,
+        "peak_T": 32.50000000037621,
+        "peak_V": 3.899910387428646,
+        "delivered_soc": 0.1881519953409831,
+        "safe": true
+      },
+      {
+        "eps_fraction": 0.003,
+        "peak_T": 32.499999996625235,
+        "peak_V": 3.89990281577107,
+        "delivered_soc": 0.17638988494873048,
+        "safe": true
+      },
+      {
+        "eps_fraction": 0.001,
+        "peak_T": 32.50000000066862,
+        "peak_V": 3.8999006525381654,
+        "delivered_soc": 0.1714286168416342,
+        "safe": true
+      },
+      {
+        "eps_fraction": 0.0001,
+        "peak_T": 32.499999992365495,
+        "peak_V": 3.899899679097543,
+        "delivered_soc": 0.16848971048990896,
+        "safe": true
+      },
+      {
+        "eps_fraction": 0.0,
+        "peak_T": 32.499999995008224,
+        "peak_V": 3.899899570938018,
+        "delivered_soc": 0.16811173756917325,
+        "safe": true
+      }
+    ],
+    "all_safe": true,
+    "spearman_soc_vs_emissivity": {
+      "rho": 1.0,
+      "p": 0.0,
+      "n": 11
+    }
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "a1_targeted": {
+    "states": 4000,
+    "identical_answers": 4000,
+    "identical_fraction": 1.0,
+    "model_evals_with_check": 1.0,
+    "model_evals_without_check": 18.0,
+    "evals_saved": 17.0,
+    "role": "performance short-circuit, not a safety mechanism: with everything infeasible the bisection drives hi toward lo=0 and returns 0 anyway",
+    "with_check": {
+      "name": "with_check",
+      "trials": 4000,
+      "violations": 0,
+      "rate_pct": 0.0,
+      "cp95_upper_pct": 0.07486526880178257
+    },
+    "without_check": {
+      "name": "without_check",
+      "trials": 4000,
+      "violations": 0,
+      "rate_pct": 0.0,
+      "cp95_upper_pct": 0.07486526880178257
+    },
+    "mean_unjustified_current_A": 0.0,
+    "max_unjustified_current_A": 0.0
+  },
+  "a4_beyond_bound": {
+    "grid": 1200,
+    "sweep": [
+      {
+        "K": 0.0,
+        "name": "K0.0",
+        "trials": 1200,
+        "violations": 529,
+        "rate_pct": 44.083333333333336,
+        "cp95_upper_pct": 46.49134310203012,
+        "mean_soc": 0.7340617806444911,
+        "worst_peak_T": 43.684005861065664
+      },
+      {
+        "K": 2.0,
+        "name": "K2.0",
+        "trials": 1200,
+        "violations": 400,
+        "rate_pct": 33.333333333333336,
+        "cp95_upper_pct": 35.64203048756902,
+        "mean_soc": 0.7006960126196848,
+        "worst_peak_T": 42.13182745316072
+      },
+      {
+        "K": 4.0,
+        "name": "K4.0",
+        "trials": 1200,
+        "violations": 311,
+        "rate_pct": 25.916666666666668,
+        "cp95_upper_pct": 28.081445287983374,
+        "mean_soc": 0.6553409658593945,
+        "worst_peak_T": 40.9778365189054
+      },
+      {
+        "K": 6.0,
+        "name": "K6.0",
+        "trials": 1200,
+        "violations": 216,
+        "rate_pct": 18.0,
+        "cp95_upper_pct": 19.92353489213152,
+        "mean_soc": 0.5982090197112048,
+        "worst_peak_T": 39.88562077078401
+      },
+      {
+        "K": 8.0,
+        "name": "K8.0",
+        "trials": 1200,
+        "violations": 115,
+        "rate_pct": 9.583333333333334,
+        "cp95_upper_pct": 11.097306722133126,
+        "mean_soc": 0.5287262202595528,
+        "worst_peak_T": 38.27509337308871
+      },
+      {
+        "K": 10.0,
+        "name": "K10.0",
+        "trials": 1200,
+        "violations": 42,
+        "rate_pct": 3.5,
+        "cp95_upper_pct": 4.503634354592655,
+        "mean_soc": 0.4491853111084232,
+        "worst_peak_T": 37.992577620648184
+      },
+      {
+        "K": 12.0,
+        "name": "K12.0",
+        "trials": 1200,
+        "violations": 5,
+        "rate_pct": 0.4166666666666667,
+        "cp95_upper_pct": 0.874075023482109,
+        "mean_soc": 0.3736671643884573,
+        "worst_peak_T": 37.992577620648184
+      },
+      {
+        "K": 15.0,
+        "name": "K15.0",
+        "trials": 1200,
+        "violations": 0,
+        "rate_pct": 0.0,
+        "cp95_upper_pct": 0.24933300375187262,
+        "mean_soc": 0.27797854468070826,
+        "worst_peak_T": 37.992577620648184
+      },
+      {
+        "K": 20.0,
+        "name": "K20.0",
+        "trials": 1200,
+        "violations": 0,
+        "rate_pct": 0.0,
+        "cp95_upper_pct": 0.24933300375187262,
+        "mean_soc": 0.16782210029804734,
+        "worst_peak_T": 37.992577620648184
+      },
+      {
+        "K": 25.0,
+        "name": "K25.0",
+        "trials": 1200,
+        "violations": 0,
+        "rate_pct": 0.0,
+        "cp95_upper_pct": 0.24933300375187262,
+        "mean_soc": 0.13888011603998546,
+        "worst_peak_T": 37.992577620648184
+      }
+    ]
+  },
+  "a4_min_safe_K": 15.0,
+  "a4_recommendation": {
+    "deployed_K": 15.0,
+    "minimum_certifying_K": 15.0,
+    "soc_recovered_points": 0.0
+  }
+}

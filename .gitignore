@@ -16,3 +16,6 @@ bench/footprint.json
 *.log
 *.out
 *.synctex.gz
+
+# zeroguard: generated artefacts kept, caches not
+zeroguard/**/__pycache__/

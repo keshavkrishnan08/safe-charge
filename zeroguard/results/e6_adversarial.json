@@ -1,0 +1,605 @@
+{
+  "e6a_adversary": {
+    "cells": 40,
+    "sequences_searched": 72000,
+    "worst_peak_T": 37.871211646539265,
+    "limit": 45.0,
+    "violations": 0,
+    "cp95_upper_pct": 7.21575245055146,
+    "mean_gain_over_greedy_C": 0.05202550112941591,
+    "gain_ci": [
+      0.024277320290247584,
+      0.08445580090357226
+    ],
+    "seconds": 310.1,
+    "rows": [
+      {
+        "soh": 0.8653944553211121,
+        "T_amb": 37.834598963393034,
+        "adversary_peak_T": 37.834598963393034,
+        "greedy_peak_T": 37.834598963393034,
+        "gain_C": 0.0
+      },
+      {
+        "soh": 0.9557809453361569,
+        "T_amb": 31.734368735444136,
+        "adversary_peak_T": 32.46891385565062,
+        "greedy_peak_T": 32.468908251327576,
+        "gain_C": 5.604323042973647e-06
+      },
+      {
+        "soh": 0.9529522865415309,
+        "T_amb": 29.425684148173747,
+        "adversary_peak_T": 32.1667709112959,
+        "greedy_peak_T": 31.983827253619367,
+        "gain_C": 0.18294365767653176
+      },
+      {
+        "soh": 0.8299983526345582,
+        "T_amb": 30.626025399391494,
+        "adversary_peak_T": 32.47882447618828,
+        "greedy_peak_T": 32.47882045939588,
+        "gain_C": 4.016792402694591e-06
+      },
+      {
+        "soh": 0.8097142538874795,
+        "T_amb": 33.494022439320695,
+        "adversary_peak_T": 33.494022439320695,
+        "greedy_peak_T": 33.494022439320695,
+        "gain_C": 0.0
+      },
+      {
+        "soh": 0.9537627448892697,
+        "T_amb": 25.52414024433334,
+        "adversary_peak_T": 31.356309114800336,
+        "greedy_peak_T": 31.19274761927603,
+        "gain_C": 0.16356149552430566
+      },
+      {
+        "soh": 0.9377624333360711,
+        "T_amb": 30.469233768760024,
+        "adversary_peak_T": 32.39086898557434,
+        "greedy_peak_T": 32.3908632167954,
+        "gain_C": 5.768778940762331e-06
+      },
+      {
+        "soh": 0.8517374045036381,
+        "T_amb": 31.275753792579398,
+        "adversary_peak_T": 32.48008400421819,
+        "greedy_peak_T": 32.48007947675162,
+        "gain_C": 4.527466572312733e-06
+      },
+      {
+        "soh": 0.9579464708106352,
+        "T_amb": 28.271243494712103,
+        "adversary_peak_T": 31.923965493675087,
+        "greedy_peak_T": 31.898070452093826,
+        "gain_C": 0.025895041581261324
+      },
+      {
+        "soh": 0.8619153139332558,
+        "T_amb": 31.04594170552088,
+        "adversary_peak_T": 32.469579471057266,
+        "greedy_peak_T": 32.46957890614127,
+        "gain_C": 5.649159930953829e-07
+      },
+      {
+        "soh": 0.8741403075157806,
+        "T_amb": 37.09227790762599,
+        "adversary_peak_T": 37.09227790762599,
+        "greedy_peak_T": 37.09227790762599,
+        "gain_C": 0.0
+      },
+      {
+        "soh": 0.823020661957431,
+        "T_amb": 29.11321640670401,
+        "adversary_peak_T": 32.20752773378046,
+        "greedy_peak_T": 31.977154006446046,
+        "gain_C": 0.2303737273344133
+      },
+      {
+        "soh": 0.8112968632593636,
+        "T_amb": 30.633426255452584,
+        "adversary_peak_T": 32.49207025669003,
+        "greedy_peak_T": 32.492068415504534,
+        "gain_C": 1.8411854938449324e-06
+      },
+      {
+        "soh": 0.8331503278325942,
+        "T_amb": 34.472713184890566,
+        "adversary_peak_T": 34.472713184890566,
+        "greedy_peak_T": 34.472713184890566,
+        "gain_C": 0.0
+      },
+      {
+        "soh": 0.9755147207430768,
+        "T_amb": 33.74446122117721,
+        "adversary_peak_T": 33.74446122117721,
+        "greedy_peak_T": 33.74446122117721,
+        "gain_C": 0.0
+      },
+      {
+        "soh": 0.9259518745483479,
+        "T_amb": 30.98740678368648,
+        "adversary_peak_T": 32.434541163367236,
+        "greedy_peak_T": 32.43453404918819,
+        "gain_C": 7.114179048528513e-06
+      },
+      {
+        "soh": 0.9434127854678608,
+        "T_amb": 31.942273903669324,
+        "adversary_peak_T": 32.4814721514254,
+        "greedy_peak_T": 32.48146502487582,
+        "gain_C": 7.126549583347241e-06
+      },
+      {
+        "soh": 0.9095162530357386,
+        "T_amb": 27.465847000151722,
+        "adversary_peak_T": 31.796031132606686,
+        "greedy_peak_T": 31.515388820521988,
+        "gain_C": 0.2806423120846979
+      },
+      {
+        "soh": 0.9754369515666428,
+        "T_amb": 32.338640012189636,
+        "adversary_peak_T": 32.49546529209389,
+        "greedy_peak_T": 32.495465149906956,
+        "gain_C": 1.421869342266291e-07
+      },
+      {
+        "soh": 0.9562223531602654,
+        "T_amb": 36.37298704989481,
+        "adversary_peak_T": 36.37298704989481,
+        "greedy_peak_T": 36.37298704989481,
+        "gain_C": 0.0
+      },
+      {
+        "soh": 0.9336023005805679,
+        "T_amb": 37.871211646539265,
+        "adversary_peak_T": 37.871211646539265,
+        "greedy_peak_T": 37.871211646539265,
+        "gain_C": 0.0
+      },
+      {
+        "soh": 0.8823723925466239,
+        "T_amb": 28.383324379058116,
+        "adversary_peak_T": 32.00949726514234,
+        "greedy_peak_T": 31.943769475224556,
+        "gain_C": 0.06572778991778705
+      },
+      {
+        "soh": 0.9871550604648274,
+        "T_amb": 30.411280814597532,
+        "adversary_peak_T": 32.33342943765932,
+        "greedy_peak_T": 32.33342943765932,
+        "gain_C": 0.0
+      },
+      {
+        "soh": 0.970404055813675,
+        "T_amb": 30.600104996324514,
+        "adversary_peak_T": 32.37731832782958,
+        "greedy_peak_T": 32.37731144987059,
+        "gain_C": 6.877958988127375e-06
+      },
+      {
+        "soh": 0.9768977315152201,
+        "T_amb": 25.748710209408458,
+        "adversary_peak_T": 31.38247982872374,
+        "greedy_peak_T": 31.355259084209752,
+        "gain_C": 0.02722074451398626
+      },
+      {
+        "soh": 0.9531155375886667,
+        "T_amb": 30.646248144573004,
+        "adversary_peak_T": 32.393585624288775,
+        "greedy_peak_T": 32.393578997711764,
+        "gain_C": 6.62657701155922e-06
+      },
+      {
+        "soh": 0.9007930721281893,
+        "T_amb": 32.02577583253955,
+        "adversary_peak_T": 32.48954301076902,
+        "greedy_peak_T": 32.489540367446594,
+        "gain_C": 2.643322424944472e-06
+      },
+      {
+        "soh": 0.9074394294450931,
+        "T_amb": 30.191850357921343,
+        "adversary_peak_T": 32.36300915982991,
+        "greedy_peak_T": 32.18084978463816,
+        "gain_C": 0.18215937519174474
+      },
+      {
+        "soh": 0.8826921225706982,
+        "T_amb": 35.48772673312884,
+        "adversary_peak_T": 35.48772673312884,
+        "greedy_peak_T": 35.48772673312884,
+        "gain_C": 0.0
+      },
+      {
+        "soh": 0.8520792099517234,
+        "T_amb": 30.082148292597765,
+        "adversary_peak_T": 32.38546807728289,
+        "greedy_peak_T": 32.1176442659877,
+        "gain_C": 0.2678238112951874
+      },
+      {
+        "soh": 0.9001371712120123,
+        "T_amb": 33.189389104077335,
+        "adversary_peak_T": 33.189389104077335,
+        "greedy_peak_T": 33.189389104077335,
+        "gain_C": 0.0
+      },
+      {
+        "soh": 0.8136323888637185,
+        "T_amb": 33.86973587812242,
+        "adversary_peak_T": 33.86973587812242,
+        "greedy_peak_T": 33.86973587812242,
+        "gain_C": 0.0
+      },
+      {
+        "soh": 0.9191282005117279,
+        "T_amb": 25.934876109078285,
+        "adversary_peak_T": 31.471542469108083,
+        "greedy_peak_T": 31.43518573089147,
+        "gain_C": 0.03635673821661456
+      },
+      {
+        "soh": 0.8573751792180585,
+        "T_amb": 28.0747230361554,
+        "adversary_peak_T": 31.966538651180556,
+        "greedy_peak_T": 31.944038361481937,
+        "gain_C": 0.022500289698619724
+      },
+      {
+        "soh": 0.9910580641766588,
+        "T_amb": 25.290039038005478,
+        "adversary_peak_T": 31.274712918828563,
+        "greedy_peak_T": 31.08833769899999,
+        "gain_C": 0.18637521982857308
+      },
+      {
+        "soh": 0.9941081799631974,
+        "T_amb": 33.07582681748624,
+        "adversary_peak_T": 33.07582681748624,
+        "greedy_peak_T": 33.07582681748624,
+        "gain_C": 0.0
+      },
+      {
+        "soh": 0.8160483239709353,
+        "T_amb": 29.948287874718766,
+        "adversary_peak_T": 32.3871820617951,
+        "greedy_peak_T": 32.01480219163823,
+        "gain_C": 0.3723798701568697
+      },
+      {
+        "soh": 0.9213074676999446,
+        "T_amb": 33.25900190950035,
+        "adversary_peak_T": 33.25900190950035,
+        "greedy_peak_T": 33.25900190950035,
+        "gain_C": 0.0
+      },
+      {
+        "soh": 0.9466365664313753,
+        "T_amb": 28.33704748114051,
+        "adversary_peak_T": 31.946897349210186,
+        "greedy_peak_T": 31.90989023129058,
+        "gain_C": 0.037007117919607424
+      },
+      {
+        "soh": 0.951230131931114,
+        "T_amb": 37.72706990901151,
+        "adversary_peak_T": 37.72706990901151,
+        "greedy_peak_T": 37.72706990901151,
+        "gain_C": 0.0
+      }
+    ]
+  },
+  "e6b_sensors": {
+    "noise_C": {
+      "sweep": [
+        {
+          "level": 0.0,
+          "name": "noise@0.0",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 0.5,
+          "name": "noise@0.5",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 1.0,
+          "name": "noise@1.0",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 2.0,
+          "name": "noise@2.0",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 4.0,
+          "name": "noise@4.0",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 8.0,
+          "name": "noise@8.0",
+          "trials": 600,
+          "violations": 1,
+          "rate_pct": 0.16666666666666666,
+          "cp95_upper_pct": 0.7881816463574881
+        }
+      ],
+      "first_failing_level": 8.0
+    },
+    "bias_C": {
+      "sweep": [
+        {
+          "level": 0.0,
+          "name": "bias@0.0",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 2.0,
+          "name": "bias@2.0",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 4.0,
+          "name": "bias@4.0",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 6.0,
+          "name": "bias@6.0",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 8.0,
+          "name": "bias@8.0",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 10.0,
+          "name": "bias@10.0",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 12.0,
+          "name": "bias@12.0",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 13.0,
+          "name": "bias@13.0",
+          "trials": 600,
+          "violations": 231,
+          "rate_pct": 38.5,
+          "cp95_upper_pct": 41.8878760946752
+        },
+        {
+          "level": 14.0,
+          "name": "bias@14.0",
+          "trials": 600,
+          "violations": 404,
+          "rate_pct": 67.33333333333333,
+          "cp95_upper_pct": 70.49755304036778
+        },
+        {
+          "level": 16.0,
+          "name": "bias@16.0",
+          "trials": 600,
+          "violations": 355,
+          "rate_pct": 59.166666666666664,
+          "cp95_upper_pct": 62.511725041823254
+        },
+        {
+          "level": 20.0,
+          "name": "bias@20.0",
+          "trials": 600,
+          "violations": 271,
+          "rate_pct": 45.166666666666664,
+          "cp95_upper_pct": 48.6041151936913
+        }
+      ],
+      "first_failing_level": 13.0
+    },
+    "dropout_p": {
+      "sweep": [
+        {
+          "level": 0.0,
+          "name": "dropout@0.0",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 0.1,
+          "name": "dropout@0.1",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 0.3,
+          "name": "dropout@0.3",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 0.5,
+          "name": "dropout@0.5",
+          "trials": 600,
+          "violations": 1,
+          "rate_pct": 0.16666666666666666,
+          "cp95_upper_pct": 0.7881816463574881
+        },
+        {
+          "level": 0.7,
+          "name": "dropout@0.7",
+          "trials": 600,
+          "violations": 1,
+          "rate_pct": 0.16666666666666666,
+          "cp95_upper_pct": 0.7881816463574881
+        },
+        {
+          "level": 0.9,
+          "name": "dropout@0.9",
+          "trials": 600,
+          "violations": 58,
+          "rate_pct": 9.666666666666666,
+          "cp95_upper_pct": 11.885080424157309
+        }
+      ],
+      "first_failing_level": 0.5
+    },
+    "quantisation_C": {
+      "sweep": [
+        {
+          "level": 0.0,
+          "name": "quant@0.0",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 0.5,
+          "name": "quant@0.5",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 1.0,
+          "name": "quant@1.0",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 2.0,
+          "name": "quant@2.0",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 4.0,
+          "name": "quant@4.0",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        },
+        {
+          "level": 8.0,
+          "name": "quant@8.0",
+          "trials": 600,
+          "violations": 0,
+          "rate_pct": 0.0,
+          "cp95_upper_pct": 0.4980443380361299
+        }
+      ],
+      "first_failing_level": null
+    }
+  },
+  "e6c_jitter": {
+    "sweep": [
+      {
+        "jitter_frac": 0.0,
+        "name": "jitter0.0",
+        "trials": 1500,
+        "violations": 0,
+        "rate_pct": 0.0,
+        "cp95_upper_pct": 0.19951618622789935
+      },
+      {
+        "jitter_frac": 0.05,
+        "name": "jitter0.05",
+        "trials": 1500,
+        "violations": 0,
+        "rate_pct": 0.0,
+        "cp95_upper_pct": 0.19951618622789935
+      },
+      {
+        "jitter_frac": 0.1,
+        "name": "jitter0.1",
+        "trials": 1500,
+        "violations": 0,
+        "rate_pct": 0.0,
+        "cp95_upper_pct": 0.19951618622789935
+      },
+      {
+        "jitter_frac": 0.2,
+        "name": "jitter0.2",
+        "trials": 1500,
+        "violations": 0,
+        "rate_pct": 0.0,
+        "cp95_upper_pct": 0.19951618622789935
+      },
+      {
+        "jitter_frac": 0.3,
+        "name": "jitter0.3",
+        "trials": 1500,
+        "violations": 0,
+        "rate_pct": 0.0,
+        "cp95_upper_pct": 0.19951618622789935
+      }
+    ],
+    "all_safe": true
+  },
+  "e6d_float32": {
+    "name": "float32",
+    "trials": 4000,
+    "violations": 0,
+    "rate_pct": 0.0,
+    "cp95_upper_pct": 0.07486526880178257,
+    "worst_current_deviation_A": 0.0002288818359375
+  }
+}

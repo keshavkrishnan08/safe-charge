@@ -1,0 +1,106 @@
+{
+  "n_episodes_per_system": 2000,
+  "systems": [
+    {
+      "name": "battery",
+      "trials": 2000,
+      "violations": 0,
+      "rate_pct": 0.0,
+      "cp95_upper_pct": 0.14967448951882512,
+      "physics": "electrochemical + lumped thermal",
+      "horizon": 80,
+      "steps_total": 160000,
+      "worst_slack": -9.993258373586222e-10,
+      "mean_slack": 5.629694642144204e-09,
+      "slack_ci": [
+        5.208806886261705e-09,
+        6.076265009194101e-09
+      ],
+      "mean_clipped_fraction": 0.9723875000000001,
+      "mean_work": 8789.502033617706,
+      "interval_diagnosis": {
+        "interval-at-zero": 400
+      },
+      "seconds": 10.2
+    },
+    {
+      "name": "heater",
+      "trials": 2000,
+      "violations": 0,
+      "rate_pct": 0.0,
+      "cp95_upper_pct": 0.14967448951882512,
+      "physics": "Joule heating, temperature-dependent resistance",
+      "horizon": 120,
+      "steps_total": 240000,
+      "worst_slack": -8.509886129104416e-10,
+      "mean_slack": 6.729886544860619e-07,
+      "slack_ci": [
+        5.888929828234524e-07,
+        7.615776884822622e-07
+      ],
+      "mean_clipped_fraction": 0.9418708333333334,
+      "mean_work": 2258.4871619415285,
+      "interval_diagnosis": {
+        "interval-at-zero": 400
+      },
+      "seconds": 1.1
+    },
+    {
+      "name": "motor",
+      "trials": 2000,
+      "violations": 0,
+      "rate_pct": 0.0,
+      "cp95_upper_pct": 0.14967448951882512,
+      "physics": "electromechanical, coupled thermal + rotational",
+      "horizon": 4000,
+      "steps_total": 8000000,
+      "worst_slack": -2.3942448024172336e-10,
+      "mean_slack": 9.045669320926208e-07,
+      "slack_ci": [
+        8.815914074872921e-07,
+        9.276665924659256e-07
+      ],
+      "mean_clipped_fraction": 0.999176125,
+      "mean_work": 123.69576201332632,
+      "interval_diagnosis": {
+        "interval-at-zero": 400
+      },
+      "seconds": 47.6
+    },
+    {
+      "name": "igbt",
+      "trials": 2000,
+      "violations": 0,
+      "rate_pct": 0.0,
+      "cp95_upper_pct": 0.14967448951882512,
+      "physics": "semiconductor conduction + switching loss, 2-node RC network",
+      "horizon": 6000,
+      "steps_total": 12000000,
+      "worst_slack": -9.99875737761613e-10,
+      "mean_slack": 4.162408274055452e-09,
+      "slack_ci": [
+        3.936571791740562e-09,
+        4.389748114519421e-09
+      ],
+      "mean_clipped_fraction": 0.9992868333333333,
+      "mean_work": 1550.5302399284362,
+      "interval_diagnosis": {
+        "interval-at-zero": 400
+      },
+      "seconds": 60.1
+    }
+  ],
+  "e1b_bit_exact": {
+    "states": 60000,
+    "mismatches": 0,
+    "worst_abs_diff": 0.0
+  },
+  "pooled": {
+    "name": "pooled",
+    "trials": 8000,
+    "violations": 0,
+    "rate_pct": 0.0,
+    "cp95_upper_pct": 0.03743964303524194,
+    "one_step_transitions": 20400000
+  }
+}
