@@ -13,7 +13,7 @@ control problems, and the battery is one instance.
 
 ```bash
 python zeroguard/run_all.py          # every experiment, then the figures, then the claim check
-python zeroguard/verify_claims.py    # re-read all 80 claims in PAPER.md out of the results
+python zeroguard/verify_claims.py    # re-read all 100 claims in PAPER.md out of the results
 ```
 
 | file | what it is |
@@ -24,7 +24,7 @@ python zeroguard/verify_claims.py    # re-read all 80 claims in PAPER.md out of 
 | `gfilter.py` | the projection, written once for any monotone system |
 | `stats.py` | Clopper–Pearson, bootstrap, Wilcoxon with effect sizes, permutation Spearman |
 | `exp/` | one script per experiment; each writes JSON to `results/` |
-| `figures.py` | nine figures, each redrawn from a results file |
+| `figures.py` | ten figures, each redrawn from a results file |
 | `verify_claims.py` | fails loudly if the manuscript and the data disagree |
 
 ## What it found
