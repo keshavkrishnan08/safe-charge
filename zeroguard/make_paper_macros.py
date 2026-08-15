@@ -16,7 +16,7 @@ RES = os.path.join(HERE, "results")
 OUT = os.path.join(os.path.dirname(HERE), "paper", "vehicle_macros.tex")
 
 D = {}
-for k, f in (("n", "n1_nasa_validation.json"), ("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
+for k, f in (("b", "b1_baselines.json"), ("n", "n1_nasa_validation.json"), ("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
              ("s", "v4_space.json"), ("x", "x_crossdomain.json"),
              ("e1", "e1_generality.json"), ("e2", "e2_boundary.json")):
     p = os.path.join(RES, f)
@@ -290,6 +290,27 @@ if "n" in D:
     m("nAssocLo", f"{nd['rho_range'][0]:+.3f}")
     m("nAssocHi", f"{nd['rho_range'][1]:+.3f}")
     m("nBadBaselines", str(nd["cells_with_bad_first_baseline"]))
+
+# ---- baselines --------------------------------------------------------------------------
+if "b" in D:
+    b = D["b"]; cc = b["controllers"]
+    m("bTrials", num(b["trials"], 0, True))
+    m("bDerateC", num(b["derate_C"], 1))
+    m("bAggrC", num(b["aggressive_C"], 1))
+    m("bGainPts", num(b["charge_gain_over_derate_points"], 1))
+    m("bGainPct", num(b["charge_gain_over_derate_pct"], 1))
+    m("bAggrViolPct", num(100 * b["aggressive_violation_rate"], 0))
+    m("bAggrViol", str(cc["ccv_aggressive"]["violations"]))
+    m("bMpcGap", num(abs(b["mpc_h1_soc_gap_points"]), 2))
+    m("bMpcRatio", num(b["mpc_h1_eval_ratio"], 1))
+    m("bMpcMaxEval", num(cc["mpc_h1"]["evals_max"], 0))
+    m("bMpcIterSpread", str(cc["mpc_h1"].get("iters_spread", "")))
+    m("bZgEval", num(cc["zeroguard"]["evals_max"], 0))
+    for k, tag in (("ccv_derate", "Derate"), ("ccv_aggressive", "Aggr"),
+                   ("mpc_h1", "MpcOne"), ("mpc_h3", "MpcThree"), ("zeroguard", "Zg")):
+        if k in cc:
+            m(f"bSoc{tag}", num(cc[k]["mean_soc"], 3))
+            m(f"bViol{tag}", str(cc[k]["violations"]))
 
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
 with open(OUT, "w") as f:

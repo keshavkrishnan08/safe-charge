@@ -1062,6 +1062,70 @@ delivered charge.}
 \end{figure}
 
 
+
+\section{Compared to what?}\label{sec:baselines}
+
+Every safety number so far has the form ``the filter violated nothing''. That is necessary and
+not sufficient, because a controller that refuses to charge violates nothing either. The claims
+that carry weight are comparative, and until this section the only comparison was against a
+crippled version of the same method. Table~\ref{tab:baselines} puts the certificate against what
+is actually deployed and what the literature actually recommends: \bTrials{} sessions per
+controller, identical plants, identical seeds, identical margins.
+
+\begin{table}[t]\centering\small
+\caption{Four controllers on the same plants. Cost is counted in one-step \emph{model
+evaluations} rather than seconds, because wall-clock depends on the language and the machine
+while the evaluation count is a property of the algorithm --- and is what a task budget is
+sized around.}
+\label{tab:baselines}
+\begin{tabular}{@{}lrrrrl@{}}
+\toprule
+\textbf{Controller} & \textbf{Violations} & \textbf{Mean SOC} & \textbf{Evals (med)} &
+\textbf{Evals (max)} & \textbf{Worst case known?} \\
+\midrule
+CC-CV at the shipped \bDerateC{}C de-rate & \bViolDerate{} & \bSocDerate{} & 1 & 1 & --- \\
+CC-CV at \bAggrC{}C & \bViolAggr{} & \bSocAggr{} & 1 & 1 & --- \\
+MPC, horizon 1 (SLSQP) & \bViolMpcOne{} & \bSocMpcOne{} & 11 & \bMpcMaxEval{} & no \\
+MPC, horizon 3 (SLSQP) & \bViolMpcThree{} & \bSocMpcThree{} & 94 & 502 & no \\
+\textbf{ZEROGUARD} & \textbf{\bViolZg{}} & \textbf{\bSocZg{}} & 20 & \textbf{\bZgEval{}} &
+\textbf{yes, $=$ \bZgEval{}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Against what ships today.} A production pack is limited to a single conservative
+C-rate chosen for the weakest cell at a temperature extreme at end of life, and applied whatever
+the present state happens to be. The certificate delivers \textbf{$+$\bGainPts{} SOC points
+($+$\bGainPct\,\%)} over that de-rate with \bViolZg{} violations. That is the entire economic
+argument of \S\ref{sec:enables}, measured rather than asserted.
+
+\paragraph{And the de-rate is not paranoia.} A comparison against a conservative baseline is
+only meaningful if the conservatism is doing something. Removing it --- charging at \bAggrC{}C
+on the same cells --- violates in \textbf{\bAggrViolPct\,\% of sessions}. The de-rate is
+protecting against something real; the certificate's contribution is to stop paying for it when
+the present state does not require it.
+
+\paragraph{Against MPC: the same problem, solved two ways.} This is the comparison that matters
+for the run-time claim, because that claim is only interesting if the solver is solving the same
+problem. It is: horizon-1 MPC and the bisection agree on delivered charge to
+\textbf{\bMpcGap{} SOC points}. The certificate is not a cheaper approximation of MPC --- on
+this problem it is an exact solver for it.
+
+The difference is what it costs to be sure. The bisection spends at most \bZgEval{} model
+evaluations, and that is a \emph{bound}: proved in \S\ref{sec:formal}, known before any data
+arrives, never exceeded. SLSQP's worst observed cost was \bMpcMaxEval{} evaluations, a factor of
+\bMpcRatio{} higher --- and that number is not a bound. It is whatever the iteration cap
+happened to allow, its iteration count varied by \bMpcIterSpread{} across states, and removing
+the cap removes the number. A safety task slot can be sized around the first quantity and cannot
+be sized around the second.
+
+\paragraph{What this does not show.} SLSQP is a general-purpose nonlinear solver and a
+specialised QP or an explicit-MPC lookup would be faster; the comparison is against the standard
+approach as it is usually implemented, not against the best conceivable optimiser. What no
+optimiser removes is the data-dependence: the argument here is about the \emph{shape} of the
+cost, not its constant.
+
+
 \section{External validation: the assumptions against measured cells}\label{sec:external}
 
 Everything to this point is simulation. The filter is checked against a reduced-order model,

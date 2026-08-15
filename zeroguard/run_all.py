@@ -36,6 +36,7 @@ VEHICLE_STAGES = [
     ("V4  space: LEO, GEO, deep space, Mars, lunar night, radiation", "exp/v4_space.py"),
     ("X   cross-domain connectedness", "exp/x_crossdomain.py"),
     ("N1  the assumptions against NASA PCoE measurements", "exp/n1_nasa_validation.py"),
+    ("B1  against CC-CV, a shipped de-rate, and MPC", "exp/b1_baselines.py"),
 ]
 
 

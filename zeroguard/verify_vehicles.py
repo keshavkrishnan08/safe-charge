@@ -58,6 +58,26 @@ def pred(label, fn, why):
 G, A_, U, S, X = ("v1_ground.json", "v2_aerial.json", "v3_underwater.json",
                   "v4_space.json", "x_crossdomain.json")
 N = "n1_nasa_validation.json"
+B = "b1_baselines.json"
+
+# ---- baselines: compared to what? -------------------------------------------------------
+eq("B1    the certificate violates nothing where the shipped de-rate also violates nothing",
+   lambda: dig(B, "controllers", "zeroguard", "violations"), 0)
+pred("B1    and it recovers real charge the de-rate gives away",
+     lambda: dig(B, "charge_gain_over_derate_points") > 5.0,
+     "the certificate did not materially beat the shipped de-rate")
+pred("B1    the de-rate is not paranoia: removing it actually violates",
+     lambda: dig(B, "aggressive_violation_rate") > 0.25,
+     "the aggressive protocol was safe, which would make the de-rate unjustified")
+pred("B1    the filter and MPC solve the same problem, to within a fraction of a point",
+     lambda: abs(dig(B, "mpc_h1_soc_gap_points")) < 2.0,
+     "the filter and MPC disagreed materially on delivered charge")
+pred("B1    but only the filter has a worst case known before the data",
+     lambda: dig(B, "zeroguard_bounded_mpc_not"),
+     "the bounded-cost distinction between the filter and MPC did not hold")
+pred("B1    and MPC's worst observed cost is far above the filter's bound",
+     lambda: dig(B, "mpc_h1_eval_ratio") > 5.0,
+     "MPC was not materially more expensive in model evaluations")
 
 # ---- external validation: assumptions against measurements from another lab -------------
 pred("N1-1  measured resistance growth stays inside the datasheet bound within the claimed life",
