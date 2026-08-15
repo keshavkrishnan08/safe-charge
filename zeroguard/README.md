@@ -56,6 +56,14 @@ pack-averaged enforcement in 1,200 of 1,200.
 = 12.802 °C predicts the measured sensor-bias breakpoint to 0.048 °C, from published constants
 with nothing fitted.
 
+**The design register was audited against what actually ran**, and the three gaps it found
+were closed rather than dropped: a six-channel vacuum envelope including radiation drift
+(0/20,000), the sample-adequacy check that `stats.n_required` was written for and never
+called, and the latency evidence that never reached a figure. The adequacy check then found a
+fourth problem of its own — the adversarial claim rested on 40 cells, bounding the violation
+rate only below 7.2 % — so the attack was re-run against 320 cells and 256,000 sequences,
+bringing it to 0.93 % with zero violations.
+
 **Two things in the original method were described wrongly**, and the ablations found both.
 The *I* = 0 short-circuit is not a safety mechanism — the bisection is self-correcting when
 every input is infeasible, and returns zero regardless; what the check buys is 17 model

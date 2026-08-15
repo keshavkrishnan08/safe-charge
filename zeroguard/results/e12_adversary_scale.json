@@ -1,0 +1,21 @@
+{
+  "name": "adversary_at_scale",
+  "trials": 320,
+  "violations": 0,
+  "rate_pct": 0.0,
+  "cp95_upper_pct": 0.9317979408884125,
+  "sequences_searched": 256000,
+  "episodes_simulated": 256320,
+  "worst_peak_T": 37.990808076642736,
+  "mean_peak_T": 33.41659411250616,
+  "limit": 45.0,
+  "headroom_C": 7.009191923357264,
+  "mean_gain_over_greedy_C": 0.06897328774611744,
+  "gain_ci": [
+    0.05779885486734751,
+    0.08047035773836976
+  ],
+  "n_required_for_1pct": 299,
+  "certifies_below_1pct": true,
+  "seconds": 792.7
+}

@@ -539,12 +539,80 @@ def f9_cost():
     save(fig, "F9_robustness")
 
 
+def f10_cost_and_adequacy():
+    """The design's ninth figure: what a projection costs, and whether the evidence behind
+    each zero-failure claim is actually enough to certify anything."""
+    d = load("e11_closure.json")
+    lat, ad = d["latency"], d["sample_adequacy"]
+    fig, axes = plt.subplots(1, 3, figsize=(DBL, 2.7), constrained_layout=True)
+
+    # (a) latency by code path -- every path, min to max
+    ax = axes[0]
+    paths = sorted(lat["paths"].values(), key=lambda v: v["evaluations"])
+    x = np.arange(len(paths))
+    med = [p["us_median"] for p in paths]
+    lo = [p["us_median"] - p["us_min"] for p in paths]
+    hi = [p["us_max"] - p["us_median"] for p in paths]
+    ax.bar(x, med, 0.55, color=C[0], zorder=3)
+    ax.errorbar(x, med, yerr=[lo, hi], fmt="none", ecolor=INK, elinewidth=0.9, capsize=3, zorder=5)
+    for xi, p in zip(x, paths):
+        ax.text(xi, p["us_max"] + 2.5, f"{p['us_median']:.1f}", ha="center", fontsize=6.4, color=INK)
+        ax.text(xi, 1.5, f"n={p['states']}", ha="center", fontsize=5.8, color="white")
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"{p['evaluations']} eval{'s' if p['evaluations']>1 else ''}" for p in paths],
+                       fontsize=6.8)
+    ax.set_ylabel("microseconds per projection")
+    ax.set_ylim(0, max(p["us_max"] for p in paths) * 1.22)
+    ax.set_title("(a)  cost by code path", loc="left", fontsize=8.5)
+    ax.text(0.03, 0.93, f"hard bound: {lat['hard_bound_evaluations']} evaluations,\nevery input, always",
+            transform=ax.transAxes, va="top", fontsize=6.2, color=MUTED)
+
+    # (b) the budget, on a log axis
+    ax = axes[1]
+    items = ["worst path\n(20 evals)", "control step"]
+    vals = [lat["worst_path_median_us"] * 1e-6, lat["control_step_s"]]
+    ax.bar([0, 1], vals, 0.5, color=[C[0], C[2]], zorder=3)
+    ax.set_yscale("log"); ax.set_ylim(1e-5, 1e2)
+    ax.set_xticks([0, 1]); ax.set_xticklabels(items, fontsize=6.8)
+    ax.set_ylabel("seconds (log)")
+    for xi, v in zip([0, 1], vals):
+        ax.text(xi, v * 1.6, f"{v:.3g} s" if v > 1e-3 else f"{v*1e6:.0f} $\\mu$s",
+                ha="center", fontsize=6.4, color=INK)
+    ax.annotate("", xy=(0.5, vals[0]), xytext=(0.5, vals[1]),
+                arrowprops=dict(arrowstyle="<->", lw=0.9, color=C[1]))
+    ax.text(0.56, np.sqrt(vals[0] * vals[1]), f"{lat['headroom_orders']:.1f} orders\nof headroom",
+            fontsize=6.4, color=C[1], va="center")
+    ax.set_title("(b)  vs the budget", loc="left", fontsize=8.5)
+    ax.text(0.03, 0.06, f"{lat['memory_bytes_double']} B double\n{lat['memory_bytes_single']} B single",
+            transform=ax.transAxes, fontsize=6.2, color=MUTED)
+
+    # (c) is the evidence enough? n run vs n needed
+    ax = axes[2]
+    cl = ad["claims"]
+    names = [c["claim"].split(" (")[0] for c in cl]
+    n = np.array([c["trials"] for c in cl])
+    y = np.arange(len(cl))
+    cols = [C[2] if c["enough_for_0p1pct"] else (C[3] if c["enough_for_1pct"] else C[1]) for c in cl]
+    ax.barh(y, n, 0.62, color=cols, zorder=3)
+    for t, lab, ls in [(ad["n_required"]["1.0%"], "1%", (0, (4, 2))),
+                       (ad["n_required"]["0.1%"], "0.1%", (0, (1, 1.6)))]:
+        ax.axvline(t, color=INK, lw=0.9, ls=ls)
+        ax.text(t, len(cl) - 0.35, f" {lab}", fontsize=6.0, color=INK, rotation=90, va="top")
+    ax.set_yticks(y); ax.set_yticklabels(names, fontsize=6.2)
+    ax.set_xscale("log"); ax.set_xlabel("independent trials (log)")
+    ax.set_xlim(20, 1e5)
+    ax.set_title("(c)  is the evidence enough?", loc="left", fontsize=8.5)
+    ax.text(0.97, 0.06, "green: certifies <0.1%\namber: <1%\norange: neither",
+            transform=ax.transAxes, ha="right", fontsize=5.9, color=MUTED)
+    save(fig, "F10_cost_and_adequacy")
+
+
 def main():
     style()
     os.makedirs(FIG, exist_ok=True)
     todo = [("F1", f1_cross_domain), ("F2", f2_boundary), ("F3", f3_radiative),
             ("F4", f4_certified_region), ("F5", f5_mission), ("F6", f6_pack),
-            ("F7", f7_ablation), ("F8", f8_margin_power), ("F9", f9_cost)]
+            ("F7", f7_ablation), ("F8", f8_margin_power), ("F9", f9_cost), ("F10", f10_cost_and_adequacy)]
     print("rendering figures")
     for name, fn in todo:
         try:

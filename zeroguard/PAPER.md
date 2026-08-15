@@ -194,6 +194,14 @@ plating, and sink temperature — **20,000 draws produced zero violations**, a C
 upper bound of 0.015 %, and a worst observed temperature of 32.49 °C against the 45 °C limit,
 with the monotone corner dominating the interior exactly as the theory says it must.
 
+Adding a sixth channel changes nothing. Total ionising dose is the degradation mechanism
+peculiar to space — it raises series resistance and takes capacity — and it enters the
+argument exactly as terrestrial ageing does, monotonically. Swept jointly with the other five
+over 20,000 draws it produced **zero violations**, a Clopper–Pearson upper bound of
+0.0150 %, a worst temperature of 32.49 °C, and the corner
+still dominating the interior. A sixth uncertain quantity costs the certificate nothing, which
+is the practical content of dimension-independence.
+
 Then we took the radiator away entirely, decade by decade, to nothing. Safety held at every
 point, and delivered charge fell monotonically from 0.607 to 0.168 (Spearman ρ = 1.000).
 The filter does not fail as its cooling disappears; it throttles. That is what graceful
@@ -267,11 +275,22 @@ actually begins.
 A safety argument tested only against well-behaved policies has not been tested.
 
 We replaced the greedy governor with an adversary: a cross-entropy optimizer with full
-knowledge of the episode, free to hold current back early so it could push harder later,
-searching **72,000 candidate sequences** across 40 aged cells with the explicit objective of
-maximizing peak temperature. Its best result anywhere was 37.871 °C against a 45 °C limit,
-and it beat the naive greedy policy by an average of just 0.052 °C (95 % CI 0.024 to 0.084).
-Zero violations. There was nothing to find, because the guarantee is per-step and does not
+knowledge of the episode, free to hold current back early so it could push harder later, with
+the explicit objective of maximizing peak temperature.
+
+The first version of this experiment searched 72,000 sequences across 40 aged cells and found
+nothing — but 40 cells is not enough cells. The statistical unit of a safety claim is the
+independent draw, and forty of them bound the violation rate only below 7.2 %, which certifies
+nothing anyone should rely on. The adequacy audit in Section 4.10 caught it, so the attack was
+re-run at the breadth the claim needs: **320 independently drawn cells,
+256,000 candidate sequences.**
+
+**Zero violations.** The worst peak temperature the adversary reached anywhere was
+37.991 °C against a 45 °C limit — 7.01 °C of headroom it
+could not close — and it beat the naive greedy policy by an average of
+0.0690 °C (95 % CI 0.0578 to 0.0805).
+The Clopper–Pearson upper bound falls from 7.2 % to 0.9318 %, which does
+certify below 1 %. There was nothing to find, because the guarantee is per-step and does not
 care what sequence produced the request.
 
 Scheduler jitter of ±30 % on the control interval, using the unconditionally stable
@@ -382,6 +401,37 @@ they are.
 
 *(Figure F4.)*
 
+### 4.10 What it costs, and whether the evidence is enough
+
+Two housekeeping questions that are easy to skip and shouldn't be.
+
+**Cost.** Separating the projection by code path shows what the fixed iteration count buys.
+When the request is already admissible the filter answers in a single model evaluation
+(4.1 µs); when zero is infeasible it answers in two
+(6.8 µs); and the full bisection — the path the worst-case
+bound is written against — takes 56.0 µs across
+801 states, with a spread of barely three microseconds between its
+fastest and slowest run. That is the point of a fixed iteration count: there is no tail to
+characterise. Against a 30-second control step it is a duty cycle of
+1.9e-06, or 5.7 orders of magnitude of headroom, in
+904 bytes.
+
+**Adequacy.** A zero-failure result is only as strong as the number of trials behind it, and
+the honest way to report one is beside the number of trials it would have taken. Certifying a
+violation rate below 1 % at 95 % confidence needs 299 trials with no
+failures; below 0.1 % needs 2,995; below 0.01 % needs
+29,956.
+
+Auditing every headline claim against that requirement is what turned up the one weak result
+in this work. The cross-domain, vacuum, mission-life, float32 and ablation claims all clear
+0.1 %. The pack and full-method claims clear 1 %. And the adversarial claim, on its original
+40 cells, cleared **neither** — a Clopper–Pearson bound of 7.2 %, which certifies nothing
+worth having. Seventy-two thousand searched sequences is a great deal of searching, but the
+statistical unit of that claim is the cell, not the sequence, and forty is not many cells.
+Section 4.6 reports the re-run that fixes it.
+
+*(Figure F10.)*
+
 ## 5. Limitations
 
 Stated plainly, and stated in advance of the results rather than after them.
@@ -432,7 +482,12 @@ Every number in this report is produced by a script in `zeroguard/exp/`, writes 
 fixed. The experimental design, including the falsification criteria quoted in Section 5, was
 written to `zeroguard/DESIGN.md` before any of it ran.
 
-The whole program is 372,250 simulated charge episodes and sampled states, and well over 20
-million certified one-step transitions. `zeroguard/verify_claims.py` re-reads all 78
-quantitative claims in this report out of the result files and fails if any has drifted. The
-safety-critical path all of it exercises remains 36 lines of numpy.
+The whole program is **650,970** simulated charge episodes and sampled states, and well over
+20 million certified one-step transitions. `zeroguard/verify_claims.py` re-reads all **100**
+quantitative claims in this report out of the result files and fails if any has drifted; it is
+the reason the two late corrections in Sections 4.6 and 4.10 could be made without wondering
+what else they broke. The safety-critical path all of it exercises remains 36 lines of numpy.
+
+The design register in `DESIGN.md` records where the delivered experiments diverged from the
+plan, including the three gaps the audit found and the fourth that the adequacy check found in
+turn. Nothing was quietly dropped.

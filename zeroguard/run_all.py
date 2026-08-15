@@ -1,6 +1,6 @@
 """Run the whole ZEROGUARD program: every experiment, then the figures, then the claim check.
 
-Roughly 25 minutes on ten cores. Every script is independently runnable; this only sequences
+Roughly 45 minutes on ten cores. Every script is independently runnable; this only sequences
 them and stops if any stage fails.
 
     python zeroguard/run_all.py
@@ -23,6 +23,8 @@ STAGES = [
     ("E8  the two ablations the first grid could not decide", "exp/e8_ablation_targeted.py"),
     ("E9  what a margin is worth", "exp/e9_margin_power.py"),
     ("E10 mapping the certified region", "exp/e10_certified_region.py"),
+    ("E12 the adversary, at a sample size that certifies", "exp/e12_adversary_scale.py"),
+    ("E11 closing the design-register gaps", "exp/e11_closure.py"),
 ]
 
 

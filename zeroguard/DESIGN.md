@@ -129,20 +129,41 @@ No p-value is reported without an effect size and a confidence interval.
 
 ## 3. Figure program
 
-Nine figures, each carrying a claim rather than decorating one.
+Ten figures, each carrying a claim rather than decorating one. The register below is the
+delivered set; where it diverges from the first draft of this document, the divergence is
+recorded rather than silently corrected.
 
-1. **F1** Cross-domain certification — four systems, admissible interval and realized trajectory
-2. **F2** The boundary — where (A1) and (A2) break, and how the filter reports it
-3. **F3** Cooling-law invariance — Newtonian vs radiative, overlaid certificates
-4. **F4** 3-D surface: violation-rate upper bound over (resistance scale × cooling loss), with
-   the certified region shaded
-5. **F5** Mission-life run — 27 000 cycles, temperature envelope and margin over time
-6. **F6** Pack scaling — `I*` vs N, and the weakest-cell identity
-7. **F7** Fault localization — per-cell vs pack-averaged detection
-8. **F8** Ablation ladder — violation rate with each mechanism removed
-9. **F9** Latency and footprint — WCET distribution against the 30 s budget
+1. **F1** Cross-domain certification — four systems, trajectory and the one-step constraint map
+2. **F2** The boundary — where (A1) and (A2) break, and how differently
+3. **F3** Cooling-law invariance — Newtonian vs radiative, and the vacuum limit
+4. **F4** 3-D surface: violation-rate upper bound over (throttle × resistance scale), plus the
+   (sensor bias × cooling loss) plane, with the certified boundary drawn on both
+5. **F5** Mission-life run — 31 000 cycles, bound versus oracle
+6. **F6** Pack scaling — the weakest-cell lemma, and fault localization
+7. **F7** Ablation ladder — each mechanism removed, plus the throttle dose-response
+8. **F8** Margin purchasing power — the bias sweep against the derived breakpoint
+9. **F9** Adversarial and corrupted-sensing robustness
+10. **F10** Latency, footprint, and sample adequacy
 
----
+Two changes from the draft register. Fault localization was promised its own figure and is
+instead panel (b) of **F6**, beside the lemma it follows from. And the draft's ninth slot was
+latency; the delivered **F9** is robustness and latency moved to **F10**, where it sits with
+the sample-adequacy audit that belongs next to it.
+
+### Late additions (E11, E12)
+
+Auditing this register against the delivered experiments found three gaps, all closed:
+
+| ID | What was missing | Where it is now |
+|----|------------------|-----------------|
+| **E11a** | the six-channel vacuum envelope (radiation drift) promised as E6; the first pass ran five | `exp/e11_closure.py` |
+| **E11b** | `stats.n_required` was written and never called, so no claim was checked for adequacy | `exp/e11_closure.py`, figure F10(c) |
+| **E11c** | the latency evidence never reached a figure | `exp/e11_closure.py`, figure F10(a,b) |
+
+E11b then found a fourth problem of its own: the adversarial claim rested on 40 cells, a
+Clopper–Pearson upper bound of 7.2 %, which certifies nothing. **E12** re-runs the same attack
+against 320 independently drawn cells — past the 299 needed to certify below 1 % — because the
+statistical unit of that claim is the cell, not the sequence.
 
 ## 4. What would make this fail
 

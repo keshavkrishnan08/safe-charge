@@ -1,0 +1,151 @@
+{
+  "six_channel_envelope": {
+    "name": "radiative_6channel",
+    "trials": 20000,
+    "violations": 0,
+    "rate_pct": 0.0,
+    "cp95_upper_pct": 0.014977539622296199,
+    "channels": [
+      "R",
+      "eps",
+      "Cth",
+      "plate",
+      "Tsink",
+      "tid"
+    ],
+    "worst_T": 32.48895338671781,
+    "worst_V": 4.105328560320257,
+    "corner_T": 32.499999981632314,
+    "corner_dominates": true,
+    "mean_soc": 0.6575962158768024,
+    "soc_ci": [
+      0.6572715923495728,
+      0.6579210931886995
+    ],
+    "seconds": 98.3
+  },
+  "sample_adequacy": {
+    "n_required": {
+      "1.0%": 299,
+      "0.1%": 2995,
+      "0.01%": 29956
+    },
+    "claims": [
+      {
+        "claim": "cross-domain (E1)",
+        "violations": 0,
+        "trials": 8000,
+        "cp95_upper_pct": 0.03743964303524194,
+        "certifies_below_pct": 0.03743964303524194,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": true,
+        "enough_for_0p01pct": false
+      },
+      {
+        "claim": "vacuum envelope 5ch (E3)",
+        "violations": 0,
+        "trials": 20000,
+        "cp95_upper_pct": 0.014977539622296199,
+        "certifies_below_pct": 0.014977539622296199,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": true,
+        "enough_for_0p01pct": false
+      },
+      {
+        "claim": "satellite mission (E4)",
+        "violations": 0,
+        "trials": 27000,
+        "cp95_upper_pct": 0.011094689210700004,
+        "certifies_below_pct": 0.011094689210700004,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": true,
+        "enough_for_0p01pct": false
+      },
+      {
+        "claim": "robotaxi mission (E4)",
+        "violations": 0,
+        "trials": 4000,
+        "cp95_upper_pct": 0.07486526880178257,
+        "certifies_below_pct": 0.07486526880178257,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": true,
+        "enough_for_0p01pct": false
+      },
+      {
+        "claim": "per-cell packs (E5)",
+        "violations": 0,
+        "trials": 1200,
+        "cp95_upper_pct": 0.24933300375187262,
+        "certifies_below_pct": 0.24933300375187262,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": false,
+        "enough_for_0p01pct": false
+      },
+      {
+        "claim": "adversary (E12)",
+        "violations": 0,
+        "trials": 320,
+        "cp95_upper_pct": 0.9317979408884125,
+        "certifies_below_pct": 0.9317979408884125,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": false,
+        "enough_for_0p01pct": false
+      },
+      {
+        "claim": "float32 (E6)",
+        "violations": 0,
+        "trials": 4000,
+        "cp95_upper_pct": 0.07486526880178257,
+        "certifies_below_pct": 0.07486526880178257,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": true,
+        "enough_for_0p01pct": false
+      },
+      {
+        "claim": "full method (E7)",
+        "violations": 0,
+        "trials": 1400,
+        "cp95_upper_pct": 0.21375210081245877,
+        "certifies_below_pct": 0.21375210081245877,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": false,
+        "enough_for_0p01pct": false
+      }
+    ]
+  },
+  "latency": {
+    "paths": {
+      "1": {
+        "evaluations": 1,
+        "states": 144,
+        "us_min": 4.058736117763652,
+        "us_median": 4.166236067248974,
+        "us_p99": 4.534404504536521,
+        "us_max": 4.543111168055071
+      },
+      "2": {
+        "evaluations": 2,
+        "states": 1455,
+        "us_min": 6.655625002167653,
+        "us_median": 6.838177487225039,
+        "us_p99": 7.13900611117424,
+        "us_max": 7.188542513176799
+      },
+      "20": {
+        "evaluations": 20,
+        "states": 801,
+        "us_min": 54.22645750513766,
+        "us_median": 54.75552125062677,
+        "us_p99": 55.88624634037842,
+        "us_max": 55.926562527019996
+      }
+    },
+    "hard_bound_evaluations": 20,
+    "worst_path_median_us": 54.75552125062677,
+    "control_step_s": 30.0,
+    "duty_cycle": 1.825184041687559e-06,
+    "headroom_orders": 5.738693337092743,
+    "memory_bytes_double": 904,
+    "memory_bytes_single": 452
+  }
+}

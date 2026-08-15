@@ -18,11 +18,15 @@ def L(n):
         return json.load(f)
 
 
+TOTAL_IN_PAPER = 650970   # quoted in Section 7 of PAPER.md
+
+
 def main():
     e1, e2, e3 = L("e1_generality.json"), L("e2_boundary.json"), L("e3_radiative.json")
     e4, e5, e6 = L("e4_mission_life.json"), L("e5_pack.json"), L("e6_adversarial.json")
     e7, e8 = L("e7_ablation.json"), L("e8_ablation_targeted.json")
     e9, e10 = L("e9_margin_power.json"), L("e10_certified_region.json")
+    e11, e12 = L("e11_closure.json"), L("e12_adversary_scale.json")
 
     checks = []
 
@@ -104,10 +108,16 @@ def main():
 
     # --- Section 4.6
     ad = e6["e6a_adversary"]
-    ck("adversary sequences = 72000", ad["sequences_searched"], 72000)
-    ck("adversary worst T = 37.871", round(ad["worst_peak_T"], 3), 37.871, 0.001)
-    ck("adversary violations = 0", ad["violations"], 0)
-    ck("adversary gain = 0.052 C", round(ad["mean_gain_over_greedy_C"], 3), 0.052, 0.001)
+    ck("adversary (first pass) sequences = 72000", ad["sequences_searched"], 72000)
+    ck("adversary (first pass) cells = 40", ad["cells"], 40)
+    ck("adversary at scale: cells = 320", e12["trials"], 320)
+    ck("adversary at scale: sequences = 256000", e12["sequences_searched"], 256000)
+    ck("adversary at scale: violations = 0", e12["violations"], 0)
+    ck("adversary at scale: worst T = 37.991", round(e12["worst_peak_T"], 3), 37.991, 0.001)
+    ck("adversary at scale: headroom = 7.009 C", round(e12["headroom_C"], 3), 7.009, 0.001)
+    ck("adversary at scale: gain = 0.0690 C", round(e12["mean_gain_over_greedy_C"], 4), 0.0690, 0.0001)
+    ck("adversary at scale: CP95 = 0.9318%", round(e12["cp95_upper_pct"], 4), 0.9318, 0.0001)
+    ck("adversary at scale certifies below 1%", e12["certifies_below_1pct"], True)
     ck("jitter all safe", e6["e6c_jitter"]["all_safe"], True)
     ck("float32 violations = 0", e6["e6d_float32"]["violations"], 0)
     ck("float32 worst dev = 2.3e-4", round(e6["e6d_float32"]["worst_current_deviation_A"], 6),
@@ -134,6 +144,28 @@ def main():
     ck("K=12 violations = 5", kk[12.0], 5)
     ck("K=15 violations = 0", kk[15.0], 0)
 
+    # --- Section 4.3 (six-channel) and 4.10 (cost + adequacy)
+    six = e11["six_channel_envelope"]
+    ck("6-channel draws = 20000", six["trials"], 20000)
+    ck("6-channel violations = 0", six["violations"], 0)
+    ck("6-channel CP95 = 0.015%", round(six["cp95_upper_pct"], 4), 0.0150, 0.0005)
+    ck("6-channel worst T = 32.49", round(six["worst_T"], 2), 32.49, 0.01)
+    ck("6-channel corner dominates", six["corner_dominates"], True)
+    ck("6 channels named", len(six["channels"]), 6)
+    lat = e11["latency"]
+    ck("hard bound = 20 evaluations", lat["hard_bound_evaluations"], 20)
+    # host timing varies by a microsecond or two between runs; the claim is the
+    # published 56 us figure, checked to within that noise
+    ck("worst path median ~ 56 us", round(lat["worst_path_median_us"], 1), 56.0, 2.0)
+    ck("headroom >= 5.5 orders", lat["headroom_orders"] >= 5.5, True)
+    ck("memory = 904 B double", lat["memory_bytes_double"], 904)
+    adq = e11["sample_adequacy"]
+    ck("n_required(1%) = 299", adq["n_required"]["1.0%"], 299)
+    ck("n_required(0.1%) = 2995", adq["n_required"]["0.1%"], 2995)
+    ck("n_required(0.01%) = 29956", adq["n_required"]["0.01%"], 29956)
+    ck("every claim now certifies below 1%",
+       all(r["enough_for_1pct"] for r in adq["claims"]), True)
+
     # --- Section 4.9
     ck("E10 grid a episodes = 14040", e10["K_vs_sR"]["total_episodes"], 14040)
     ck("E10 grid b episodes = 19890", e10["bias_vs_cool"]["total_episodes"], 19890)
@@ -152,7 +184,9 @@ def main():
              + e8["a1_targeted"]["states"] + sum(r["trials"] for r in e8["a4_beyond_bound"]["sweep"])
              + sum(r["trials"] for r in e9["cap_live"])
              + sum(r["trials"] for r in e9["tail_cap_live"]) + sum(r["trials"] for r in e9["tail_cap_frozen"])
-             + e10["K_vs_sR"]["total_episodes"] + e10["bias_vs_cool"]["total_episodes"])
+             + e10["K_vs_sR"]["total_episodes"] + e10["bias_vs_cool"]["total_episodes"]
+             + six["trials"] + sum(v["states"] for v in lat["paths"].values())
+             + e12["episodes_simulated"])
 
     bad = [c for c in checks if not c[0]]
     for ok, claim, got, want in checks:
@@ -160,7 +194,7 @@ def main():
             print(f"  MISMATCH  {claim}: results say {got}, paper says {want}")
     print(f"\n{len(checks) - len(bad)}/{len(checks)} claims verified against the result files")
     print(f"total simulated episodes / states across the program: {total:,}")
-    ck2 = 372250
+    ck2 = TOTAL_IN_PAPER
     print(f"  (paper Section 7 quotes {ck2:,}) -> "
           f"{'agrees' if total == ck2 else 'MISMATCH'}")
     if bad:
