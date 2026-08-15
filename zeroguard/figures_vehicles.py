@@ -637,3 +637,119 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# =======================================================================================
+def fv0_geometry():
+    """The one-step geometry: why the admissible set is an interval.
+
+    Every other figure in this file reports an outcome. This one shows the mechanism, and it is
+    drawn from the real constrained signals rather than sketched: each panel evaluates the
+    actual cell model over the whole input range at one fixed state, plots every constrained
+    signal against its own limit, and marks where each constraint stops being satisfied.
+
+    Left, a cell being charged: three caps, no floors, and the admissible set runs from zero to
+    whichever cap binds first. Right, the same machinery on a vehicle in flight: the caps still
+    come down from above, but the load's power requirement now comes *up* from below, and the
+    certificate is the gap between them.
+    """
+    from zeroguard import anchored as A, platforms as P, vexp as V
+    fig, axes = plt.subplots(2, 2, figsize=(DBL, 4.3), constrained_layout=True,
+                             gridspec_kw=dict(height_ratios=[1, 1]))
+
+    for col, (case, mode, T0, soc0, lab) in enumerate((
+            ("robotaxi-urban", "charge", 30.0, 0.55, "charging a pack: every constraint is a cap"),
+            ("delivery-quadrotor", "discharge", 25.0, 0.55,
+             "flying: the load is a floor the caps must clear"))):
+        est = V.pessimistic(case)
+        marg = V.margins(est)
+        s = est.init(soc0, T0)
+        dt, w = est.dt_nominal, est.w_nominal
+        lo_b, hi_b = A._bounds(est, s)
+        g = np.linspace(lo_b, hi_b, 500)
+        vals = np.array([est.probe(s, float(u), dt, w) for u in g])
+        u_lo, u_hi, st = A.interval(est, s, dt, w, marg)
+
+        # -- top: the constrained signals against their own limits --------------------
+        ax = axes[0, col]
+        hi_f, lo_f = A.split_cached(est)
+        series = []
+        for i, idx, sense, val in hi_f:
+            m = marg[i]
+            lim = val - m if sense == "<=" else val + m
+            series.append((idx, lim, sense, "cap"))
+        for i, idx, sense, val in lo_f:
+            m = marg[i]
+            lim = val + m if sense == ">=" else val - m
+            series.append((idx, lim, sense, "floor"))
+        names = {0: r"$V$  [V]", 1: r"$T$  [$^\circ$C]", 2: r"$\varphi_{an}$  [V]",
+                 3: r"$P$  [kW]", 4: "SOC"}
+        for k, (idx, lim, sense, kind) in enumerate(series):
+            y = vals[:, idx] / (1000.0 if idx == 3 else 1.0)
+            L = lim / (1000.0 if idx == 3 else 1.0)
+            yn = (y - L) / (np.abs(y).max() + 1e-12)     # normalised distance to the limit
+            ax.plot(g, yn, "-", color=C[k % len(C)], lw=1.5,
+                    label=f"{names[idx]} ({kind})")
+        ax.axhline(0, color=INK, lw=1.1)
+        ax.text(0.995, 0.06, "limit", transform=ax.transAxes, ha="right", fontsize=5.6,
+                color=INK)
+        # Not every binding constraint is one of the probed signals. On charge the
+        # temperature-dependent plating *current cap* bounds the search directly, and on
+        # discharge the actuator ceiling does; neither appears as a curve crossing zero, so
+        # without drawing them the interval appears to end for no reason.
+        capv = est.cap(s)
+        if capv is not None and capv < hi_b * 0.999:
+            ax.axvline(capv, color=MUTED, ls=":", lw=1.2)
+            ax.text(capv, ax.get_ylim()[0] * 0.86, " plating current cap", fontsize=5.4,
+                    color=MUTED, rotation=90, va="bottom")
+        elif abs(hi_b - est.u_max) < 1e-9:
+            ax.axvline(est.u_max, color=MUTED, ls=":", lw=1.2)
+            ax.text(est.u_max, ax.get_ylim()[0] * 0.86, " actuator ceiling", fontsize=5.4,
+                    color=MUTED, rotation=90, va="bottom", ha="right")
+        if st == "ok":
+            ax.axvspan(u_lo, u_hi, color=C[2], alpha=0.13, zorder=0)
+        ax.set_ylabel("distance to limit\n(normalised)", fontsize=6.6)
+        ax.legend(loc="lower left", fontsize=5.4, ncol=2, framealpha=0.95)
+        tag(ax, f"({'ab'[col]})  {lab}")
+
+        # -- bottom: the resulting admissible set -------------------------------------
+        ax = axes[1, col]
+        ok = np.array([A.feasible(est, s, float(u), dt, w, marg) for u in g])
+        ax.fill_between(g, 0, ok.astype(float), step="mid", color=C[2], alpha=0.30)
+        ax.plot(g, ok.astype(float), drawstyle="steps-mid", color=C[2], lw=1.4)
+        if st == "ok":
+            for e, c, nm, ha in ((u_lo, C[1], r"$u_{lo}$", "left"),
+                                 (u_hi, C[0], r"$u_{hi}$", "right")):
+                ax.axvline(e, color=c, lw=1.3, ls="--")
+                ax.text(e, 1.10, nm, color=c, fontsize=7, ha=ha)
+            a = A.effective_anchor(est, s)
+            ax.plot([a], [0.5], "v", color=INK, markersize=6)
+            ax.text(a, 0.60, r"anchor $u_a$" + ("$\\,=0$" if mode == "charge" else ""),
+                    fontsize=5.8, ha="center", color=INK)
+            # name the constraint that actually set the upper edge, so the panel explains
+            # its own boundary instead of leaving the reader to infer it
+            binder = None
+            for i, idx, sense, val in hi_f:
+                m = marg[i]
+                v = est.probe(s, min(u_hi * 1.01 + 1e-6, hi_b), dt, w)[idx]
+                bad = (v > val - m) if sense == "<=" else (v < val + m)
+                if bad:
+                    binder = {0: "voltage", 1: "temperature", 2: "plating margin"}.get(idx)
+                    break
+            if binder is None and abs(u_hi - hi_b) < 1e-6:
+                binder = "actuator / plating current cap"
+            if binder:
+                ax.text(u_hi, 0.86, f"set by {binder} ", fontsize=5.6, color=C[0],
+                        ha="right", va="top")
+            ax.annotate("", xy=(u_lo, 0.28), xytext=(u_hi, 0.28),
+                        arrowprops=dict(arrowstyle="<->", color=INK, lw=0.9))
+            ax.text(0.5 * (u_lo + u_hi), 0.33,
+                    f"reserve = {u_hi-u_lo:.1f} A", fontsize=6, ha="center", color=INK)
+        ax.set_ylim(0, 1.35); ax.set_yticks([0, 1])
+        ax.set_yticklabels(["unsafe", "admissible"], fontsize=6)
+        ax.set_xlabel("pack current $u$  [A]")
+        tag(ax, f"({'cd'[col]})  the admissible set is one interval")
+
+    fig.suptitle("Why the search collapses: monotone constraints make the admissible set an "
+                 "interval", fontsize=9, weight="bold", color=INK)
+    save(fig, "FV0_geometry")

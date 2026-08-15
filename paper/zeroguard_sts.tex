@@ -195,33 +195,101 @@ These four are not a list of markets. They are four different ways for the same 
 guarantee to be the binding constraint, and a method that addresses one by exploiting its
 specifics would not transfer. What follows is deliberately one method, unmodified, in all four.
 
-\section{Background and related work}
+\subsection{Related work}
 
-\paragraph{Set-invariance and predictive safety filters.} The framework is control invariance
-\cite{blanchini2008settheoretic}: a set is control-invariant if from every state in it some
-input keeps the next state inside. Control barrier functions \cite{ames2019cbf} and predictive
-safety filters \cite{wabersich2021psf} enforce this by solving an optimisation each step;
-reference governors \cite{gilbert2002governor} and shielding \cite{alshiekh2018shielding} are
-related. Ours is a predictive safety filter whose optimisation has been replaced by a bisection,
-which is possible only because of the monotone structure below.
+The framework is control invariance \cite{blanchini2008settheoretic}: a set is
+control-invariant if from every state in it some input keeps the next state inside. Control
+barrier functions \cite{ames2019cbf} and predictive safety filters \cite{wabersich2021psf}
+enforce this by solving an optimisation each step; reference governors
+\cite{gilbert2002governor} and shielding \cite{alshiekh2018shielding} are related. Ours is a
+predictive safety filter whose optimisation has been replaced by a bisection, which is possible
+only because of monotonicity \cite{angeli2003monotone,coogan2015mixed} --- order-preserving
+structure that lets worst-case reachability be computed from extreme points rather than by
+searching an interior. Our use is narrower, monotonicity in a scalar \emph{input} rather than in
+the state, and it is what turns a search into two bisections.
 
-\paragraph{Monotone systems.} The structural property doing the work is monotonicity
-\cite{angeli2003monotone,coogan2015mixed}: order-preserving dynamics let worst-case reachability
-be computed from extreme points rather than by searching an interior. Our use is narrower ---
-monotonicity in a scalar \emph{input} rather than in the state --- but it is what turns a search
-into two bisections.
-
-\paragraph{Batteries, degradation and learned policies.} The reference model is
-Doyle--Fuller--Newman \cite{doyle1993,newman2004} with Bernardi thermal coupling
-\cite{bernardi1985}, implemented in PyBaMM \cite{sulzer2021pybamm} with the Chen
+The reference battery model is Doyle--Fuller--Newman \cite{doyle1993,newman2004} with Bernardi
+thermal coupling \cite{bernardi1985}, in PyBaMM \cite{sulzer2021pybamm} with the Chen
 \cite{chen2020} and O'Kane \cite{okane2022} parameter sets; plating is the dominant fast-charge
-degradation mode \cite{yang2017plating}. Online estimation of resistance and
-capacity is mature \cite{plett2015,moura2017} --- and is exactly what this method
-deliberately does not require. Reinforcement learning has been applied to fast charging
-\cite{wei2022ddpg,attia2020}, and constrained RL offers expectation-level guarantees
-\cite{achiam2017cpo,altman1999constrained}, which are the wrong shape for a constraint that must
-hold on every step of every episode. Our position is that the policy may be learned and the
-safety must not be.
+degradation mode \cite{yang2017plating}. Online estimation of resistance and capacity is mature
+\cite{plett2015,moura2017} --- and is exactly what this method deliberately does not require.
+Reinforcement learning has been applied to fast charging \cite{wei2022ddpg,attia2020}, and
+constrained RL offers expectation-level guarantees \cite{achiam2017cpo,altman1999constrained},
+which are the wrong shape for a constraint that must hold on every step of every episode. Our
+position is that the policy may be learned and the safety must not be.
+
+\section{The cell, and which of its constraints are monotone}\label{sec:cell}
+
+The result of \S\ref{sec:theory} is a statement about constraints, so it is worth writing the
+constraints down. Everything in this paper rests on a reduced-order electro-thermal model of a
+lithium-ion cell, calibrated against a Doyle--Fuller--Newman simulation in PyBaMM and reported
+in \cite{krishnan2026safe} at a held-out voltage RMSE of 20.3\,mV and temperature RMSE of
+1.32\,\degC{} across ambients from 0 to 25\,\degC{}. The model is prior work; what matters here
+is its \emph{shape}, because that is what the theorem consumes.
+
+\paragraph{State and outputs.} The state is $x = (\mathrm{soc}, T, V_1)$ --- state of charge,
+cell temperature, and the overpotential stored in a single RC branch --- with a slowly varying
+ageing pair (capacity loss, resistance growth) carried alongside. For an applied current $I$
+(positive charging) over a step $\Delta t$, the model returns terminal voltage, the next
+temperature, and a plating-potential proxy:
+\begin{align}
+V &= \mathrm{OCV}(\mathrm{soc}) \;+\; \underbrace{I\,R_\Omega(\mathrm{soc},T)}_{\text{ohmic}}
+   \;+\; \underbrace{A\big(1+c_T (T-25)\big)\,\mathrm{asinh}\!\big(I/2i_0(\mathrm{soc})\big)}_{\text{activation}}
+   \;+\; V_1, \label{eq:V}\\[2pt]
+C_{\mathrm{th}}\,\dot T &= \underbrace{I\,\eta_\Omega + I\,\eta_{\mathrm{act}}
+   + V_1^2/R_1}_{\text{irreversible}} \;+\; \underbrace{I\,(T+273.15)\,\partial U/\partial T}_{\text{reversible}}
+   \;-\; q_{\mathrm{out}}(T), \label{eq:T}\\[2pt]
+\varphi_{\mathrm{an}} &= p_0(\mathrm{soc}) \;-\; p_1(\mathrm{soc},T)\,I, \qquad p_1 > 0.
+\label{eq:phi}
+\end{align}
+$R_\Omega$ carries an Arrhenius temperature dependence, so resistance rises as the cell cools;
+$q_{\mathrm{out}}$ is the cooling law, and it is the \emph{only} thing that changes between the
+four media of \S\ref{sec:ground}--\S\ref{sec:space}.
+
+\paragraph{Why each constraint is monotone in current.} This is the property the theorem needs,
+and each one has a physical reason rather than an empirical one.
+\begin{itemize}\itemsep1pt
+\item \textbf{Voltage} \eqref{eq:V}. Both overpotential terms are odd and increasing in $I$
+($\mathrm{asinh}$ is strictly increasing), and $\mathrm{OCV}$ does not depend on $I$. So $V$
+increases in charge current and decreases in discharge current: a cap on charge, a cap on
+discharge as well, because the constraint there is $V \ge V_{\min}$ on a signal that falls.
+\item \textbf{Temperature} \eqref{eq:T}. Every generation term is non-decreasing in $|I|$ ---
+$I\eta_\Omega = I^2 R_\Omega \ge 0$ regardless of sign --- and $q_{\mathrm{out}}$ does not
+depend on $I$ at all. So the next temperature is non-decreasing in current, whatever the cooling
+law, which is why replacing Newtonian convection with Stefan--Boltzmann radiation
+(\S\ref{sec:space}) leaves the certificate's structure untouched.
+\item \textbf{Plating} \eqref{eq:phi} is \emph{affine} and strictly decreasing in $I$. Plating
+occurs when $\varphi_{\mathrm{an}} \le 0$.
+\item \textbf{Delivered power} $P = S\,V(I)\,I$ is increasing in $I$ below the maximum-power
+point --- the one condition of Remark~\ref{rem:mpp}.
+\end{itemize}
+
+\paragraph{Why plating is enforced and not certified.} This distinction recurs throughout the
+paper and it is a consequence of \eqref{eq:phi} rather than a modelling choice. Forward
+invariance requires an always-available input that returns the state to the safe set. At $I=0$,
+$\varphi_{\mathrm{an}} = p_0(\mathrm{soc})$, and $p_0$ falls with state of charge: above roughly
+0.82\,SOC it is already below the required margin. \textbf{There is no current --- not even zero
+--- that clears the plating margin at high state of charge}, so no one-step condition can render
+it invariant, and no honest certificate can claim it.
+
+The certified set is therefore $\mathcal{S} = \{T \le T_{\max},\; V \le V_{\max}\}$, and plating
+is \emph{enforced} by the same bisection plus a temperature-dependent current cap, and monitored.
+It rides the same monotone structure, so it costs nothing extra to enforce; it simply cannot be
+promised. \S\ref{sec:water} is where that distinction stops being bookkeeping and becomes the
+binding constraint of an entire vehicle class.
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.82\textwidth]{FV0_geometry.pdf}
+\caption{Why the search collapses, drawn from the model of \eqref{eq:V}--\eqref{eq:phi} at one
+fixed state rather than sketched. \textbf{(a)} Charging: every constrained signal is a cap, each
+crossing its limit exactly once, and the admissible set runs from zero to whichever crosses
+first --- here the plating margin at 171\,A, well before voltage at 281\,A. \textbf{(b)} Flying:
+the caps still come down from above, but the load's power requirement comes \emph{up} from
+below, and the certificate is the gap between them. \textbf{(c,d)} The resulting admissible set:
+one interval, with the anchor inside it, and a width that is the reserve.}
+\label{fig:geometry}
+\end{figure}
+
 
 \section{Theory}\label{sec:theory}
 
@@ -395,11 +463,11 @@ vacuum do not share a cooling law. Under the Newtonian law with positive current
 cell reproduces the published model \emph{bit for bit}, and every result downstream inherits
 that.
 
-\paragraph{Scope of the platform parameters.} Pack geometry, hover powers, hotel loads and orbit
-parameters are \emph{class-representative} --- chosen to place each vehicle in the right region
-of its class's design space using published figures --- and are not any manufacturer's design.
-The purpose is that ``it works on autonomous vehicles'' is not a testable sentence, while ``it
-holds a 96S45P pack under a 30-minute 350\,kW session at 35\,\degC{} ambient'' is.
+Pack geometry, hover powers, hotel loads and orbit parameters are
+\emph{class-representative} --- placing each vehicle in the right region of its class's design
+space using published figures --- and are not any manufacturer's design. The purpose is that
+``it works on autonomous vehicles'' is not a testable sentence, while ``it holds a 96S45P pack
+under a 30-minute 350\,kW session at 35\,\degC{} ambient'' is.
 
 \subsection{Experimental discipline}
 
@@ -419,7 +487,7 @@ with permutation Spearman.
 
 
 \begin{figure}[t]\centering
-\includegraphics[width=0.93\textwidth]{FV1_domains.pdf}
+\includegraphics[width=0.88\textwidth]{FV1_domains.pdf}
 \caption{The anchor moves off zero, and three of the four media require it. (a) The irreducible
 load of every platform, spanning five orders of magnitude from a glider's 0.5\,W hotel draw to
 an eVTOL's 400\,kW hover; the null-input theorem lives at the dashed line. (b) On the same
@@ -537,7 +605,7 @@ filter recorded zero unsafe episodes in \gVtwoGN{} sessions each, while the null
 dropped the contracted load in \textbf{\gVtwoGBrown{} of \gVtwoGN{}} at every power.
 
 \begin{figure}[t]\centering
-\includegraphics[width=0.93\textwidth]{FV4_environments.pdf}
+\includegraphics[width=0.88\textwidth]{FV4_environments.pdf}
 \caption{Four media, four cooling laws, one unmodified projection. (a) Ground: the passive
 ceiling at $T_{\max}-\delta_T$ and what a coolant loop recovers. (b) Underwater: plating binds
 at every water temperature and thermal never does; what shifts with cold is the share taken by
@@ -614,7 +682,7 @@ endurance of \aEvtolMed{} minutes, and interval width predicting that endurance 
 $\rho = \aEvtolRho$.
 
 \begin{figure}[t]\centering
-\includegraphics[width=0.93\textwidth]{FV3_sortie.pdf}
+\includegraphics[width=0.88\textwidth]{FV3_sortie.pdf}
 \caption{A whole delivery sortie. The reserve opens in cruise, where power demand is low and
 forced-air cooling is high, and closes over the drop. The filter is never told a mission plan
 exists; it sees a load that changes and re-derives both edges every step. Closure is not
@@ -689,7 +757,7 @@ violations, CP-95 upper bound \aAdvCP\,\%, past the \nReqOne{} cells needed to c
 claim in this line of work rested on 40 cells and bounded nothing below 7.2\,\%.
 
 \begin{figure}[t]\centering
-\includegraphics[width=0.93\textwidth]{FV2_reserve.pdf}
+\includegraphics[width=0.88\textwidth]{FV2_reserve.pdf}
 \caption{The reserve warns, and it is one of two clocks. (a) Under ice, closure itself leaves only
 \uIceClosureMed{} minutes before a breach against a \uIceTransit{}-minute transit; aborting on a
 reserve threshold gives warning ahead of closure, and \uIceThresh\,A covers the transit. (b) Interval width predicts endurance
@@ -699,7 +767,7 @@ carries both clocks. (c) Breaches with no prior warning, across every stress: al
 \end{figure}
 
 \begin{figure}[t]\centering
-\includegraphics[width=0.93\textwidth]{FV8_envelope.pdf}
+\includegraphics[width=0.88\textwidth]{FV8_envelope.pdf}
 \caption{The two-sided envelope in three vehicles. The upper edge falls as the pack heats and
 sags; the lower edge rises as the load costs more current at lower terminal voltage; the gap
 between them is the reserve, and closure is where they meet. The dotted line is the anchor ---
@@ -951,7 +1019,7 @@ one. Of those, the worst overshoot actually realised in the plant was
 range check and the number beside it, not a theorem.
 
 \begin{figure}[t]\centering
-\includegraphics[width=0.93\textwidth]{FV7_case_studies.pdf}
+\includegraphics[width=0.88\textwidth]{FV7_case_studies.pdf}
 \caption{Six named vehicles, in the units their operators use: robotaxi dispatch feasibility
 over state of health and ambient; the weakest-cell result at \gTruckCells{} cells; eVTOL hover
 endurance; a glider and an AUV four decades of load apart; a GEO eclipse season; and
@@ -960,7 +1028,7 @@ single-event-upset containment on a high-radiation orbiter.}
 \end{figure}
 
 \begin{figure}[t]\centering
-\includegraphics[width=0.93\textwidth]{FV5_missions.pdf}
+\includegraphics[width=0.88\textwidth]{FV5_missions.pdf}
 \caption{Nobody recalibrates anything. (a) Mission length by domain, on a log scale, with
 violations annotated. (b) What ageing costs across each mission: delivered charge per session,
 first quarter against last. (c) A fixed datasheet bound against an oracle told the plant's true
@@ -978,12 +1046,11 @@ domains were only superficially related.
 
 \textbf{The admissible set is a single interval everywhere.} \scanTotal{} dense scans across all
 \vPlatforms{} platforms and both modes: \scanSingle{} single intervals, \scanEmpty{} empty,
-\textbf{\scanDisconnected{} disconnected}. The two-bisection construction rests entirely on this,
-and it is measured rather than argued from monotonicity.
+\textbf{\scanDisconnected{} disconnected} --- measured, not argued from monotonicity.
 
 \textbf{The generalisation reduces to the original theorem exactly.} Bit-exact on
-\reduceStates{} states with \reduceMismatch{} mismatches, and on every charge-mode platform the
-lower edge is exactly zero. Proposition~\ref{prop:nic} is recovered, not approximated.
+\reduceStates{} states, \reduceMismatch{} mismatches, and every charge-mode platform's lower
+edge is exactly zero: Proposition~\ref{prop:nic} recovered, not approximated.
 
 \textbf{The cost is fixed, and it is the same fixed cost everywhere.} \evalCharge{} evaluations
 on every charge platform and \evalDischarge{} on every discharge platform, against theoretical
@@ -1019,22 +1086,20 @@ under-ice AUV       & \clockWUnderIceAuv                  & $\mathbf{\clockEUnde
 \end{tabular}
 \end{table}
 
-An interval can close for two different reasons. \emph{Envelope-driven} closure is the upper
-edge falling onto the lower one as the pack heats and sags --- there the width \emph{is} the
-distance still to travel. \emph{Energy-driven} closure is the state of charge reaching its floor
-with the interval still wide open --- there the clock is set by how much charge was in the pack,
-and the width has nothing to say about it. Both are correctly reported as closures; only the
-first is a countdown.
-
-The certificate already carries both quantities, and every platform has one of them
-significantly positive ($\rho > 0.3$, $p < 0.001$), the \reserveWeakest{} most weakly at
-$\reserveWeakestRho$. \textbf{The operational rule is to act on the minimum of the two}, which
-is conservative whether or not either is individually tight. The pooled, anchor-normalised
+An interval closes for one of two reasons. \emph{Envelope-driven} closure is the upper edge
+falling onto the lower one as the pack heats and sags --- there the width \emph{is} the distance
+still to travel. \emph{Energy-driven} closure is the state of charge reaching its floor with the
+interval still wide open --- there the clock is set by the charge that was in the pack, and the
+width says nothing about it. Both are correctly reported as closures; only the first is a
+countdown. The certificate carries both quantities and every platform has one of them
+significantly positive ($\rho>0.3$, $p<0.001$), the \reserveWeakest{} most weakly at
+$\reserveWeakestRho$. \textbf{The rule is to act on the minimum of the two}, which is
+conservative whether or not either is individually tight. The pooled, anchor-normalised
 correlation is $\reservePooledRho$ over $\reservePooledN{}$ episodes; reporting that alone would
 have been the most flattering presentation available and the least honest.
 
 \begin{figure}[t]\centering
-\includegraphics[width=0.93\textwidth]{FV6_connectedness.pdf}
+\includegraphics[width=0.88\textwidth]{FV6_connectedness.pdf}
 \caption{Four domains, one method. (a) Every dense scan returns a single interval or an empty
 one; none is disconnected. (b) The evaluation count is bounded at \evalCharge{} on charge and
 \evalDischarge{} on discharge, and latency follows it. (c) Every headline claim clears the
@@ -1087,22 +1152,16 @@ an oracle recalibrated daily, and measures the price of never recalibrating at
 significant part is not that the price is small; it is that the guarantee does not depend on
 paying it.
 
-\paragraph{And the design space itself becomes searchable.} Three of this paper's results are
-design conclusions that fall out of running the certificate over a sweep rather than over a
+\paragraph{And the design space itself becomes searchable.} Three results in this paper are
+design conclusions that fell out of running the certificate over a \emph{sweep} rather than a
 trajectory: a rotorcraft's binding constraint below freezing is voltage, not temperature
-(\S\ref{sec:aerial}); a sealed hull is limited by plating at every water temperature
-(\S\ref{sec:water}); and a lunar lander's survival is bought by emissivity, from
-\sNightBase{} to \sNightBest{} hours, and not by capacity (\S\ref{sec:space}). None required a
-new method. Each required only asking the certificate a question about a vehicle that does not
-exist yet, which costs \worstLatency\,$\mu$s per answer.
-
-\paragraph{The guarantee is cheap enough and simple enough to be everywhere.}
-\worstLatency\,$\mu$s of deterministic, branch-bounded arithmetic on a scalar model fits inside
-any microcontroller a battery management system already contains. It allocates nothing, calls no
-library, and has no path on which it fails to terminate. There is no solver to qualify and no
-iteration cap to justify --- which matters most exactly where qualification is hardest, and is
-the difference between arguing that a safety component usually finishes and proving that it
-always does.
+(\S\ref{sec:aerial}); a sealed hull is plating-limited at every water temperature
+(\S\ref{sec:water}); and a lunar lander's survival is bought by emissivity, \sNightBase{} to
+\sNightBest{} hours, not by capacity (\S\ref{sec:space}). Each required only asking the
+certificate about a vehicle that does not exist yet, at \worstLatency\,$\mu$s per answer ---
+deterministic, branch-bounded arithmetic that allocates nothing, calls no library, and has no
+path on which it fails to terminate. There is no solver to qualify and no iteration cap to
+justify, which matters most exactly where qualification is hardest.
 
 \section{Limitations}\label{sec:limits}
 
@@ -1113,16 +1172,16 @@ reduced-order-model level or model-versus-model; the Doyle--Fuller--Newman valid
 underlying filter is prior work \cite{krishnan2026safe}, cited rather than re-derived.
 
 \paragraph{The certified set is $\{T, V\}$; plating is enforced, never certified.}
-\S\ref{sec:water} shows this is not a technicality: in a sealed hull at any water temperature,
-the binding constraint is the one the theorem does not certify. Extending the certificate to
-plating would require a control-invariance argument that the $u=0$ backup cannot supply, and we
-do not have one.
+\S\ref{sec:cell} gives the reason and \S\ref{sec:water} shows it is not a technicality: in a
+sealed hull at any water temperature, the binding constraint is the one the theorem does not
+certify. Extending to plating needs a control-invariance argument the $u=0$ backup cannot
+supply, and we do not have one.
 
-\paragraph{One cell, sixteen vehicles.} Every platform uses the same calibrated coefficients,
-because that is the cell the model was fitted to. Where a vehicle class would really use a
-different cell --- the rotorcraft --- the substitution is explicit, is $0.40\times$ resistance
-and $0.60\times$ capacity, and is an extrapolation beyond the calibration. Every aerial number
-carries it.
+\paragraph{One cell, sixteen vehicles.} Every platform uses the coefficients of
+\S\ref{sec:cell}, because that is the cell the model was fitted to. Where a class would really
+use a different cell --- the rotorcraft --- the substitution is explicit ($0.40\times$
+resistance, $0.60\times$ capacity), is an extrapolation beyond the calibration, and every aerial
+number carries it.
 
 \paragraph{Class-representative platforms.} Pack geometry, hover powers, hotel loads and orbit
 parameters place each vehicle in the right region of its class's design space; they are not any
@@ -1134,10 +1193,10 @@ bit, because there is none to claim.
 
 \paragraph{Simulation of simulation.} The plants are models, and a filter tested against models
 chosen to satisfy its hypotheses is weaker than one tested against hardware. What partially
-answers this is that three of the four media \emph{break} the original hypothesis, one platform
-is refused outright, and four experiments contradicted the hypothesis they were written to test.
-The register was not constructed so that everything passes. Hardware validation is the natural
-next step and is not claimed here.
+answers it is that three of the four media \emph{break} the original hypothesis, one platform is
+refused outright, and fourteen of \vExperiments{} experiments contradicted the hypothesis they
+were written to test: the register was not built so that everything passes. Hardware validation
+is the natural next step and is not claimed here.
 
 \section{Conclusion}
 
