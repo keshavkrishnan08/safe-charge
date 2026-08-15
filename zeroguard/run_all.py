@@ -35,6 +35,7 @@ VEHICLE_STAGES = [
     ("V3  underwater: survey AUVs, gliders, under-ice", "exp/v3_underwater.py"),
     ("V4  space: LEO, GEO, deep space, Mars, lunar night, radiation", "exp/v4_space.py"),
     ("X   cross-domain connectedness", "exp/x_crossdomain.py"),
+    ("N1  the assumptions against NASA PCoE measurements", "exp/n1_nasa_validation.py"),
 ]
 
 

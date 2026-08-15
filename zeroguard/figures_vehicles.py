@@ -621,9 +621,11 @@ def main():
     matplotlib.rcParams["pdf.fonttype"] = 42       # TrueType, for IEEE PDF eXpress
     matplotlib.rcParams["ps.fonttype"] = 42
     os.makedirs(FIG, exist_ok=True)
-    todo = [("FV1", fv1_domains), ("FV2", fv2_reserve), ("FV3", fv3_sortie),
+    todo = [("FV0", fv0_geometry), ("FV1", fv1_domains), ("FV2", fv2_reserve),
+            ("FV3", fv3_sortie),
             ("FV4", fv4_environments), ("FV5", fv5_missions),
-            ("FV6", fv6_connectedness), ("FV7", fv7_case_studies), ("FV8", fv8_envelope)]
+            ("FV6", fv6_connectedness), ("FV7", fv7_case_studies), ("FV8", fv8_envelope),
+            ("FV9", fv9_external)]
     print("rendering vehicle figures")
     for name, fn in todo:
         try:
@@ -753,3 +755,123 @@ def fv0_geometry():
     fig.suptitle("Why the search collapses: monotone constraints make the admissible set an "
                  "interval", fontsize=9, weight="bold", color=INK)
     save(fig, "FV0_geometry")
+
+
+# =======================================================================================
+def fv9_external():
+    """The assumptions, against measurements from another lab.
+
+    Everything else in this repository is a model checked against a model. This figure is the
+    one place real cells appear: NASA Ames PCoE 18650s, cycled to failure with periodic
+    impedance spectroscopy, published years before this work for a different purpose.
+    """
+    import scipy.io, glob, os
+    d = load("n1_nasa_validation.json")
+    fig, axes = plt.subplots(1, 3, figsize=(DBL, 2.9), constrained_layout=True)
+
+    # (a) measured resistance growth against the bound the filter is given
+    ax = axes[0]
+    rb = d["n1_resistance_bound"]
+    seen = set()
+    for f in sorted(glob.glob(os.path.join(os.path.dirname(RES), "..", "data", "nasa",
+                                           "**", "*.mat"), recursive=True)):
+        nm = os.path.basename(f)[:-4]
+        if nm in seen:
+            continue
+        seen.add(nm)
+        try:
+            cyc = scipy.io.loadmat(f, simplify_cells=True)[nm]["cycle"]
+        except Exception:
+            continue
+        R = []
+        for c in cyc:
+            if c.get("type") != "impedance":
+                continue
+            try:
+                v = float(np.real(np.atleast_1d(c["data"]["Re"])[0])) + \
+                    float(np.real(np.atleast_1d(c["data"]["Rct"])[0]))
+                if 0.010 <= v <= 2.0:
+                    R.append(v)
+            except Exception:
+                pass
+        if len(R) < 5:
+            continue
+        R = np.array(R)
+        ax.plot(np.arange(R.size) / (R.size - 1), R / R[0], "-", color=C[0], lw=0.7,
+                alpha=0.45)
+    ax.axhline(rb["bound"], color=RED, lw=1.6, ls="--")
+    ax.text(0.02, rb["bound"] * 1.02, f"datasheet bound $s_R$ = {rb['bound']}", fontsize=6,
+            color=RED, va="bottom")
+    ax.set_ylim(0.6, rb["bound"] * 1.25)
+    ax.set_xlabel("fraction of measured life"); ax.set_ylabel("resistance / initial")
+    ax.text(0.97, 0.05, f"{rb['inside']:,}/{rb['measurements']:,} inside\n"
+                        f"({100*rb['fraction_inside']:.2f}%)",
+            transform=ax.transAxes, ha="right", fontsize=6, color=C[2], weight="bold")
+    tag(ax, f"(a)  {rb['cells']} real cells vs the assumed bound")
+
+    # (b) hypothesis (A2), measured and model-free
+    ax = axes[1]
+    m3 = d["n3_monotone_heating"]
+    for k, col, mk in (("discharge", C[1], "o"), ("charge", C[0], "^")):
+        v = m3[k]
+        ax.scatter([], [], s=18, color=col, marker=mk,
+                   label=f"{k}: $\\rho$={v['peak_dT_vs_joule']['rho']:+.3f}")
+    # redraw the underlying cycles
+    for f in sorted(glob.glob(os.path.join(os.path.dirname(RES), "..", "data", "nasa",
+                                           "**", "*.mat"), recursive=True)):
+        nm = os.path.basename(f)[:-4]
+        if nm not in seen:
+            continue
+        seen.discard(nm)
+        try:
+            cyc = scipy.io.loadmat(f, simplify_cells=True)[nm]["cycle"]
+        except Exception:
+            continue
+        for c in cyc:
+            if c.get("type") not in ("charge", "discharge"):
+                continue
+            try:
+                t = np.asarray(c["data"]["Time"], float)
+                I = np.asarray(c["data"]["Current_measured"], float)
+                T = np.asarray(c["data"]["Temperature_measured"], float)
+            except Exception:
+                continue
+            g = np.isfinite(t) & np.isfinite(I) & np.isfinite(T)
+            if g.sum() < 30:
+                continue
+            t, I, T = t[g], I[g], T[g]
+            trap = np.trapezoid if hasattr(np, "trapezoid") else np.trapz
+            j2 = float(trap(I ** 2, t))
+            if j2 <= 0:
+                continue
+            amb = float(c.get("ambient_temperature", 24.0))
+            col, mk = (C[1], "o") if c["type"] == "discharge" else (C[0], "^")
+            ax.scatter([j2], [T.max() - amb], s=3, color=col, marker=mk, alpha=0.30,
+                       linewidths=0)
+    ax.set_xscale("log")
+    ax.set_xlabel(r"$\int I^2\,dt$  [A$^2$s]"); ax.set_ylabel("peak temperature rise  [K]")
+    ax.legend(loc="upper left", fontsize=6)
+    tag(ax, "(b)  (A2) on real cells, model-free")
+
+    # (c) transfer error against the margin that has to absorb it
+    ax = axes[2]
+    tr = d["n4_transfer_prediction"]
+    lo, hi = tr["p05_C"], tr["p95_C"]
+    ax.barh([0], [hi - lo], left=[lo], height=0.34, color=C[0], alpha=0.85,
+            label="ROM transfer error, p05-p95")
+    ax.plot([tr["bias_C"]], [0], "|", color=INK, markersize=14, markeredgewidth=1.6)
+    ax.barh([1], [2 * tr["thermal_margin_C"]], left=[-tr["thermal_margin_C"]], height=0.34,
+            color=C[2], alpha=0.55, label="thermal margin the filter carries")
+    ax.axvline(0, color=INK, lw=1.0)
+    ax.set_yticks([0, 1]); ax.set_yticklabels(["transfer\nerror", "margin"], fontsize=6.4)
+    ax.set_ylim(-0.55, 1.85)
+    ax.set_xlabel("temperature error  [K]   (negative = under-predicts)")
+    ax.legend(loc="lower center", fontsize=5.4, framealpha=0.95)
+    ax.text(0.5, 0.99, f"the margin covers the worst under-prediction "
+                       f"{tr['margin_over_underprediction']:.0f}$\\times$",
+            transform=ax.transAxes, fontsize=6, va="top", ha="center", color=INK)
+    tag(ax, "(c)  a 5 Ah NMC model on 2 Ah LCO cells")
+
+    fig.suptitle("The assumptions, tested against cells this work did not produce",
+                 fontsize=9, weight="bold", color=INK)
+    save(fig, "FV9_external")

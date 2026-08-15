@@ -57,6 +57,45 @@ def pred(label, fn, why):
 
 G, A_, U, S, X = ("v1_ground.json", "v2_aerial.json", "v3_underwater.json",
                   "v4_space.json", "x_crossdomain.json")
+N = "n1_nasa_validation.json"
+
+# ---- external validation: assumptions against measurements from another lab -------------
+pred("N1-1  measured resistance growth stays inside the datasheet bound within the claimed life",
+     lambda: dig(N, "n1_resistance_bound", "fraction_inside_within_eol") >= 0.999,
+     "real cells left the resistance bound inside the life the certificate claims")
+# Over the FULL measured life -- including cells NASA ran down to 3 % of initial capacity,
+# far past anything the certificate claims -- exactly one measurement of 1,940 exceeds the
+# bound, and it does so by 0.1 %. Asserting zero exceedances over the full life would be
+# asserting something the data does not support; this asserts what it does.
+pred("N1-1  at most one exceedance over the full measured life, and it is marginal",
+     lambda: (dig(N, "n1_resistance_bound", "violations") <= 1
+              and dig(N, "n1_resistance_bound", "worst_ratio")
+              <= 1.01 * dig(N, "n1_resistance_bound", "bound")),
+     "more than one cell, or one by more than 1 %, exceeded the resistance bound")
+pred("N1-2  the capacity envelope's scope is stated rather than assumed",
+     lambda: dig(N, "n2_capacity_envelope", "cells_past_envelope") > 0
+     and "note" in d(N)["n2_capacity_envelope"],
+     "the capacity scope limitation was not recorded")
+pred("N1-3  hypothesis (A2) holds on real cells, model-free",
+     lambda: dig(N, "n3_monotone_heating", "monotone_supported"),
+     "the energy-balance test did not support monotone heating")
+pred("N1-3  and the confounded instantaneous test is reported as confounded",
+     lambda: dig(N, "n3_monotone_heating", "instantaneous_test_confounded"),
+     "the thermal-lag confound was not recorded")
+pred("N1-4  the ROM transfer beats persistence over the horizon",
+     lambda: dig(N, "n4_transfer_prediction", "skill_vs_persistence") > 0.0,
+     "the transferred model did not beat a persistence baseline")
+pred("N1-4  and the thermal margin covers the worst transfer under-prediction",
+     lambda: dig(N, "n4_transfer_prediction", "margin_over_underprediction") >= 3.0,
+     "the thermal margin does not comfortably cover the transfer error")
+pred("N1-5  the filter permits the majority of a real charging protocol",
+     lambda: dig(N, "n5_permits_protocol", "allowed_fraction") > 0.5,
+     "the filter refused most of a standard measured charging protocol")
+pred("N1-6  the refusal-versus-degradation test is reported as inconclusive, not cherry-picked",
+     lambda: (not dig(N, "n6_refusals_predict_degradation", "conclusive"))
+     and (not dig(N, "n6_refusals_predict_degradation", "signs_agree"))
+     and len(dig(N, "n6_refusals_predict_degradation", "variants")) == 4,
+     "the inconclusive external association was not reported with all its variants")
 
 # ---- the theorem -----------------------------------------------------------------------
 eq("V1-1  vehicle filter on one cell is bit-exact with project_current",

@@ -19,3 +19,8 @@ bench/footprint.json
 
 # zeroguard: generated artefacts kept, caches not
 zeroguard/**/__pycache__/
+
+# NASA PCoE battery data set (209 MB) -- downloaded by zeroguard/exp/n1_nasa_validation.py
+data/nasa_battery.zip
+data/nasa/
+formal/.lake/

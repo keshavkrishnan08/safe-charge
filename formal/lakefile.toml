@@ -1,0 +1,5 @@
+name = "AnchoredCollapse"
+defaultTargets = ["AnchoredCollapse"]
+
+[[lean_lib]]
+name = "AnchoredCollapse"

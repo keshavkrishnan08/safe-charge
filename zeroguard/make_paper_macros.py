@@ -16,7 +16,7 @@ RES = os.path.join(HERE, "results")
 OUT = os.path.join(os.path.dirname(HERE), "paper", "vehicle_macros.tex")
 
 D = {}
-for k, f in (("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
+for k, f in (("n", "n1_nasa_validation.json"), ("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
              ("s", "v4_space.json"), ("x", "x_crossdomain.json"),
              ("e1", "e1_generality.json"), ("e2", "e2_boundary.json")):
     p = os.path.join(RES, f)
@@ -247,6 +247,49 @@ rd = s["v4_10_radiator"]
 m("sRadLo", num(rd["rows"][0]["mean_soc"], 3))
 m("sRadHi", num(rd["rows"][-1]["mean_soc"], 3))
 m("sRadViol", str(rd["total_violations"]))
+
+# ---- external validation (NASA PCoE) ----------------------------------------------------
+if "n" in D:
+    n = D["n"]
+    rb = n["n1_resistance_bound"]
+    m("nCells", str(rb["cells"]))
+    m("nEIS", num(rb["measurements"], 0, True))
+    m("nInsideFrac", num(100 * rb["fraction_inside"], 2))
+    m("nInsideEolFrac", num(100 * rb["fraction_inside_within_eol"], 2))
+    m("nEolMeas", num(rb["measurements_within_eol"], 0, True))
+    m("nWorstCell", rb["worst_cell"])
+    m("nWorstRatio", num(rb["worst_ratio"], 3))
+    m("nViolations", str(rb["violations"]))
+    m("nBound", num(rb["bound"], 1))
+    ce = n["n2_capacity_envelope"]
+    m("nCapPast", str(ce["cells_past_envelope"]))
+    m("nCapCells", str(ce["cells"]))
+    m("nCapWorst", num(ce["worst_q"], 3))
+    mh = n["n3_monotone_heating"]
+    m("nDisCycles", num(mh["discharge"]["cycles"], 0, True))
+    m("nDisRho", f"{mh['discharge']['peak_dT_vs_joule']['rho']:+.3f}")
+    m("nChgCycles", num(mh["charge"]["cycles"], 0, True))
+    m("nChgRho", f"{mh['charge']['peak_dT_vs_joule']['rho']:+.3f}")
+    m("nMaxI", num(mh["discharge"]["current_range"][1], 2))
+    m("nMaxDT", num(mh["discharge"]["peak_dT_range"][1], 1))
+    tr = n["n4_transfer_prediction"]
+    m("nHorizon", num(tr["horizon_s"], 0))
+    m("nRMSE", num(tr["rmse_C"], 3))
+    m("nPersist", num(tr["persistence_rmse_C"], 3))
+    m("nSkill", f"{tr['skill_vs_persistence']:+.3f}")
+    m("nBias", f"{tr['bias_C']:+.3f}")
+    m("nOverFrac", num(100 * tr["over_prediction_fraction"], 1))
+    m("nUnderWorst", num(tr["worst_underprediction_C"], 2))
+    m("nMarginCover", num(tr["margin_over_underprediction"], 0))
+    pp = n["n5_permits_protocol"]
+    m("nPermitFrac", num(100 * pp["allowed_fraction"], 1))
+    m("nHeadroom", num(pp["median_headroom"], 2))
+    m("nCeiling", num(pp["throttled_ceiling_C"], 1))
+    m("nRefuseCeil", num(100 * pp["refusals_explained_by_ceiling"], 0))
+    nd = n["n6_refusals_predict_degradation"]
+    m("nAssocLo", f"{nd['rho_range'][0]:+.3f}")
+    m("nAssocHi", f"{nd['rho_range'][1]:+.3f}")
+    m("nBadBaselines", str(nd["cells_with_bad_first_baseline"]))
 
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
 with open(OUT, "w") as f:

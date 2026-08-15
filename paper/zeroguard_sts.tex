@@ -77,6 +77,13 @@ was breached while the certificate reported feasible. The admissible set was a s
 in all \scanTotal{} dense scans. Worst-case latency across every platform was \worstLatency{}
 $\mu$s, or \slotFraction\,\% of a 10\,ms ISO~26262 task slot.
 
+The theorem and the bisection's soundness are \textbf{machine-checked in Lean~4}: seven
+theorems, no \texttt{sorry}, and no dependency on any axiom. And the two assumptions the method
+rests on are tested against \nCells{} cells measured by another laboratory: real resistance
+growth stays inside the assumed bound in \nInsideEolFrac\,\% of \nEolMeas{} measurements over
+the life the certificate claims, and heat generation is confirmed monotone in current across
+\nDisCycles{} measured cycles ($\rho = \nDisRho$), model-free.
+
 Four results contradicted the hypotheses they were written to test, and are reported as
 findings rather than repaired: the certificate \emph{refuses} the calibrated cell for a
 rotorcraft before takeoff above \aRefuseC{}C of hover draw; in a sealed pressure hull the
@@ -388,6 +395,23 @@ a pack reaches its maximum-power point near half its open-circuit voltage, far b
 $V_{\min}$, so $u_{\mathrm{hi}} < u_{\mathrm{MPP}}$ always and the floor search is bounded by
 $u_{\mathrm{hi}}$. This ordering is checked on every discharge platform, not assumed.
 \end{remark}
+
+\subsection{Machine-checked}\label{sec:formal}
+
+Theorem~\ref{thm:anchored} and the soundness of the bisection are formalised in Lean~4 and
+checked mechanically (\texttt{formal/AnchoredCollapse.lean}). Seven theorems compile with no
+\texttt{sorry}, and Lean reports that each \textbf{depends on no axioms at all} --- not
+classical choice, not propositional extensionality. The proofs turned out to need less than
+the paper assumes: they are stated over an arbitrary type carrying a $\le$ relation, with no
+order axiom used anywhere, so they hold without transitivity, antisymmetry or totality.
+
+The property worth checking mechanically is not the collapse theorem but
+\texttt{bisect\_sound}: \emph{every} state the bisection can reach has a feasible lower
+endpoint. Convergence says how good the answer is; this says whether it is safe, and it holds
+independent of iteration count, of the midpoint rule, and of floating-point behaviour --- the
+proof never assumes the midpoint is the arithmetic mean, only that it lies between the
+endpoints. A filter interrupted by a deadline, starved of its budget, or run with a sloppy
+division still returns an admissible input.
 
 \subsection{Cost}
 
@@ -1037,6 +1061,112 @@ delivered charge.}
 \label{fig:missions}
 \end{figure}
 
+
+\section{External validation: the assumptions against measured cells}\label{sec:external}
+
+Everything to this point is simulation. The filter is checked against a reduced-order model,
+and that model was calibrated against a Doyle--Fuller--Newman simulation. That is a defensible
+chain and it is still a chain of models, so the fair question is what happens when the
+assumptions meet a real cell.
+
+This section answers it with the NASA Ames Prognostics Center of Excellence battery data set:
+\nCells{} 18650 cells cycled to failure with periodic electrochemical impedance spectroscopy,
+published by a different laboratory, years before this work, for a different purpose. Nothing
+here was produced by us.
+
+The design point is that \textbf{the load-bearing assumptions are testable without any model at
+all.} The method does not need the ROM to be right about NASA's cells. It needs three things to
+be true of real cells, and each is a chemistry-independent statement about the shape of
+degradation.
+
+\subsection{The resistance bound holds}
+
+The filter never identifies resistance; it assumes a \emph{bound} on it, taken from a datasheet
+before the vehicle ships. If real cells leave that bound, every certificate in this paper is
+void. Across \nEIS{} impedance measurements, \textbf{\nInsideFrac\,\% lie inside the assumed
+bound $s_R = \nBound$} (Fig.~\ref{fig:external}a). Restricted to the life the certificate
+actually claims --- cells at or above 80\,\% of initial capacity, the standard automotive end of
+life --- the figure is \textbf{\nInsideEolFrac\,\% of \nEolMeas{} measurements}.
+
+Over the full measured life, including cells NASA ran down to \nCapWorst{} of initial capacity,
+\nViolations{} measurement exceeds the bound, on cell \nWorstCell{}, by 0.1\,\%. That is
+reported rather than trimmed: the bound is tight, and it is not a comfortable over-estimate.
+
+\subsection{Heat generation is monotone in current, measured}
+
+Hypothesis (A2) is the other load-bearing assumption, and it too can be checked without a model
+--- though the obvious way of doing it does not work, and why is worth recording. Correlating
+instantaneous $\mathrm{d}T/\mathrm{d}t$ against instantaneous current returns nothing usable:
+stratifying by $T-T_{\mathrm{amb}}$ to control for cooling gives rank correlations that
+\emph{flip sign} between strata ($-0.34$ in the coldest, $+0.54$ in the warmest). NASA measures
+surface temperature, the core leads it by minutes, and over a charge whose total rise is under
+3\,K the thermal lag dominates the signal. Reporting either sign from that test would be an
+artefact of the instrument.
+
+The lag-free formulation is an energy balance over a whole cycle, which does not care how the
+heat arrives: total ohmic generation goes as $\int I^2\,\mathrm{d}t$, so a cycle's peak
+temperature rise should increase with it. Across \nDisCycles{} measured discharge cycles, with
+currents to \nMaxI\,A and temperature rises to \nMaxDT\,K, the rank correlation is
+\textbf{$\rho = \nDisRho$} ($p < 0.0005$; Fig.~\ref{fig:external}b). The charge cycles give
+$\nChgRho$, which is weaker for a mundane reason: NASA charges almost everything at a constant
+1.5\,A, so there is little current variation to correlate against.
+
+\subsection{Where the model does not transfer, and whether that matters}
+
+The harder question is how the ROM itself behaves on a cell it was never fitted to --- a 5\,Ah
+NMC model applied to $\sim$2\,Ah LCO cells with capacity rescaled and nothing else refitted.
+Measured one step ahead the question is meaningless, because NASA samples every $\sim$9\,s over
+which the temperature moves about 0.01\,K and predicting ``unchanged'' scores well. Integrated
+forward over a \nHorizon\,s horizon under the measured current, the transferred model scores
+RMSE \nRMSE\,\degC{} against a persistence baseline of \nPersist\,\degC{} --- a skill of
+\nSkill{}.
+
+The safety-relevant question is not the magnitude but the \emph{sign}. A model that
+over-predicts temperature yields a conservative certificate; one that under-predicts yields an
+unsafe one. \textbf{This transfer is not conservative}: the bias is \nBias\,\degC{} and it
+over-predicts in only \nOverFrac\,\% of forecasts. What rescues it is the margin. The worst
+under-prediction at the 5th percentile is \nUnderWorst\,\degC{} against a thermal margin of
+12.5\,\degC{} --- a factor of \textbf{\nMarginCover} of cover (Fig.~\ref{fig:external}c). The
+margin was not designed for cross-chemistry transfer; it happens to absorb it, and that is a
+fact about this data rather than a guarantee.
+
+\subsection{The filter permits a real protocol, and refuses where it said it would}
+
+A safety filter that refuses everything is safe and useless. Given the end-of-life resistance
+bound and the full throttled margin --- its most conservative configuration --- the certificate
+permits \textbf{\nPermitFrac\,\%} of NASA's measured charge steps, with a median headroom of
+\nHeadroom$\times$ the applied current. Of the refusals, \nRefuseCeil\,\% are cells measured
+above the throttled ceiling of \nCeiling\,\degC{}: the same frontier \S\ref{sec:ground}
+predicts from the margin alone, appearing unprompted in someone else's measurements.
+
+\subsection{One test that did not work}
+
+It was tempting to go further and ask whether the cells the filter would have refused are the
+cells that actually degraded. The mechanism would have been clean --- NASA cycled some cells at
+4\,\degC{}, the plating cap falls to a 0.70C floor below about 5.5\,\degC{}, and plating is what
+degrades a cold-charged cell.
+
+The association is not stable. Its sign \emph{changes} with how the capacity baseline is
+defined --- first measured discharge against the median of the largest few --- because NASA's
+first discharge on \nBadBaselines{} of \nCapCells{} cells is partial, giving baselines as low as
+0.068\,Ah for a 2\,Ah cell. Across the four defensible combinations of baseline and fade metric,
+$\rho$ ranges from $\nAssocLo$ to $\nAssocHi$, with significant results of both signs, and
+ambient temperature and cycle count sit behind both quantities. All four are reported in
+Table-form in the results file rather than one. \textbf{A result that flips sign with a
+defensible change of definition is not a result}, and selecting the flattering version would be
+the most misleading thing this study could do.
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.88\textwidth]{FV9_external.pdf}
+\caption{The assumptions against cells this work did not produce. \textbf{(a)} Measured
+resistance growth for \nCells{} NASA cells against the datasheet bound the filter is given.
+\textbf{(b)} Hypothesis (A2), model-free: a cycle's peak temperature rise against its total
+ohmic generation. \textbf{(c)} The transferred model's error against the thermal margin that
+has to absorb it.}
+\label{fig:external}
+\end{figure}
+
+
 \section{What makes this one method}\label{sec:cross}
 
 Forty-four experiments establish that the certificate holds in each medium. That is not the same
@@ -1167,9 +1297,11 @@ justify, which matters most exactly where qualification is hardest.
 
 Stated in full, because several of them are load-bearing.
 
-\paragraph{No high-fidelity electrochemistry in this study.} Every number here is
+\paragraph{No high-fidelity electrochemistry in this study.} The simulated results are
 reduced-order-model level or model-versus-model; the Doyle--Fuller--Newman validation of the
 underlying filter is prior work \cite{krishnan2026safe}, cited rather than re-derived.
+\S\ref{sec:external} is the exception and does not close the gap: it validates the
+\emph{assumptions} against measured cells, not the vehicle results.
 
 \paragraph{The certified set is $\{T, V\}$; plating is enforced, never certified.}
 \S\ref{sec:cell} gives the reason and \S\ref{sec:water} shows it is not a technicality: in a
@@ -1191,12 +1323,20 @@ manufacturer's design.
 single-event-upset exposure and offers a range check; it does not claim robustness to a flipped
 bit, because there is none to claim.
 
-\paragraph{Simulation of simulation.} The plants are models, and a filter tested against models
-chosen to satisfy its hypotheses is weaker than one tested against hardware. What partially
-answers it is that three of the four media \emph{break} the original hypothesis, one platform is
-refused outright, and fourteen of \vExperiments{} experiments contradicted the hypothesis they
-were written to test: the register was not built so that everything passes. Hardware validation
+\paragraph{The vehicle results remain simulation.} \S\ref{sec:external} tests the assumptions
+against measured cells, but every \emph{vehicle} number in \S\ref{sec:ground}--\S\ref{sec:space}
+comes from a plant we wrote, and a filter tested against models chosen to satisfy its hypotheses
+is weaker than one tested on hardware. Three things partially answer it: three of the four media
+\emph{break} the original hypothesis, one platform is refused outright, and fourteen of
+\vExperiments{} experiments contradicted the hypothesis they were written to test --- the
+register was not built so that everything passes. Running the filter in the loop on real cells
 is the natural next step and is not claimed here.
+
+\paragraph{The external validation is of assumptions, not of vehicles.} NASA's cells are $\sim$2\,Ah
+LCO 18650s charged at 1.5\,A; none of them is a robotaxi, a rotorcraft or a spacecraft. What
+\S\ref{sec:external} establishes is that the two hypotheses the theorem consumes hold on real
+cells, and that the ROM's transfer error is small against the margin --- not that any vehicle
+result would reproduce on hardware.
 
 \section{Conclusion}
 
