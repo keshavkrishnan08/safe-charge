@@ -13,6 +13,7 @@
 \usepackage{lmodern}
 \usepackage{natbib}
 \usepackage{multicol}
+\usepackage{longtable}
 \setcitestyle{numbers,square}
 \usepackage[final,protrusion=true,expansion=false]{microtype}
 \graphicspath{{figures/}}
@@ -52,8 +53,9 @@ standard answers are to identify the pack online, which requires excitation nobo
 or to solve a constrained optimisation every control step, whose iteration count a safety task
 slot cannot be sized around.
 
-This paper develops a third answer and takes it across four physical media. We prove that when
-a system's constraints are monotone in a scalar input and one always-available input is safe,
+This paper develops a third answer and takes it across four physical media. Building on a solver-free safety filter for battery fast charging \cite{krishnan2026safe},
+we prove that when a system's constraints are monotone in a scalar input and one
+always-available input is safe,
 the admissible input set collapses to a single interval whose edges are found by bisection ---
 in a \emph{fixed} number of one-step model evaluations, with no optimiser, no convergence test,
 and no identification of the plant. The original form of this result assumes the safe input is
@@ -66,8 +68,8 @@ temperature and voltage constraint on a discharging vehicle; what zero cannot do
 load, and that is a constraint of a different kind --- a floor rather than a cap --- for which
 the original theorem has no vocabulary. \textbf{Anchored Collapse} adds the floor family and a
 second bisection, raising the worst-case cost from \evalCharge{} to \evalDischarge{} model
-evaluations, both fixed. It reduces to the published filter bit-for-bit on \reduceStates{}
-states.
+evaluations, both fixed. It reduces to the published filter \cite{krishnan2026safe} bit-for-bit on
+\reduceStates{} states.
 
 Across \vPlatforms{} vehicle platforms in four media --- ground, air, water and vacuum --- and
 \vExperiments{} experiments totalling \vTotalEpisodes{} simulated episodes, no plant constraint
@@ -254,7 +256,8 @@ not.
 
 \subsection{Where it breaks, and why that reading is wrong}\label{sec:anchored}
 
-Placed on a quadrotor holding altitude, a filter built on Proposition~\ref{prop:nic} passes
+Placed on a quadrotor holding altitude, a filter built on Proposition~\ref{prop:nic}
+\cite{krishnan2026safe} passes
 every one-step check for a mean of 22.3 consecutive steps and then violates in 100\,\% of
 episodes. The natural reading is that (A1) has failed: $u=0$ is plainly not safe for an
 aircraft.
@@ -384,7 +387,7 @@ Vacuum & Stefan--Boltzmann to 4\,K & LEO smallsat; GEO comsat; deep- & 60\,W; 3\
 \end{tabular}
 \end{table}
 
-The cell underneath is the published reduced-order model's arithmetic in every case --- same
+The cell underneath is the reduced-order model of \cite{krishnan2026safe} in every case --- same
 overpotential form, same plating proxy, same calibrated coefficients --- with two changes the
 vehicles require. Current may be negative, because vehicles discharge. And the Newtonian cooling
 term is a callable, because a quadrotor at 400\,m, an AUV at 2\,\degC{} and a spacecraft in
@@ -1076,8 +1079,8 @@ qualify, and no failure mode in which the computation does not finish.
 Stated in full, because several of them are load-bearing.
 
 \paragraph{No high-fidelity electrochemistry in this study.} Every number here is
-reduced-order-model level or model-versus-model; the Doyle--Fuller--Newman evidence validating
-the underlying filter is prior work, cited rather than re-derived.
+reduced-order-model level or model-versus-model; the Doyle--Fuller--Newman validation of the
+underlying filter is prior work \cite{krishnan2026safe}, cited rather than re-derived.
 
 \paragraph{The certified set is $\{T, V\}$; plating is enforced, never certified.}
 \S\ref{sec:water} shows this is not a technicality: in a sealed hull at any water temperature,
@@ -1139,5 +1142,94 @@ reserve, not on its exhaustion --- is more useful than the positive result would
 \bibliographystyle{IEEEtran}
 \bibliography{refs}
 \end{multicols}}
+
+
+\appendix
+\section*{Appendix: the full experiment register}
+\addcontentsline{toc}{section}{Appendix}
+
+\noindent All \vExperiments{} experiments, their claim, and the measured outcome. The register
+--- including what would falsify each claim --- was fixed before any code ran; where the result
+diverged from the hypothesis it is marked $\dagger$ and discussed in the section cited. Nothing
+below was added after the fact to accommodate a result.
+
+{\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{@{}llp{7.4cm}p{4.6cm}@{}}
+\toprule
+\textbf{ID} & \textbf{\S} & \textbf{Claim under test} & \textbf{Outcome} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{ID} & \textbf{\S} & \textbf{Claim under test} & \textbf{Outcome} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\bottomrule
+\endlastfoot
+\multicolumn{4}{@{}l}{\textit{V1 --- Ground: robotaxis, shuttles, autonomous trucks}}\\
+V1-1  & \ref{sec:ground} & the vehicle filter on one cell is the published filter & bit-exact, \gReduceMismatch{}/\gReduceStates{} \\
+V1-2  & \ref{sec:ground} & a 350\,kW session holds under the full envelope & \gFastViol{}/\gFastN{}, CP95 \gFastCP\,\% \\
+V1-3$^\dagger$ & \ref{sec:ground} & the certificate holds across the fleet ambient range & holds; \emph{passive charging impossible above} \gCeiling\,\degC \\
+V1-4$^\dagger$ & \ref{sec:ground} & the 30-min service degrades continuously & charge does; the binary metric cannot \\
+V1-5  & \ref{sec:ground} & a \gTruckCells{}-cell pack certifies at its weakest cell & exact to $\gTruckDev$\,A \\
+V1-6  & \ref{sec:ground} & five years of robotaxi duty, never recalibrated & \gRoboViol{}/\gRoboSessions{} \\
+V1-7  & \ref{sec:ground} & cooling loss is covered exactly as the reserve predicts & holds, \gCoolTrials{} trials \\
+V1-8  & \ref{sec:ground} & regenerative pulses at 10\,Hz do not break it & 0/\gRegenN{} \\
+V1-9  & \ref{sec:cross}  & worst-case time fits an ISO~26262 slot & \groundLatency\,$\mu$s $=$ \groundSlotPct\,\% \\
+V1-10 & \ref{sec:ground} & sensor bias is survivable to a derived breakpoint & predicted \gBiasPred\,\degC, measured \gBiasMeas \\
+V1-11 & \ref{sec:ground} & V2G needs a nonzero anchor on the ground & null-input browns out \gVtwoGBrown{}/\gVtwoGN{} \\
+\addlinespace
+\multicolumn{4}{@{}l}{\textit{V2 --- Air: delivery rotorcraft and eVTOL}}\\
+V2-1$^\dagger$ & \ref{sec:refusal} & where null-input fails, anchored holds & holds; \emph{cell refused above} \aRefuseC{}C \\
+V2-2  & \ref{sec:aerial} & the two-sided admissible set is one interval & \aScanDisc{} disconnected in \aScanStates{} \\
+V2-3  & \ref{sec:aerial} & the reserve warns before it fails & \aLeadNoWarn{}/\aLeadN{}, median \aLeadMed\,s \\
+V2-4$^\dagger$ & \ref{sec:aerial} & a full sortie certifies end to end & takeoff binds; \aSortieComplete\,\%$\to$\aSortieBigger\,\% on a larger pack \\
+V2-5  & \ref{sec:aerial} & payload and altitude act through one term & $\rho=\aHoverRho$ on hover power \\
+V2-6  & \ref{sec:aerial} & gusts do not breach the floor & \aGustUnsafe{}/\aGustTrials{} \\
+V2-7$^\dagger$ & \ref{sec:aerial} & cold soak is survivable; which edge binds & voltage, not thermal, everywhere below freezing \\
+V2-8  & \ref{sec:aerial} & motor-out becomes a closure, not a breach & \aMotorUnsafe{}/\aMotorTrials{} \\
+V2-9$^\dagger$ & \ref{sec:aerial} & 40 turnaround charges a day holds & holds; needs \aTurnPacks{} packs in rotation \\
+V2-10 & \ref{sec:aerial} & eVTOL reserve converts to endurance & $\rho=\aEvtolRho$ \\
+V2-11 & \ref{sec:aerial} & an adversary cannot break the filter & \aAdvViol{}/\aAdvCells{} packs, CP95 \aAdvCP\,\% \\
+\addlinespace
+\multicolumn{4}{@{}l}{\textit{V3 --- Water: survey AUVs, gliders, under-ice vehicles}}\\
+V3-1  & \ref{sec:water} & a sealed hull still certifies & \uHullViol{}/\uHullN{} \\
+V3-2$^\dagger$ & \ref{sec:water} & cold switches the binding constraint to plating & it never switches: plating binds everywhere \\
+V3-3  & \ref{sec:water} & a stationary AUV still cannot command zero & null-input browns out \uIdleBrown{}/\uIdleN{} \\
+V3-4  & \ref{sec:water} & a six-month deployment holds unrecalibrated & 0/\uDeployN{} \\
+V3-5$^\dagger$ & \ref{sec:water} & dormancy is one more monotone channel & no effect at all: spread $\uDormSpread$ \\
+V3-6$^\dagger$ & \ref{sec:water} & depth degrades gracefully & no effect: spread $\uDepthSpread$ \\
+V3-7$^\dagger$ & \ref{sec:ice}   & the warning arrives in time to reach a hole & \emph{it does not}; reserve threshold \uIceThresh\,A does \\
+V3-8  & \ref{sec:water} & obstacle-avoidance bursts do not breach & 0/800 \\
+V3-9  & \ref{sec:water} & 180 days unrecalibrated costs charge, not safety & identical safety, and identical charge \\
+V3-10 & \ref{sec:water} & a glider and an AUV are the same certificate & both single-interval, \uLoadRatio$\times$ load apart \\
+V3-11 & \ref{sec:water} & the buoyancy burst is absorbed by the anchor & 0/600 \\
+\addlinespace
+\multicolumn{4}{@{}l}{\textit{V4 --- Vacuum: LEO, GEO, deep space, Mars, lunar night, radiation}}\\
+V4-1  & \ref{sec:space} & five years of LEO cycling, never recalibrated & \sLeoViol{}/\sLeoCycles{}, CP95 \sLeoCP\,\% \\
+V4-2  & \ref{sec:space} & a GEO eclipse season holds to the seasonal max & every duration completes \\
+V4-3  & \ref{sec:space} & radiative cooling leaves the certificate intact & \sCruiseViol{}/\sCruiseN{} \\
+V4-4  & \ref{sec:space} & radiation $+$ thin atmosphere is still monotone & \sMarsViol{}/\sMarsTrials{} \\
+V4-5$^\dagger$ & \ref{sec:space} & the lander survives lunar night & no configuration does; frontier reported \\
+V4-6  & \ref{sec:space} & dose is one more monotone channel & \sDoseViol{} to \sDoseMax\,krad \\
+V4-7  & \ref{sec:space} & a single-event upset is contained & exposure measured, not certified away \\
+V4-8  & \ref{sec:space} & no ground loop costs charge, not safety & costs \sNoGroundGap{} SOC points \\
+V4-9$^\dagger$ & \ref{sec:space} & array decay shrinks the window, not the certificate & never becomes binding in \sArrayYears{} years \\
+V4-10$^\dagger$ & \ref{sec:space} & radiator loss degrades gracefully & it \emph{improves} charge: cold-limited \\
+V4-11 & \ref{sec:space} & the eclipse bus load is a nonzero anchor & null-input browns out every case \\
+\addlinespace
+\multicolumn{4}{@{}l}{\textit{X --- Cross-domain}}\\
+X1 & \ref{sec:cross} & the admissible set is one interval in every domain & \scanDisconnected{} disconnected in \scanTotal{} \\
+X2 & \ref{sec:cross} & the generalisation reduces to the original theorem & bit-exact, \reduceMismatch{}/\reduceStates{} \\
+X3 & \ref{sec:cross} & the cost is fixed and identical everywhere & \evalCharge{}/\evalDischarge{} evaluations, \worstLatency\,$\mu$s \\
+X4$^\dagger$ & \ref{sec:cross} & the reserve predicts endurance in every domain & only where closure is envelope-driven \\
+X5 & \ref{sec:cross} & every zero-failure claim has enough samples & \adequacyViol{}/\adequacyTrials{}, all past \nReqOne{} \\
+\end{longtable}}
+
+\vspace{4pt}
+\noindent Fourteen of \vExperiments{} are marked $\dagger$. A register in which nothing is marked
+is a register written after the results.
 
 \end{document}
