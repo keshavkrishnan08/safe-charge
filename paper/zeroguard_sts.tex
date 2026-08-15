@@ -1,0 +1,1143 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage{textcomp}
+\usepackage[hidelinks]{hyperref}
+\usepackage{lmodern}
+\usepackage{natbib}
+\usepackage{multicol}
+\setcitestyle{numbers,square}
+\usepackage[final,protrusion=true,expansion=false]{microtype}
+\graphicspath{{figures/}}
+\input{vehicle_macros.tex}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+\newcommand{\degC}{\textdegree C}
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+\setlength{\parskip}{0pt}
+\linespread{1.0}
+
+\title{\vspace{-1.4cm}\large\textbf{ZEROGUARD: A Solver-Free Battery Safety Certificate for\\[2pt]
+Autonomous Vehicles, from Robotaxis to Deep Space}\\[5pt]
+\normalsize\normalfont Anchored Collapse and the geometry of the admissible input set}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\vspace{-1.4cm}
+
+\begin{abstract}
+\noindent
+Every autonomous vehicle that must operate unattended --- a robotaxi that never sees a
+technician, a delivery drone flying forty sorties a day, an autonomous underwater vehicle six
+months into a deployment, a spacecraft that has not been touched since integration --- runs into
+the same wall. Its battery must be pushed hard enough to be useful and held back enough to be
+safe, and the state that decides where that line falls is not measurable in the field. The
+standard answers are to identify the pack online, which requires excitation nobody can afford,
+or to solve a constrained optimisation every control step, whose iteration count a safety task
+slot cannot be sized around.
+
+This paper develops a third answer and takes it across four physical media. We prove that when
+a system's constraints are monotone in a scalar input and one always-available input is safe,
+the admissible input set collapses to a single interval whose edges are found by bisection ---
+in a \emph{fixed} number of one-step model evaluations, with no optimiser, no convergence test,
+and no identification of the plant. The original form of this result assumes the safe input is
+zero, which is true of a cell being charged and false of essentially every vehicle doing its
+job: cut the current to a rotorcraft and it falls; cut it to a submersible and it loses the
+computer navigating it; cut it to a spacecraft in eclipse and the payload browns out.
+
+We show that this apparent failure is a misdiagnosis. Zero \emph{is} still safe for every
+temperature and voltage constraint on a discharging vehicle; what zero cannot do is serve the
+load, and that is a constraint of a different kind --- a floor rather than a cap --- for which
+the original theorem has no vocabulary. \textbf{Anchored Collapse} adds the floor family and a
+second bisection, raising the worst-case cost from \evalCharge{} to \evalDischarge{} model
+evaluations, both fixed. It reduces to the published filter bit-for-bit on \reduceStates{}
+states.
+
+Across \vPlatforms{} vehicle platforms in four media --- ground, air, water and vacuum --- and
+\vExperiments{} experiments totalling \vTotalEpisodes{} simulated episodes, no plant constraint
+was breached while the certificate reported feasible. The admissible set was a single interval
+in all \scanTotal{} dense scans. Worst-case latency across every platform was \worstLatency{}
+$\mu$s, or \slotFraction\,\% of a 10\,ms ISO~26262 task slot.
+
+Four results contradicted the hypotheses they were written to test, and are reported as
+findings rather than repaired: the certificate \emph{refuses} the calibrated cell for a
+rotorcraft before takeoff above \aRefuseC{}C of hover draw; in a sealed pressure hull the
+binding constraint is plating at every water temperature, which is the one constraint the
+theorem enforces but does not certify; in deep space a \emph{smaller} radiator delivers more
+charge, because the pack is cold-limited rather than heat-limited; and under an ice shelf closure leaves only \uIceClosureMed{} minutes before an actual breach
+against a \uIceTransit{}-minute transit to safety, which makes closure the wrong trigger and
+converts a negative result into a quantitative design rule.
+\end{abstract}
+
+\section{Introduction}
+
+The limiting resource for long-duration autonomy is not perception, planning, or control. It is
+\emph{energy under certainty}: how hard a vehicle may push its battery when nobody is available
+to inspect it, and how confident anyone can be in the answer.
+
+The gap between what a lithium-ion pack can physically deliver and what a battery management
+system will actually permit is large, and it is not there by accident. Fast charging drives
+three coupled failure modes --- thermal runaway, over-potential, and lithium plating on the
+anode --- whose onset depends on internal states that a production sensor suite does not
+measure. Series resistance roughly doubles over a pack's service life, plating risk climbs as
+temperature falls, and the safe current at end of life in cold weather is a fraction of the
+safe current when new and warm. A manufacturer facing that uncertainty does the only defensible
+thing and de-rates for the worst case, permanently.
+
+For a privately owned car this is a mild inefficiency. For an autonomous fleet it is the
+economics of the whole enterprise. A robotaxi that charges twelve times a day accumulates a
+private car's decade of fast-charge stress in \gWeeks{} weeks (\S\ref{sec:ground}); the
+de-rate it inherits was designed for a vehicle with a fundamentally different duty cycle. For a
+spacecraft it is worse still, because the de-rate is chosen before launch and can never be
+revisited.
+
+\subsection{Two standard answers, and why neither reaches the vehicle}
+
+The first is \emph{identification}: estimate the pack's internal state online and de-rate against
+the estimate. Estimating resistance and capacity well requires excitation --- current profiles
+rich enough to be informative --- which an operational vehicle is not free to inject. Worse, the
+guarantee becomes conditional on the estimator having converged, which is a claim about a
+transient nobody audits.
+
+The second is \emph{constrained optimisation}: solve a small model-predictive control problem
+each step and let the solver enforce the constraints. This is the standard modern answer, and a
+good one, with a specific defect --- a quadratic program's iteration count depends on its data.
+A safety-critical task slot is sized for the worst case, and if the worst case is unbounded the
+slot cannot be sized at all. In practice this is handled with iteration caps and fallback logic:
+by having a plan for when the guarantee does not hold.
+
+\subsection{The result}
+
+We take a third path, whose value is that it needs neither. The observation is geometric rather
+than numerical:
+
+\begin{quote}
+If every constraint is monotone in a scalar input, and one input is known to be safe, then the
+set of admissible inputs is not a complicated region to be searched. It is a single interval,
+and its edges can be located by bisection in a fixed number of one-step model evaluations.
+\end{quote}
+
+Bisection needs no optimiser, no convergence test, and --- critically --- no identification of
+the plant, because a monotone \emph{bound} on the uncertain parameter suffices where a point
+estimate would be required. A datasheet end-of-life resistance figure is such a bound and is
+known before the vehicle ships.
+
+The contribution of this paper is to establish that this result survives contact with real
+vehicles, which required repairing it first. Section~\ref{sec:theory} shows that the failure
+observed when the filter is placed on a hovering rotorcraft is not the failure it appears to be,
+and develops \textbf{Anchored Collapse}, which covers discharge as well as charge. Sections
+\ref{sec:ground}--\ref{sec:space} then take it across four media --- ground, air, water, vacuum
+--- across \vPlatforms{} platforms and \vExperiments{} experiments.
+
+\paragraph{Contributions.} \textbf{(i)} \emph{Anchored Collapse} (\S\ref{sec:anchored}), a
+generalisation covering constraints requiring the input to be \emph{large} enough --- what every
+vehicle's irreducible load imposes and what the original theorem cannot express --- at a cost of
+\evalDischarge{} fixed evaluations rather than \evalCharge{}. \textbf{(ii)} A two-sided
+certificate and a \emph{reserve} (\S\ref{sec:reserve}): the gap between the edges is how much
+room the vehicle has left, which the one-sided version cannot report and which yields an abort
+rule for vehicles that cannot afford to find their limit empirically. \textbf{(iii)} A
+certificate that refuses \emph{designs}, not just commands (\S\ref{sec:refusal}).
+\textbf{(iv)} Application across four media (\S\ref{sec:ground}--\S\ref{sec:space}), including
+where the result does \emph{not} hold and what that costs.
+
+\section{The autonomy energy bottleneck}\label{sec:bottleneck}
+
+Why a battery certificate is a bottleneck for autonomy rather than a component-level concern is
+worth being concrete about, because the four application sections that follow are chosen to span
+the ways it binds.
+
+\paragraph{Ground fleets are duty-cycle limited.} A robotaxi's economics are set by
+utilisation, and utilisation is set by how long it spends attached to a charger. The
+constraint is not the charger --- \S\ref{sec:ground} shows a 350\,kW station is already past
+what the pack will accept --- but how aggressively the pack may be driven at the temperature it
+happens to be, at the age it happens to be, with no technician in the loop. That is precisely
+the quantity a certificate computes.
+
+\paragraph{Aerial autonomy is margin limited.} A rotorcraft in hover draws a continuous
+1--3C from its pack. There is no coasting, no regeneration, and no graceful degradation: an
+aircraft that runs out of admissible current does not slow down, it descends. Every kilogram of
+battery carried to buy margin is a kilogram not carried as payload, so the margin is contested
+directly against the mission.
+
+\paragraph{Underwater autonomy is abort limited.} An AUV under an ice shelf has no
+abort-to-surface. The vehicle must decide to turn back while turning back is still possible,
+using only what it can compute onboard, hours or days from any human. A certificate that is
+correct but late is indistinguishable from one that is wrong.
+
+\paragraph{Space autonomy is calibration limited.} A spacecraft's battery model is fixed at
+integration and cannot be updated in any meaningful sense afterwards --- the downlink budget is
+not for battery parameters, and the round-trip light time to the outer planets is hours. Over a
+five-year mission the pack ages, takes radiation dose, and cycles tens of thousands of times
+against a parameter set that has not changed since before launch. \textbf{The property that
+makes a solver-free certificate merely convenient on a car is the property that makes it
+admissible at all on a spacecraft}: it requires no identification, so there is nothing to
+recalibrate.
+
+These four are not a list of markets. They are four different ways for the same underlying
+guarantee to be the binding constraint, and a method that addresses one by exploiting its
+specifics would not transfer. What follows is deliberately one method, unmodified, in all four.
+
+\section{Background and related work}
+
+\paragraph{Set-invariance and predictive safety filters.} The framework is control invariance
+\cite{blanchini2008settheoretic}: a set is control-invariant if from every state in it some
+input keeps the next state inside. Control barrier functions \cite{ames2019cbf} and predictive
+safety filters \cite{wabersich2021psf} enforce this by solving an optimisation each step;
+reference governors \cite{gilbert2002governor} and shielding \cite{alshiekh2018shielding} are
+related. Ours is a predictive safety filter whose optimisation has been replaced by a bisection,
+which is possible only because of the monotone structure below.
+
+\paragraph{Monotone systems.} The structural property doing the work is monotonicity
+\cite{angeli2003monotone,coogan2015mixed}: order-preserving dynamics let worst-case reachability
+be computed from extreme points rather than by searching an interior. Our use is narrower ---
+monotonicity in a scalar \emph{input} rather than in the state --- but it is what turns a search
+into two bisections.
+
+\paragraph{Batteries, degradation and learned policies.} The reference model is
+Doyle--Fuller--Newman \cite{doyle1993,newman2004} with Bernardi thermal coupling
+\cite{bernardi1985}, implemented in PyBaMM \cite{sulzer2021pybamm} with the Chen
+\cite{chen2020} and O'Kane \cite{okane2022} parameter sets; plating is the dominant fast-charge
+degradation mode \cite{yang2017plating}. Online estimation of resistance and
+capacity is mature \cite{plett2015,moura2017} --- and is exactly what this method
+deliberately does not require. Reinforcement learning has been applied to fast charging
+\cite{wei2022ddpg,attia2020}, and constrained RL offers expectation-level guarantees
+\cite{achiam2017cpo,altman1999constrained}, which are the wrong shape for a constraint that must
+hold on every step of every episode. Our position is that the policy may be learned and the
+safety must not be.
+
+\section{Theory}\label{sec:theory}
+
+Let a system have state $x$, scalar input $u \in [u_{\min}, u_{\max}]$, one-step map
+$x^+ = f(x,u,w)$, and a finite family of constraints $c_j(x,u)\le 0$ defining a safe set
+$\mathcal{S}$. Write $\mathcal{U}(x) = \{u : c_j(x,u)\le 0\ \forall j\}$ for the admissible input
+set.
+
+\subsection{Null-Input Collapse}
+
+\begin{proposition}[Null-Input Collapse]\label{prop:nic}
+Suppose \textbf{(A1)} $u = 0$ is safe --- from every $x \in \mathcal{S}$ the one-step map at
+$u=0$ returns to $\mathcal{S}$ --- and \textbf{(A2)} each $c_j$ is non-decreasing in $u$. Then
+$\mathcal{U}(x) = [0, u^\ast(x)]$ is a single interval anchored at zero, $\mathcal{S}$ is
+forward-invariant under any policy filtered through it, and $u^\ast$ is computed to precision
+$\varepsilon$ in $\lceil \log_2 (u_{\max}/\varepsilon)\rceil + 2$ one-step evaluations.
+\end{proposition}
+
+\begin{proof}[Sketch]
+By (A2) each $\{u : c_j \le 0\}$ is a down-set; a finite intersection of down-sets in
+$\mathbb{R}$ is a down-set, hence an interval $[u_{\min}, u^\ast]$, which by (A1) contains $0$.
+Bisection on a monotone predicate converges linearly with an iteration count depending only on
+the requested precision, not on the data. Forward invariance follows by induction: each filtered
+step lands in $\mathcal{S}$ and $u=0$ remains available.
+\end{proof}
+
+Two things are worth isolating. First, no step requires knowing the plant's uncertain
+parameters --- only evaluating $c_j$ under a \emph{bound} on them, and a conservative bound
+yields a conservative interval. Second, the cost is $O(\log 1/\varepsilon)$ \emph{deterministic}
+evaluations, which is what a task slot can be sized around and a solver's iteration count is
+not.
+
+\subsection{Where it breaks, and why that reading is wrong}\label{sec:anchored}
+
+Placed on a quadrotor holding altitude, a filter built on Proposition~\ref{prop:nic} passes
+every one-step check for a mean of 22.3 consecutive steps and then violates in 100\,\% of
+episodes. The natural reading is that (A1) has failed: $u=0$ is plainly not safe for an
+aircraft.
+
+That reading is wrong, and the correction is the technical heart of this paper. Consider what
+$u=0$ actually does to a discharging pack. No current flows, so there is no $I^2R$ heating and
+the temperature relaxes toward ambient. Terminal voltage returns to open-circuit, so it cannot
+sag below a floor. State of charge does not fall. \textbf{Every temperature and voltage
+constraint is satisfied at $u=0$, on a quadrotor in flight exactly as on a cell being charged.}
+
+What $u = 0$ cannot do is fly the aircraft. The constraint that failed is of a different kind:
+a requirement that the input be \emph{large} enough. Call these \emph{floors}, as against the
+\emph{caps} of Proposition~\ref{prop:nic}. Every vehicle has at least one, because every vehicle
+has an irreducible load --- the power it cannot stop drawing and remain a vehicle. Hover thrust
+for a rotorcraft. Hotel load for a submersible, whose computer and inertial navigation draw
+their watts whether the thrusters do or not, so that even a stationary AUV cannot command zero.
+Bus load for a spacecraft in eclipse. Contracted export power for a car doing vehicle-to-grid.
+
+Charging is the special case where the irreducible load is zero --- which is exactly why the
+original filter could anchor at zero without ever noticing it was making a choice.
+
+\begin{theorem}[Anchored Collapse]\label{thm:anchored}
+Partition the constraints into caps $\mathcal{C}$, each satisfied on $[u_{\min}, u_c]$, and
+floors $\mathcal{F}$, each satisfied on $[u_c, u_{\max}]$. Suppose
+\textbf{(A1$'$)} $u = u_{\min}$ is safe for every cap, from every $x \in \mathcal{S}$, and
+\textbf{(A2)} each constraint is monotone in $u$. Then
+\begin{equation}
+\mathcal{U}(x) \;=\; [\,u_{\mathrm{lo}}(x),\; u_{\mathrm{hi}}(x)\,]
+\;=\;\Big[\;\max_{j\in\mathcal{F}} u_{c_j},\;\; \min_{j\in\mathcal{C}} u_{c_j}\;\Big],
+\end{equation}
+both edges are found by bisection in $O(\log 1/\varepsilon)$ one-step evaluations, and
+$\mathcal{U}(x)\neq\emptyset$ exactly when $u_{\mathrm{lo}} \le u_{\mathrm{hi}}$.
+\end{theorem}
+
+\begin{proof}[Sketch]
+Each cap's satisfying set is a down-set and each floor's an up-set; their finite intersections
+are $[u_{\min}, u_{\mathrm{hi}}]$ and $[u_{\mathrm{lo}}, u_{\max}]$, whose intersection is the
+stated interval. (A1$'$) places $u_{\min}$ inside the cap family, giving the upper bisection a
+known-good left endpoint; $u_{\max}$ is inside the floor family if anything is, giving the lower
+bisection its right endpoint. Neither bisection needs the load current as a seed.
+\end{proof}
+
+Proposition~\ref{prop:nic} is the case $\mathcal{F} = \emptyset$. Note that (A1$'$) is
+\emph{strictly weaker} than (A1): it asks only that zero satisfy the caps, which is the part
+that survives contact with a vehicle.
+
+\begin{remark}[The side of a constraint is data, not inference]
+The plating constraint is $\varphi_{\mathrm{an}} \ge \delta$ --- a lower-bound test on a signal
+that \emph{decreases} in current, so it caps current from above. Sense and side coincide only
+when the constrained signal increases in $u$. Inferring side from the operator would file that
+cap among the floors and let the filter command straight through it: silent, and unsafe. Plants
+declare the side; an undeclared constraint raises rather than defaults.
+\end{remark}
+
+\begin{remark}[A soundness condition that is not obvious]\label{rem:mpp}
+Delivered bus power $P = S\,V(u)\,u$ with $\mathrm{d}V/\mathrm{d}u<0$ peaks at the maximum-power
+point and \emph{falls} beyond it, so past that peak the set where the load is met stops being an
+up-set and the lower bisection would search a non-monotone family. The voltage cap prevents it:
+a pack reaches its maximum-power point near half its open-circuit voltage, far below any usable
+$V_{\min}$, so $u_{\mathrm{hi}} < u_{\mathrm{MPP}}$ always and the floor search is bounded by
+$u_{\mathrm{hi}}$. This ordering is checked on every discharge platform, not assumed.
+\end{remark}
+
+\subsection{Cost}
+
+Two probes bracket the cap family, then eighteen halvings; two more bracket the floors, then
+eighteen more. Worst case \evalDischarge{} one-step model evaluations on discharge and
+\evalCharge{} on charge, both fixed and both branch-bounded. Measured worst p99 latency across
+all \vPlatforms{} platforms is \worstLatency{}\,$\mu$s (\worstLatencyCase{}), which is
+\slotFraction\,\% of a 10\,ms ISO~26262 task slot. On the ground platforms the figure is
+\groundLatency{}\,$\mu$s, or \groundSlotPct\,\%.
+
+The property that matters is not that the number is small. It is that it does not move with the
+data.
+
+\subsection{The reserve}\label{sec:reserve}
+
+The two-sided certificate makes available a quantity the one-sided version cannot express: the
+width $u_{\mathrm{hi}} - u_{\mathrm{lo}}$ shrinks to zero as the envelope closes, so the filter
+can report \emph{how close to unrecoverable} a vehicle is before it arrives. We treat this claim
+adversarially in \S\ref{sec:aerial} and scope it in \S\ref{sec:cross}: it carries the most
+operational weight and is the most likely to be overstated.
+
+\section{Method and platforms}\label{sec:method}
+
+\subsection{The filter}
+
+Given a proposed input $u_{\mathrm{req}}$, the filter returns
+$\mathrm{clip}(u_{\mathrm{req}}, u_{\mathrm{lo}}, u_{\mathrm{hi}})$, or reports the interval
+empty. Empty is not a violation: it is the certificate stating correctly that the irreducible
+load can no longer be served inside the envelope, which is the true statement and the one a
+mission planner needs.
+
+Robustness enters through margins rather than estimation: a thermal throttle
+$\delta_T = \delta_{T0} + K(s_R - 1)$ scaled by the \emph{assumed} resistance bound $s_R$, with
+$K$ the smallest value certifying cells past the rated bound, and a cooling reserve $f$ that
+certifies any cooling loss up to $f/(1+f)$.
+
+\subsection{One cell, sixteen vehicles}
+
+Three things vary across the platforms and nothing else does: the \textbf{medium}, through the
+cooling law; the \textbf{pack}, through series/parallel counts; and the \textbf{load}, through
+the irreducible draw. Table~\ref{tab:platforms} lists them.
+
+\begin{table}[t]\centering\small
+\caption{The \vPlatforms{} platforms. Charge-mode platforms have a zero anchor and test
+Proposition~\ref{prop:nic} at vehicle scale; discharge-mode platforms have a positive anchor and
+test Theorem~\ref{thm:anchored}.}
+\label{tab:platforms}
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Medium} & \textbf{Cooling law} & \textbf{Platforms} & \textbf{Irreducible load} \\
+\midrule
+Ground & Newtonian, liquid loop & robotaxi 96S45P 78\,kWh; shuttle; & 0 (charge); \\
+       &                        & haul truck 288S115P 601\,kWh; V2G & 7.4--22\,kW export \\
+\addlinespace
+Air & forced air, density-derated & delivery quadrotor 6S3P; eVTOL & hover thrust; 400\,kW; \\
+    &                             & air taxi 300S45P; turnaround & 0 (charge) \\
+\addlinespace
+Water & sealed hull into 2\,\degC{} & survey AUV; buoyancy glider; & 25--265\,W; 0.5\,W; \\
+      &                             & under-ice AUV; dock recharge & 175\,W; 0 (charge) \\
+\addlinespace
+Vacuum & Stefan--Boltzmann to 4\,K & LEO smallsat; GEO comsat; deep- & 60\,W; 3\,kW; 200\,W; \\
+       & ($+$ 6\,mbar CO$_2$ on Mars) & space cruiser; Mars rover; lunar & 100\,W; 45\,W heater; \\
+       &                           & lander; \sDoseMax{}\,krad orbiter & 0 (charge) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The cell underneath is the published reduced-order model's arithmetic in every case --- same
+overpotential form, same plating proxy, same calibrated coefficients --- with two changes the
+vehicles require. Current may be negative, because vehicles discharge. And the Newtonian cooling
+term is a callable, because a quadrotor at 400\,m, an AUV at 2\,\degC{} and a spacecraft in
+vacuum do not share a cooling law. Under the Newtonian law with positive current the vehicle
+cell reproduces the published model \emph{bit for bit}, and every result downstream inherits
+that.
+
+\paragraph{Scope of the platform parameters.} Pack geometry, hover powers, hotel loads and orbit
+parameters are \emph{class-representative} --- chosen to place each vehicle in the right region
+of its class's design space using published figures --- and are not any manufacturer's design.
+The purpose is that ``it works on autonomous vehicles'' is not a testable sentence, while ``it
+holds a 96S45P pack under a 30-minute 350\,kW session at 35\,\degC{} ambient'' is.
+
+\subsection{Experimental discipline}
+
+Every experiment runs a \emph{pessimistic estimator against a drawn plant}: the filter is given a
+platform at the conservative corner of the parameter envelope, and the plant it drives is drawn
+from inside it. A filter tested against its own model is testing arithmetic. One property makes
+that corner well defined for a two-sided certificate --- scaling the assumed resistance up
+lowers the upper edge \emph{and} raises the lower edge, so the interval shrinks from both sides
+under one perturbation --- and it is verified numerically, not assumed.
+
+The experimental surface, including what would falsify each claim, was fixed in a design
+register before any code ran; divergences between the register and what happened are recorded
+rather than edited into agreement. Zero-failure claims are reported with Clopper--Pearson 95\,\%
+one-sided upper bounds \cite{clopper1934}; continuous outcomes with bootstrap confidence
+intervals; paired comparisons with Wilcoxon signed-rank and effect sizes; monotonicity claims
+with permutation Spearman.
+
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.93\textwidth]{FV1_domains.pdf}
+\caption{The anchor moves off zero, and three of the four media require it. (a) The irreducible
+load of every platform, spanning five orders of magnitude from a glider's 0.5\,W hotel draw to
+an eVTOL's 400\,kW hover; the null-input theorem lives at the dashed line. (b) On the same
+seeds, the null-input filter starves the load in essentially every episode while the anchored
+filter breaches nothing. (c) Applied before flight, the certificate refuses the calibrated
+energy cell for a rotorcraft above \aRefuseC{}C of hover draw.}
+\label{fig:domains}
+\end{figure}
+
+\section{Ground: robotaxis, shuttles, autonomous trucks}\label{sec:ground}
+
+The ground domain is where the original result should hold most directly --- the anchor is zero,
+the medium is a liquid loop, the physics is what the model was calibrated on. What is new is
+scale and duty.
+
+\subsection{The filter is unchanged, at pack scale}
+
+On one cell the vehicle filter is bit-exact with the published projection: \gReduceMismatch{}
+mismatches in \gReduceStates{} states, across both discretisations, fresh and aged. A
+$P$-parallel pack's admissible current is exactly $P$ times one cell's, to a relative deviation
+of $\gPackDev$. And on a \gTruckCells{}-cell haul-truck pack the admissible current equals the
+minimum over its heterogeneous cells to $\gTruckDev$\,A --- below the $\gTruckRes$\,A resolution
+of the search itself. A pack-averaged thermal limit on that many cells is a statement about a
+cell that does not exist; the weakest-cell result is what makes a per-cell certificate tractable.
+
+\subsection{Megawatt charging and the weakest cell}
+
+The haul truck is the scale case, and it is where the per-cell architecture stops being a design
+preference. A 288S115P pack is \gTruckCells{} cells with individually different resistances,
+capacities and plating margins. A pack-averaged thermal limit on that many cells is a statement
+about a cell that does not exist --- the average cell is not the one that fails.
+
+The per-cell alternative is only tractable because of a structural result: the pack's admissible
+current is exactly the minimum over its cells'. We verify this from $N=1$ to $N=\gTruckCells{}$
+with heterogeneous ageing, and the agreement is $\gTruckDev$\,A --- below the $\gTruckRes$\,A
+resolution of the search itself, which is to say exact. The consequence is that a fleet operator
+does not need \gTruckCells{} filters; one filter evaluated at the weakest cell's parameters is
+provably the pack's answer.
+
+Megawatt charging makes this urgent rather than academic. The binding constraint at that power
+is not the connector or the cable; it is the coldest, most-aged cell in a 600\,kWh pack, and
+identifying which cell that is by measurement is not something a truck stop can do.
+
+\subsection{A 350\,kW session}
+
+Under the full parameter envelope, \gFastN{} sessions on a 78\,kWh robotaxi pack at 35\,\degC{}
+produced \gFastViol{} violations (Clopper--Pearson 95\,\% upper bound \gFastCP\,\%), with a worst
+plant temperature of \gFastWorstT\,\degC{} against a 45\,\degC{} limit, and the pessimistic
+corner dominating every draw. Note which constraint binds: 350\,kW into a 96S pack is about
+\gChargerA\,A, above the pack's own 3C ceiling of \gPackCeilA\,A. \textbf{The charger is not the
+limiting element; the certificate is.}
+
+Over five years of robotaxi duty --- \gRoboSessions{} fast-charge sessions with the filter given
+a fixed datasheet bound on day one and told nothing afterwards --- there were \gRoboViol{}
+violations (CP-95 \gRoboCP\,\%). At twelve DC fast charges a day against a private car's one a
+fortnight, a factor of \gStressRatio{}, a robotaxi accumulates a private car's \emph{decade} of
+fast-charge stress in \gWeeks{} weeks.
+
+\subsection{The result this domain was not looking for}
+
+Coupled straight to ambient air, the throttled margin puts the admissible ceiling at
+$T_{\max}-\delta_T = \gCeiling\,\degC$. Above roughly that ambient there is \emph{no} admissible
+fast charge at all, and the certificate delivers nothing --- correctly, because at the datasheet
+end-of-life resistance bound there is none to deliver. The measured dead zone begins at
+\gDeadZone\,\degC{}, the first grid node past the prediction.
+
+Running the identical sweep with a loop holding coolant at 25\,\degC{} recovers the whole range
+and buys \textbf{+\gLoopGain{} points of delivered charge} on average, with \gFastViol{}
+violations in all \gAmbTrials{} sessions across both configurations. That difference is exactly
+what a thermal management system purchases, quantified, and it is why production packs carry
+chillers rather than radiators.
+
+A smaller finding follows. Delivered charge is not monotone in ambient and was never going to
+be: it peaks at \gPeakAmb\,\degC{}, rising along the cold limb ($\rho = \gColdRho$) where series
+resistance limits and falling along the hot limb ($\rho = \gHotRho$) where the thermal margin
+does. A \emph{binary} service metric --- ``will it make 60\,\% in thirty minutes'' --- jumps the
+full range between adjacent grid cells, because thresholding a smooth quantity produces a
+threshold. Dispatch should plan on the curve the filter already computes, not on the binary
+derived from it.
+
+\subsection{What the certificate is worth to a fleet}
+
+These quantities translate into fleet operations directly, and the mechanism is the clearest
+case in this paper of a safety result having an economic consequence.
+
+A production pack ships with a de-rate chosen for a worst case: end of life, temperature
+extreme, weakest cell. That worst case is almost never the present case. A vehicle that is warm,
+mid-life and mid-charge is being held to a limit designed for a vehicle that is none of those
+things. The certificate replaces the fixed de-rate with an evaluation at the \emph{current}
+state under a bound that is still conservative --- nothing is given up in safety --- and the
+difference is recovered continuously.
+
+The \gLoopGain{}-point gain from active cooling above is one instance made measurable. So is the
+ambient curve: a dispatcher who knows delivered charge peaks at \gPeakAmb\,\degC{} and falls
+along each limb for a different physical reason can schedule charging around weather rather than
+against it. And the stress-equivalence result sharpens the whole question --- a robotaxi is not
+a car that drives more, it is a vehicle whose battery ages at roughly \gStressRatio{} times the
+rate its de-rate was designed around. A guarantee holding for \gRoboSessions{} sessions with no
+recalibration is what makes that duty cycle defensible rather than merely profitable.
+
+\subsection{Sensing, transients, and vehicle-to-grid}
+
+A thermistor reading low is survivable up to a breakpoint with a closed form,
+$b^\ast = \delta_T/(1 - \Delta t\, hA / C_{\mathrm{th}}) = \gBiasPred\,\degC$, using the
+throttled margin actually in force. The measured breakpoint is \gBiasMeas\,\degC{} on a
+0.1\,\degC{} grid --- an error of \textbf{\gBiasErr\,\degC{}}, from published constants with
+nothing fitted. Regenerative-braking pulses at 10\,Hz over \gRegenN{} episodes produced zero
+certified violations, and a coolant-degradation sweep over \gCoolTrials{} trials violated
+nothing anywhere inside the region the cooling reserve predicts.
+
+Finally, vehicle-to-grid gives the ground domain its own instance of the generalisation, which
+matters because it removes the objection that anchored collapse is a story about aircraft. At
+7.4, 11 and 22\,kW of contracted export --- anchors up to \gVtwoGMaxAnchor\,A --- the anchored
+filter recorded zero unsafe episodes in \gVtwoGN{} sessions each, while the null-input filter
+dropped the contracted load in \textbf{\gVtwoGBrown{} of \gVtwoGN{}} at every power.
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.93\textwidth]{FV4_environments.pdf}
+\caption{Four media, four cooling laws, one unmodified projection. (a) Ground: the passive
+ceiling at $T_{\max}-\delta_T$ and what a coolant loop recovers. (b) Underwater: plating binds
+at every water temperature and thermal never does; what shifts with cold is the share taken by
+the temperature-dependent current cap. (c) Space: delivered charge \emph{rises} as the radiator
+shrinks, because the pack is cold-limited. (d) Lunar night: capacity barely moves survival,
+insulation moves it by an order of magnitude, until the energy ceiling takes over.}
+\label{fig:environments}
+\end{figure}
+
+\section{Air: delivery rotorcraft and eVTOL}\label{sec:aerial}
+
+This is the domain the generalisation exists for, and the one where the null-input filter does
+not merely under-perform but loses the aircraft. On identical seeds, \aFlights{} flights each:
+the anchored filter recorded \aAnchUnsafe{} unsafe-while-certified episodes; the null-input
+filter starved the rotors in \textbf{\aNullBrown{} of \aFlights{}}, serving a mean of
+\aNullSteps{} steps before brownout. It does not fly the aircraft for a while and then fail. It
+never flies it at all.
+
+The two-sided admissible set is genuinely an interval: \aScanStates{} flight states scanned
+densely returned \aScanDisc{} disconnected sets, with every bisected edge within one grid step
+of the dense scan. Across the whole flight envelope --- payload $\times$ altitude, gusts to
+$\sigma=0.5$ (\aGustTrials{} flights), cold soak at 2\,000\,m, motor-out to $+100\,\%$ power
+(\aMotorTrials{} flights) --- nothing was breached while the certificate reported feasible.
+
+\subsection{The certificate refuses to fly the calibrated cell}\label{sec:refusal}
+
+The most interesting aerial result is a refusal. With the model's own calibrated coefficients
+--- an energy cell --- the anchored filter reports the interval \textbf{empty before takeoff} at
+and above \aRefuseC{}C of hover draw. The admissible width collapses smoothly toward it:
+5.06\,A at 0.6C, 1.28\,A at 1.0C, 0.16\,A at 1.1C, empty at \aRefuseC{}C
+(Fig.~\ref{fig:domains}c).
+
+This is not a filter failure. It is the filter working as a \emph{design tool}. The correct
+engineering answer to ``may I fly a rotorcraft on an energy cell'' is no, and here that answer
+arrives before the aircraft leaves the ground rather than as a thermal event in flight. A
+runtime guard is not normally able to produce it, because a runtime guard is only ever asked
+about the vehicle it is already installed in.
+
+The remaining aerial experiments therefore use a power cell --- $0.40\times$ resistance,
+$0.60\times$ capacity --- which is the largest single modelling liberty in this work and is
+flagged wherever it applies.
+
+\subsection{The reserve warns, and the takeoff transient sizes the pack}
+
+Across \aLeadN{} flights, \emph{every} closure preceded its breach: \aLeadNoWarn{} breaches with
+no prior warning, median lead \aLeadMed{}\,s, 5th percentile \aLeadPfive{}\,s, 95th percentile
+\aLeadPninefive{}\,s. Under gusts the result holds at every variance up to $\sigma=0.5$ with
+\aGustUnsafe{} unsafe episodes in \aGustTrials{} flights --- once the \emph{live} closure is
+distinguished from a debounced one. Requiring three consecutive empty steps before declaring
+closure costs up to \aGustDebounceHi{}\,s at the highest gust variance, and measuring lead from
+the debounced signal made an earlier version of this experiment report \emph{negative} lead
+times for a filter that had already closed correctly.
+
+A full delivery sortie --- takeoff, climb, cruise, hover over the drop, return, land --- shows
+the reserve tracking the mission without the filter being told a mission plan exists:
+\aReserveTakeoff\,A in takeoff, \aReserveClimb\,A in climb, \aReserveCruiseOut\,A in cruise,
+\aReserveHoverDrop\,A over the drop (Fig.~\ref{fig:sortie}).
+
+\textbf{Takeoff is the binding phase, and it is what sizes the pack.} On 6S2P the certificate
+refuses a $1.75\times$ takeoff transient outright; on 6S3P it allows it and \aSortieComplete\,\%
+of sorties complete; on 6S4P, \textbf{\aSortieBigger\,\%}, with \aSortieUnsafe{} unsafe episodes
+throughout. The frontier is actionable, which is what separates a design tool from a complaint.
+
+Payload and density altitude close the envelope through the same physical term --- momentum
+theory places both inside $T^{3/2}/\sqrt{\rho A}$ --- and the reserve falls with each:
+$\rho = \aPayloadRho$ against payload and $\rho = \aHoverRho$ against hover power, the shared
+term, and negative against altitude in \emph{every} payload stratum. Pooled across the grid the
+altitude correlation is a non-significant $\aAltPooledRho$ ($p = \aAltPooledP$), because payload
+spans a far larger range of hover power and swamps it; the within-stratum test is the one that
+answers the question.
+
+An eVTOL air taxi hovering at \aEvtolC{}C certifies with zero unsafe episodes, a median hover
+endurance of \aEvtolMed{} minutes, and interval width predicting that endurance at
+$\rho = \aEvtolRho$.
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.93\textwidth]{FV3_sortie.pdf}
+\caption{A whole delivery sortie. The reserve opens in cruise, where power demand is low and
+forced-air cooling is high, and closes over the drop. The filter is never told a mission plan
+exists; it sees a load that changes and re-derives both edges every step. Closure is not
+violation: the amber fraction is the certificate correctly refusing to continue.}
+\label{fig:sortie}
+\end{figure}
+
+\subsection{Which edge binds, and why cold is the aerial problem}
+
+The two-sided certificate makes it possible to ask which constraint is actually limiting, and
+the answer moves with temperature in a way that is not intuitive. Table~\ref{tab:coldsoak}
+reports the binding edge for a quadrotor at 2\,000\,m across an 70\,K air-temperature range.
+
+\begin{table}[t]\centering\small
+\caption{Binding edge for a delivery quadrotor at 2\,000\,m density altitude, 400 flights per
+node. Warm, the actuator ceiling limits and the aircraft is thrust-limited. Cold, series
+resistance climbs and \emph{voltage sag} limits --- and the interval closes entirely below
+$-20\,\degC$. Nothing was breached while certified at any node.}
+\label{tab:coldsoak}
+\begin{tabular}{@{}rrrrrr@{}}
+\toprule
+\textbf{Air temp.} & \textbf{Mean reserve} & \textbf{Voltage} & \textbf{Thermal} &
+\textbf{Actuator} & \textbf{Closed} \\
+\midrule
+$-30\,\degC$ & 2.09\,A  & 228 & 0 & 0   & 172 \\
+$-20\,\degC$ & 7.11\,A  & 298 & 0 & 0   & 102 \\
+$-10\,\degC$ & 13.64\,A & 354 & 0 & 0   & 46  \\
+$0\,\degC$   & 20.20\,A & 279 & 0 & 120 & 1   \\
+$+10\,\degC$ & 25.30\,A & 108 & 0 & 292 & 0   \\
+$+20\,\degC$ & 27.35\,A & 45  & 0 & 355 & 0   \\
+$+30\,\degC$ & 28.01\,A & 9   & 0 & 391 & 0   \\
+$+40\,\degC$ & 17.73\,A & 0   & 3 & 251 & 146 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two things follow. First, the thermal constraint --- the one an aviation engineer would expect to
+dominate a high-power pack --- essentially never binds; \emph{voltage sag} does, everywhere
+below freezing. Second, the envelope closes outright in 43\,\% of states at $-30\,\degC$: a
+cold-soaked delivery drone at altitude is not marginally degraded, it is refused. Only at
+$+40\,\degC$ does thermal appear at all, and even there it accounts for 3 of 400 states.
+
+An operator planning winter service on the basis of thermal derating would be planning against
+the wrong constraint. The certificate identifies the right one without being told which to look
+for, because it evaluates all of them.
+
+\subsection{What forty sorties a day actually costs}
+
+A delivery pack lands at up to 44\,\degC{}, and the throttled margin puts the admissible ceiling
+at \gCeiling\,\degC{} --- so the certificate refuses to charge it. Measuring how little charge a
+refused session delivers measures the refusal. The operational question is how long the pack
+must sit, and the filter answers it directly, because \emph{the wait is the time until the
+interval opens}.
+
+Of \aTurnN{} turnarounds, \aTurnImmediate\,\% could start at once; the rest waited a median of
+\textbf{\aTurnWaitMed{} minutes} (95th percentile \aTurnWaitPninefive{}), and none was still
+refused after two hours, with zero violations throughout. On a single pack that is
+\aTurnOnePack{} sorties/day. Swapping packs so the cool-downs overlap gives \aTurnSwap{}
+sorties/day, and holding a 40/day target requires \textbf{\aTurnPacks{} packs in rotation}.
+
+This is why delivery operators swap packs rather than wait. The contribution is that the
+certificate produces the number instead of the folklore.
+
+\subsection{An adversary}
+
+A cross-entropy adversary was given \aAdvCells{} independently drawn packs and
+\aAdvSeq{} flight profiles, free to command anywhere inside the certified interval and
+optimising the demand and airspeed schedule to maximise peak temperature. It reached
+\aAdvPeak\,\% of the limit while the certificate was open and broke nothing: \aAdvViol{}
+violations, CP-95 upper bound \aAdvCP\,\%, past the \nReqOne{} cells needed to certify below
+1\,\%. The statistical unit is the \emph{cell}, not the sequence, because an earlier adversarial
+claim in this line of work rested on 40 cells and bounded nothing below 7.2\,\%.
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.93\textwidth]{FV2_reserve.pdf}
+\caption{The reserve warns, and it is one of two clocks. (a) Under ice, closure itself leaves only
+\uIceClosureMed{} minutes before a breach against a \uIceTransit{}-minute transit; aborting on a
+reserve threshold gives warning ahead of closure, and \uIceThresh\,A covers the transit. (b) Interval width predicts endurance
+where the envelope is what closes and does not where the pack simply empties; the certificate
+carries both clocks. (c) Breaches with no prior warning, across every stress: all zero.}
+\label{fig:reserve}
+\end{figure}
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.93\textwidth]{FV8_envelope.pdf}
+\caption{The two-sided envelope in three vehicles. The upper edge falls as the pack heats and
+sags; the lower edge rises as the load costs more current at lower terminal voltage; the gap
+between them is the reserve, and closure is where they meet. The dotted line is the anchor ---
+the current the irreducible load demands, which is where the lower edge lands. On a charging
+cell that line sits at zero and the whole lower half of this picture is absent.}
+\label{fig:envelope}
+\end{figure}
+
+\section{Water: survey AUVs, gliders, under-ice vehicles}\label{sec:water}
+
+The hardest domain, for reasons that have nothing to do with the theorem. A pack inside a
+pressure hull is thermally isolated from an excellent heat sink --- \uHullUA\,W/K per cell
+against a car's \uCarUA{}, about one \uRatio{}th --- and the water is 2\,\degC{}, so both
+intuitions are wrong at once: it heats slowly \emph{and} it is very cold.
+
+It is also the cleanest separation of the anchored generalisation from anything about flight. A
+survey AUV sitting perfectly still on the seabed still cannot command zero: its computer,
+inertial navigation and acoustic modem draw \uIdleW\,W regardless, an anchor of
+\uIdleAnchor\,A. Across idle, survey and transit the anchored filter recorded zero
+unsafe-while-certified episodes, and the null-input filter browned out the vehicle in
+\textbf{\uIdleBrown{} of \uIdleN{} --- including the case where nothing is moving.}
+
+A sealed hull certifies: \uHullN{} dock recharges in 2\,\degC{} water, \uHullViol{} violations.
+A six-month deployment with no recalibration: \uDeployN{} recharges, zero violations. And 180
+days with no ground truth: a fixed bound and a daily oracle record identical safety
+\emph{and} identical delivered charge.
+
+\subsection{The constraint the theorem does not certify is the one that binds}
+
+This experiment was written to show the binding constraint \emph{switching} from thermal to
+plating as the water cools. It never switches, because it was never thermal. \textbf{Plating
+binds in 100\,\% of states at every water temperature from $-1.8$ to 25\,\degC{}, and
+temperature binds in none} (Fig.~\ref{fig:environments}b), across \uColdTrials{} trials. A
+sealed hull charges so slowly that the pack never approaches its thermal limit. What changes
+with temperature is which plating mechanism binds: the temperature-dependent current cap takes
+\uCapWarm\,\% of cases at 25\,\degC{} and \uCapCold\,\% at 2\,\degC{}.
+
+That has a consequence worth stating plainly rather than dressing up. The certified set is
+$\{T, V\}$; plating is enforced and monitored but never certified, because $u=0$ does not clear
+the plating margin at high state of charge and so no one-step condition can make it invariant.
+\textbf{On this vehicle, in this medium, the binding constraint is the one the theorem does not
+certify.}
+
+Two downstream sweeps inherit it and both come back flat. Delivered charge does not move across
+ten years of dormancy (spread $\uDormSpread$ SOC) or 6\,000\,m of depth ($\uDepthSpread$),
+because neither channel touches the plating cap. Those spreads are numerical noise and no rank
+correlation is reported over them --- an earlier version did, and reported $\rho=+1.000$,
+$p=0.0002$ for a flat line. \emph{The certificate is not tolerant of dormancy and depth so much
+as blind to them.}
+
+\subsection{A negative result, and the design rule it forces}\label{sec:ice}
+
+Under an ice shelf there is no abort-to-surface: a closed envelope is a lost vehicle. The
+question is therefore not whether the certificate is correct but whether it is \emph{early}.
+
+\textbf{Waiting for the interval to close is too late.} Closure is the moment the envelope is
+gone, so it offers no warning ahead of itself; what it does offer is the interval before the
+vehicle actually breaks something, and across \uIceN{} missions that is a median of
+\uIceClosureMed{} minutes. Against a \uIceTransit{}-minute transit to a known hole in the ice,
+it covers the return in \uIceCover\,\% of episodes. \uIceNoWarn{} breaches occurred without a
+warning --- the certificate is correct --- and correct \uIceClosureMed{} minutes before the
+damage, when the vehicle needs \uIceTransit{}, loses the vehicle anyway.
+
+The fix is not a better certificate. It is to stop using closure as the trigger. The reserve is
+available at every step and falls smoothly toward zero, so the abort can fire on a
+\emph{threshold} rather than on exhaustion (Table~\ref{tab:ice}). Aborting at \uIceThresh\,A of remaining reserve gives \uIceThreshMed{} minutes of warning
+\emph{before} closure at the median and \uIceThreshPfive{} at the 5th percentile --- covering the
+transit in every episode, with the \uIceClosureMed{}-minute post-closure margin still in hand on
+top of it.
+
+\begin{table}[t]\centering\small
+\caption{Under-ice abort rule. Two different quantities are involved and conflating them would
+overstate the result. Waiting for closure gives \emph{no} warning before closure by
+definition --- it \emph{is} closure --- and leaves only \uIceClosureMed{} minutes before an
+actual constraint breach. Aborting on a threshold in the reserve gives warning \emph{ahead} of
+closure, which is the quantity a transit needs. Only the two-sided certificate has a reserve to
+threshold.}
+\label{tab:ice}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Abort trigger} & \textbf{Median warning} & \textbf{5th percentile} &
+\textbf{Covers \uIceTransit{}-min transit} \\
+& \textbf{before closure} & & \\
+\midrule
+wait for closure & 0 min (by definition) & 0 min & \uIceCover\,\% \\
+2\,A             & 11 min & 10 min & 0\,\% \\
+4\,A             & 20 min & 18 min & 54\,\% \\
+\textbf{\uIceThresh\,A} & \textbf{\uIceThreshMed{} min} & \textbf{\uIceThreshPfive{} min} &
+\textbf{100\,\%} \\
+16\,A            & 58 min & 52 min & 100\,\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+It is worth stating what this rule replaces. Current practice for autonomous underwater
+endurance is a fixed reserve fraction --- turn back at 30\,\% state of charge, say --- chosen
+conservatively because the quantity that actually matters, how much admissible current remains,
+is not observable. A fixed SOC reserve is simultaneously too conservative in warm water with a
+fresh pack and not conservative enough in cold water with an aged one, and nothing tells the
+vehicle which situation it is in.
+
+The reserve threshold is directly observable, updates every control step at
+\worstLatency\,$\mu$s, and carries the temperature and ageing state implicitly because it is
+computed from them. That is the difference between a mission rule that is defensible and one
+that is merely traditional.
+
+\subsection{Four decades of load, one certificate}
+
+A buoyancy glider drawing 0.5\,W and an under-ice AUV drawing 175\,W differ by a factor of
+\uLoadRatio{} in load. Both produced single-interval admissible sets in every state scanned and
+zero unsafe episodes. What differs is the reserve \emph{ratio} --- \uGliderRatio{} for the
+glider against \uAuvRatio{} for the AUV --- which is the dimensionless statement of how much
+room each has relative to what it must draw.
+
+\section{Vacuum: LEO, GEO, deep space, Mars, lunar night}\label{sec:space}
+
+Space is where the certificate's least glamorous property becomes the decisive one. The filter
+requires no identification of the plant: no recursive least squares, no observer to converge, no
+ground station in the loop. On a car that is a convenience. On a spacecraft that has not been
+touched since integration, whose ground link is hours of light time away, and whose battery has
+taken \sDoseMax{}\,krad of ionising dose in the interim, \textbf{it is the only reason a fixed
+pre-launch parameter set is admissible at all.}
+
+Space is also where the \emph{form} of the guarantee matters as much as its content. Flight
+software is qualified by argument about worst-case behaviour, and an iterative solver is
+difficult to argue about: its run time depends on data that has not happened yet, its
+convergence depends on conditioning nobody can bound in advance, and its failure mode is to
+return late rather than to return wrong. A projection that always executes the same bounded
+sequence of arithmetic operations, allocates nothing, and branches a fixed number of times is a
+different kind of object to qualify. It is the difference between arguing that a component
+usually finishes and proving that it always does.
+
+\begin{table}[t]\centering\small
+\caption{Five mission classes and what each one makes hard. The certificate is unmodified across
+all of them; only the cooling law, the pack and the irreducible load change.}
+\label{tab:missions}
+\begin{tabular}{@{}p{2.4cm}p{2.9cm}p{4.0cm}p{4.6cm}@{}}
+\toprule
+\textbf{Mission class} & \textbf{Defining stress} & \textbf{What it makes hard} &
+\textbf{Measured result} \\
+\midrule
+LEO smallsat & \sLeoPerYear{} cycles/year, no technician & count, not severity &
+\sLeoCycles{} charges, \sLeoViol{} violations \\
+\addlinespace
+GEO comsat & \sGeoMax{}-min eclipse, payload cannot go quiet & depth of discharge at end of
+life & every duration completes, \sGeoDoD\,\% DoD \\
+\addlinespace
+Deep-space cruise & 4--250\,K sink, hours of light time & recalibration is impossible &
+oracle buys \sNoGroundGap{} SOC points \\
+\addlinespace
+Mars surface & 80\,K diurnal swing, 6\,mbar CO$_2$ & two cooling laws at once &
+\sMarsTrials{} trials, \sMarsViol{} violations \\
+\addlinespace
+Lunar night & \sNightHours{}\,h at 100\,K, heater is the load & both edges push on temperature &
+survival frontier measured, not passed \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Four environments}
+
+\textbf{Low Earth orbit} is defined by its count rather than its severity: at a 92.9-minute
+period, \sLeoPerYear{} charge cycles a year. Five years --- \sLeoCycles{} charges, never
+recalibrated --- produced \sLeoViol{} violations (CP-95 \sLeoCP\,\%), with delivered charge on
+the final quarter matching the first to three decimal places.
+
+\textbf{Geostationary orbit} is the opposite duty cycle: about ninety eclipses a year clustered
+into two seasons, the longest \sGeoMax{} minutes, with a payload that is not allowed to go
+quiet. Every duration out to the seasonal maximum completed, at a median depth of discharge of
+\sGeoDoD\,\%, with zero unsafe episodes.
+
+\textbf{Deep-space cruise} radiates to a 4--250\,K sink and nothing else: \sCruiseN{} draws,
+\sCruiseViol{} violations, with the Stefan--Boltzmann cooling channel verified monotone in
+temperature numerically rather than assumed. \textbf{The Martian surface} adds 6\,mbar of
+CO$_2$ to radiation across an 80\,K diurnal swing: \sMarsTrials{} trials at hourly resolution,
+\sMarsViol{} violations, with the sum of the two cooling terms confirmed monotone.
+
+\textbf{Ionising dose} enters as one more monotone channel: zero violations to \sDoseMax{}\,krad,
+with delivered charge falling gently and monotonically in dose.
+
+\subsection{Why the count is the hard part in low Earth orbit}
+
+The LEO number is easy to misread as routine. Fifteen and a half charge cycles a day for five
+years is \sLeoCycles{} cycles executed by a filter given its parameters before launch and sent
+nothing since. Over that span the pack's series resistance grows, its capacity fades and its
+plating margin tightens --- and the certificate does not know any of it. It does not need to,
+because a monotone \emph{bound} suffices where a point estimate would be required, and the bound
+was known at integration.
+
+The observable consequence is that delivered charge on the last quarter of the mission matches
+the first to three decimal places. An operator's usual expectation is that battery performance
+is a slowly degrading resource requiring periodic re-planning. Here it is flat --- not because
+the pack has not aged, but because the certificate was never relying on the pack being new.
+
+\subsection{Two inversions of terrestrial intuition}
+
+\paragraph{Losing the radiator helps.} Sweeping $\varepsilon A$ down by two orders of magnitude
+produced \sRadViol{} violations at every point --- and delivered charge \emph{rose}, from
+\sRadLo{} to \sRadHi{} (Fig.~\ref{fig:environments}c). On a car, losing cooling costs charge.
+Radiating to a 4--250\,K sink, a healthy radiator makes the pack \emph{cold}, series resistance
+climbs, and the voltage limit arrives sooner; shrinking it lets the pack keep its own
+dissipation. In this domain the pack is cold-limited, not heat-limited, and a thermal-control
+failure of this kind is not an emergency.
+
+\paragraph{Lunar night is a cold problem, so capacity is the wrong lever.} A lander on 2.9\,kWh
+survives about \sNightBase{} hours of a \sNightHours{}-hour night, and quadrupling the pack buys
+only a couple more --- because the envelope closes on cold-induced voltage sag, not on stored
+energy. Insulation is the lever: dropping emissivity from 0.72 to \sNightBestEps{} takes
+survival from \sNightBase{} to \textbf{\sNightBest{} hours}, at which point the pack stops being
+cold-limited and meets its energy ceiling of \sNightEnergy{} hours. No configuration survives
+the full night, which is the honest answer and the reason real landers that survive lunar night
+carry radioisotope heaters rather than bigger batteries.
+
+These two results share a structure worth naming. Terrestrial battery engineering is organised
+around removing heat, because on Earth the ambient sits close to the cell's operating
+temperature and the failure mode is thermal. In vacuum the ambient is 4\,K and the failure mode
+inverts: the pack's problem is \emph{retaining} heat, series resistance is the mechanism, and
+voltage sag is how it presents. A method tuned to terrestrial intuition --- one that treats
+cooling as unambiguously good --- would prescribe exactly the wrong design for both the
+deep-space probe and the lunar lander. The certificate makes no such assumption. It evaluates
+the constraints it is given under the cooling law it is given, and the inversion falls out.
+
+\subsection{No ground in the loop}
+
+Over \sNoGroundDays{} charges --- five years --- a fixed datasheet bound and an oracle
+recalibrated every single day record identical safety \emph{and} identical delivered charge: the
+gap is \sNoGroundGap{} SOC points. In deep space, recalibration buys not just no safety but no
+performance either, because the binding constraint is the plating corner rather than resistance.
+
+Solar-array degradation, swept to \sArrayYears{} years --- three times any real mission, down to
+\sArrayFrac\,\% of beginning-of-life output --- never becomes the binding constraint at all, and
+delivered charge varies by \sArraySpread{} SOC across the whole sweep. The separation between
+what the vehicle can \emph{request} and what the filter can \emph{certify} is not marginal here.
+
+\subsection{The one fault the theorem cannot survive, measured anyway}
+
+Every other fault model in this work corrupts the plant or the sensor. A single-event upset
+corrupts the \emph{certificate}: a heavy ion flips a bit in the state word the projection is
+about to read, so the filter computes an admissible interval for a spacecraft that does not
+exist and commands it to the one that does.
+
+No one-step theorem survives corruption of its own input, and claiming otherwise would be
+dishonest. What can be measured is the shape of the exposure. Across \sSeuFlips{} bit flips into
+state of charge, temperature and the RC overpotential: \sSeuCaught\,\% are caught by a
+three-comparison range check on the state word; \sSeuBenign\,\% are benign or leave the command
+\emph{more} conservative; and \sSeuAggr\,\% produce a more aggressive command than the clean
+one. Of those, the worst overshoot actually realised in the plant was
+\textbf{\sSeuOvershoot\,\degC{}} --- none breached anything in one step. The deliverable is the
+range check and the number beside it, not a theorem.
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.93\textwidth]{FV7_case_studies.pdf}
+\caption{Six named vehicles, in the units their operators use: robotaxi dispatch feasibility
+over state of health and ambient; the weakest-cell result at \gTruckCells{} cells; eVTOL hover
+endurance; a glider and an AUV four decades of load apart; a GEO eclipse season; and
+single-event-upset containment on a high-radiation orbiter.}
+\label{fig:cases}
+\end{figure}
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.93\textwidth]{FV5_missions.pdf}
+\caption{Nobody recalibrates anything. (a) Mission length by domain, on a log scale, with
+violations annotated. (b) What ageing costs across each mission: delivered charge per session,
+first quarter against last. (c) A fixed datasheet bound against an oracle told the plant's true
+resistance before every cycle --- identical safety, and on these two missions identical
+delivered charge.}
+\label{fig:missions}
+\end{figure}
+
+\section{What makes this one method}\label{sec:cross}
+
+Forty-four experiments establish that the certificate holds in each medium. That is not the same
+as establishing it is the \emph{same} certificate --- four domains that each worked for their
+own reasons would be four papers. Five cross-cutting checks, each of which would fail if the
+domains were only superficially related.
+
+\textbf{The admissible set is a single interval everywhere.} \scanTotal{} dense scans across all
+\vPlatforms{} platforms and both modes: \scanSingle{} single intervals, \scanEmpty{} empty,
+\textbf{\scanDisconnected{} disconnected}. The two-bisection construction rests entirely on this,
+and it is measured rather than argued from monotonicity.
+
+\textbf{The generalisation reduces to the original theorem exactly.} Bit-exact on
+\reduceStates{} states with \reduceMismatch{} mismatches, and on every charge-mode platform the
+lower edge is exactly zero. Proposition~\ref{prop:nic} is recovered, not approximated.
+
+\textbf{The cost is fixed, and it is the same fixed cost everywhere.} \evalCharge{} evaluations
+on every charge platform and \evalDischarge{} on every discharge platform, against theoretical
+bounds of exactly \evalCharge{} and \evalDischarge{}. Worst p99 latency across all sixteen is
+\worstLatency\,$\mu$s, or \slotFraction\,\% of a 10\,ms task slot.
+
+\textbf{Every zero-failure claim is backed by enough samples.} Twelve headline claims,
+\adequacyTrials{} pooled trials, \adequacyViol{} violations; all exceed the \nReqOne{} trials
+needed to certify below 1\,\% at 95\,\% confidence and five exceed the \nReqTenth{} for
+0.1\,\%.
+
+\subsection{The reserve is one of two clocks}
+
+The claim that interval width is a countdown survives in the air and on the Moon and does
+\emph{not} survive underwater, and pooling would have hidden it (Table~\ref{tab:clocks}).
+
+\begin{table}[t]\centering\small
+\caption{Spearman $\rho$ against measured endurance for the two quantities the certificate
+carries. Every platform is well predicted by one of them; none by both.}
+\label{tab:clocks}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Platform} & \textbf{Width clock} $u_{\mathrm{hi}}-u_{\mathrm{lo}}$ &
+\textbf{Charge clock} $(\mathrm{soc}-\mathrm{soc}_{\min})Q/u_{\mathrm{lo}}$ \\
+\midrule
+eVTOL air taxi      & $\mathbf{\clockWEvtolAirTaxi}$      & \clockEEvtolAirTaxi \\
+lunar-night lander  & $\mathbf{\clockWLunarNightLander}$  & \clockELunarNightLander \\
+delivery quadrotor  & $\mathbf{\clockWDeliveryQuadrotor}$ & \clockEDeliveryQuadrotor \\
+GEO comsat          & $\mathbf{\clockWGeoComsat}$         & \clockEGeoComsat \\
+survey AUV          & \clockWSurveyAuv                    & $\mathbf{\clockESurveyAuv}$ \\
+under-ice AUV       & \clockWUnderIceAuv                  & $\mathbf{\clockEUnderIceAuv}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+An interval can close for two different reasons. \emph{Envelope-driven} closure is the upper
+edge falling onto the lower one as the pack heats and sags --- there the width \emph{is} the
+distance still to travel. \emph{Energy-driven} closure is the state of charge reaching its floor
+with the interval still wide open --- there the clock is set by how much charge was in the pack,
+and the width has nothing to say about it. Both are correctly reported as closures; only the
+first is a countdown.
+
+The certificate already carries both quantities, and every platform has one of them
+significantly positive ($\rho > 0.3$, $p < 0.001$), the \reserveWeakest{} most weakly at
+$\reserveWeakestRho$. \textbf{The operational rule is to act on the minimum of the two}, which
+is conservative whether or not either is individually tight. The pooled, anchor-normalised
+correlation is $\reservePooledRho$ over $\reservePooledN{}$ episodes; reporting that alone would
+have been the most flattering presentation available and the least honest.
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.93\textwidth]{FV6_connectedness.pdf}
+\caption{Four domains, one method. (a) Every dense scan returns a single interval or an empty
+one; none is disconnected. (b) The evaluation count is bounded at \evalCharge{} on charge and
+\evalDischarge{} on discharge, and latency follows it. (c) Every headline claim clears the
+sample size needed to certify below 1\,\%.}
+\label{fig:connected}
+\end{figure}
+
+\section{What this enables}\label{sec:enables}
+
+The results above are safety results; their significance is what they permit. What follows
+separates what has been demonstrated from what follows from it.
+
+\paragraph{Fleets can charge at the physical limit rather than a fixed de-rate.} The de-rate a
+production pack ships with is chosen for a worst case that is almost never the present case;
+evaluating at the \emph{current} state under a still-conservative bound recovers the difference
+continuously. \S\ref{sec:ground} quantifies what a thermal-management system buys at
+\gLoopGain{} points of delivered charge --- otherwise a design decision made on intuition.
+
+\paragraph{Aircraft can be sized by a certificate rather than by flight testing.} The takeoff
+frontier of \S\ref{sec:aerial} is a design curve: which pack configurations can certify the
+transient the aircraft must actually fly, before an airframe is built. The refusal of
+\S\ref{sec:refusal} rejects a cell chemistry for a mission class in one evaluation.
+
+\paragraph{Vehicles that cannot be rescued can be given an abort rule with a number in it.}
+\S\ref{sec:ice} converts ``turn back when you are low'' into ``abort at \uIceThresh\,A of
+remaining reserve, which gives \uIceThreshPfive{} minutes of warning at the 5th percentile''. That is a rule
+a mission planner can defend, and it exists only because the two-sided certificate produces a
+reserve.
+
+\paragraph{Spacecraft can fly a fixed parameter set for a decade and know what it costs.}
+\S\ref{sec:space} measures that cost directly against a daily oracle and finds it to be
+\sNoGroundGap{} SOC points --- that is, nothing. For a mission that cannot recalibrate, this is
+the difference between a guarantee and a hope.
+
+\paragraph{And the guarantee is cheap enough to be everywhere.} \worstLatency\,$\mu$s of
+deterministic, branch-bounded computation on a scalar model fits inside any microcontroller a
+battery management system already contains. There is no solver to certify, no library to
+qualify, and no failure mode in which the computation does not finish.
+
+\section{Limitations}\label{sec:limits}
+
+Stated in full, because several of them are load-bearing.
+
+\paragraph{No high-fidelity electrochemistry in this study.} Every number here is
+reduced-order-model level or model-versus-model; the Doyle--Fuller--Newman evidence validating
+the underlying filter is prior work, cited rather than re-derived.
+
+\paragraph{The certified set is $\{T, V\}$; plating is enforced, never certified.}
+\S\ref{sec:water} shows this is not a technicality: in a sealed hull at any water temperature,
+the binding constraint is the one the theorem does not certify. Extending the certificate to
+plating would require a control-invariance argument that the $u=0$ backup cannot supply, and we
+do not have one.
+
+\paragraph{One cell, sixteen vehicles.} Every platform uses the same calibrated coefficients,
+because that is the cell the model was fitted to. Where a vehicle class would really use a
+different cell --- the rotorcraft --- the substitution is explicit, is $0.40\times$ resistance
+and $0.60\times$ capacity, and is an extrapolation beyond the calibration. Every aerial number
+carries it.
+
+\paragraph{Class-representative platforms.} Pack geometry, hover powers, hotel loads and orbit
+parameters place each vehicle in the right region of its class's design space; they are not any
+manufacturer's design.
+
+\paragraph{No theorem survives corruption of its own input.} \S\ref{sec:space} measures the
+single-event-upset exposure and offers a range check; it does not claim robustness to a flipped
+bit, because there is none to claim.
+
+\paragraph{Simulation of simulation.} The plants are models, and a filter tested against models
+chosen to satisfy its hypotheses is weaker than one tested against hardware. What partially
+answers this is that three of the four media \emph{break} the original hypothesis, one platform
+is refused outright, and four experiments contradicted the hypothesis they were written to test.
+The register was not constructed so that everything passes. Hardware validation is the natural
+next step and is not claimed here.
+
+\section{Conclusion}
+
+The safety guarantee an autonomous vehicle's battery needs turns out to require neither an
+optimiser nor an identified model, only a geometric fact: when constraints are monotone in a
+scalar input and one input is known safe, the admissible set is an interval, and an interval can
+be found by bisection at fixed cost.
+
+Getting that from a cell to a vehicle required noticing that the theorem's apparent failure in
+flight was a misreading. Zero current is still safe for every temperature and voltage constraint
+on a discharging pack; what zero cannot do is serve the load the vehicle exists to serve, and
+that is a floor rather than a cap. Anchored Collapse adds the floor family and a second
+bisection, and nothing else --- \evalDischarge{} fixed evaluations against the original
+\evalCharge{}.
+
+Across \vPlatforms{} platforms in four media and \vExperiments{} experiments totalling
+\vTotalEpisodes{} episodes, nothing was breached while the certificate reported feasible, the
+admissible set was a single interval in all \scanTotal{} dense scans, and the worst latency
+anywhere was \worstLatency\,$\mu$s.
+
+The results we would most want a reader to take are the ones that did not come out as intended.
+A certificate that refuses a cell chemistry for a mission class before takeoff is doing
+something a runtime guard is not normally asked to do. A domain in which the binding constraint
+is the one the theorem explicitly does not certify is a limitation a less careful register would
+not have surfaced. And a warning that leaves \uIceClosureMed{} minutes when the vehicle
+needs \uIceTransit{} is a negative result whose forced abort rule --- act on a threshold in the
+reserve, not on its exhaustion --- is more useful than the positive result would have been.
+
+{\scriptsize
+\setlength{\bibsep}{0pt plus 0.2ex}
+\begin{multicols}{2}
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+\end{multicols}}
+
+\end{document}

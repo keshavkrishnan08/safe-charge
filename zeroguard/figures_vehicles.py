@@ -348,6 +348,10 @@ def fv4_environments():
     ax.text(0.03, 0.06, f"energy ceiling {ln['energy_limit_h']:.0f} h",
             transform=ax.transAxes, fontsize=5.2, color=MUTED)
     ax.set_xscale("log"); ax.invert_xaxis(); ax.set_yscale("log")
+    # an inverted log axis over 0.02-0.72 puts a decade of minor ticks on top of each other;
+    # label the sweep's own nodes instead
+    ax.set_xticks(eps); ax.set_xticklabels([f"{e:.2f}" for e in eps], fontsize=5.0)
+    ax.minorticks_off()
     ax.set_xlabel(r"radiator emissivity $\varepsilon$")
     ax.set_ylabel("survival  [h]")
     ax.legend(loc="center left", fontsize=5.2)

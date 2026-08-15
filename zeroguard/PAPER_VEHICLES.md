@@ -320,26 +320,30 @@ line. The certificate is not *tolerant* of dormancy and depth so much as blind t
 Under an ice shelf there is no abort-to-surface: a closed envelope is a lost vehicle. So the
 question is not whether the certificate is correct but whether it is *early*.
 
-**Waiting for the interval to close is too late.** Across 1,000 missions the closure warning
-arrives a median of **7 minutes** before the envelope is gone (p05 6 min, p95 8 min), against a
-20-minute transit back to a known hole. It covers the transit in **0 % of episodes**. Zero
-breaches occurred without a warning — the certificate is correct — and correct seven minutes
-late loses the vehicle anyway.
+**Waiting for the interval to close is too late.** Closure is the moment the envelope is gone,
+so it offers no warning ahead of itself. What it offers is the interval before the vehicle
+actually breaks something, and across 1,000 missions that is a median of **7 minutes** (p05 6,
+p95 8) against a 20-minute transit back to a known hole. It covers the return in **0 % of
+episodes**. Zero breaches occurred without a warning — the certificate is correct — and correct
+with 7 minutes left when the vehicle needs 20 loses it anyway.
 
 The fix is not a better certificate; it is to stop using closure as the trigger. The reserve is
 available at every step and falls smoothly, so the abort can fire on a *threshold* instead of
 on exhaustion:
 
-| abort threshold | median warning | 5th percentile | covers the transit |
+Warning here means time *ahead of closure*, which is the quantity a transit needs:
+
+| abort threshold | median warning before closure | 5th percentile | covers the transit |
 |---|---|---|---|
-| closure (0 A) | 7 min | 6 min | 0 % |
+| wait for closure | 0 min (by definition) | 0 min | 0 % |
 | 2 A | 11 min | 10 min | 0 % |
 | 4 A | 20 min | 18 min | 54 % |
 | **8 A** | **34 min** | **31 min** | **100 %** |
 | 16 A | 58 min | 52 min | 100 % |
 
-Aborting at 8 A of remaining reserve buys 31 minutes at the 5th percentile and covers the
-transit in every episode. This is a design rule the null-input certificate could not have
+Aborting at 8 A of remaining reserve gives 31 minutes of warning before closure at the 5th
+percentile and covers the transit in every episode — with the 7-minute post-closure margin still
+in hand on top of it. This is a design rule the null-input certificate could not have
 produced, because it has no reserve to threshold — and reporting the closure-triggered lead
 time alone would have been a true sentence and a misleading paper.
 

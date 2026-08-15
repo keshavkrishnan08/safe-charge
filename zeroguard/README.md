@@ -113,11 +113,12 @@ the pack is cold-limited rather than heat-limited. And on the lunar surface a bi
 buys almost nothing while insulation takes survival from 5.3 h to 54.3 h, against a 61.3 h
 energy ceiling.
 
-**One negative result, kept.** Under an ice shelf the closure warning arrives a median of 7
-minutes before the envelope is gone, against a 20-minute transit — it covers the transit in 0 %
-of episodes. Closure is the wrong trigger. Aborting instead at 8 A of remaining reserve buys 31
-minutes at the 5th percentile and covers it in every episode: a design rule the null-input
-certificate could not have produced, because it has no reserve to threshold.
+**One negative result, kept.** Under an ice shelf, closure leaves a median of 7 minutes before
+an actual breach — and the vehicle needs 20 to reach a hole in the ice, so it covers the return
+in 0 % of episodes. Closure is the wrong trigger. Aborting instead at 8 A of remaining reserve
+gives 31 minutes of warning *ahead of* closure at the 5th percentile and covers it every time: a
+design rule the null-input certificate could not have produced, because it has no reserve to
+threshold.
 
 **And the reserve claim is scoped rather than pooled.** Interval width predicts endurance in
 the air (ρ = +0.88) and does not underwater (ρ = −0.12), because there the mission ends on
