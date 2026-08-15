@@ -433,11 +433,11 @@ def fv6_connectedness():
            label="disconnected")
     ax.set_xticks(xx); ax.set_xticklabels(doms, fontsize=6.2, rotation=20)
     ax.set_ylabel("dense scans")
-    ax.legend(loc="upper left", fontsize=5.8)
-    ax.text(0.5, 0.42, f"disconnected: {x['x1_structure']['disconnected']}\n"
-                       f"of {x['x1_structure']['scans']:,}",
-            transform=ax.transAxes, fontsize=6.4, color=C[2], weight="bold", ha="center")
-    tag(ax, "(a)  it really is an interval")
+    ax.set_ylim(0, max(a + b + c for a, b, c in zip(si, em, dc)) * 1.22)
+    ax.legend(loc="upper left", fontsize=5.6, framealpha=0.96, handlelength=1.2)
+    # the count goes in the title rather than the panel: an annotation placed anywhere inside
+    # these axes collides with either the legend or the tallest bar
+    tag(ax, f"(a)  an interval in all {x['x1_structure']['scans']:,} scans")
 
     ax = axes[1]
     rows = x["x3_cost"]["rows"]

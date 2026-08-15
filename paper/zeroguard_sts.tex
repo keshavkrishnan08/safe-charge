@@ -1045,34 +1045,64 @@ sample size needed to certify below 1\,\%.}
 \section{What this enables}\label{sec:enables}
 
 The results above are safety results; their significance is what they permit. What follows
-separates what has been demonstrated from what follows from it.
+separates what has been demonstrated from what follows from it, and attaches a number to each
+where one exists.
 
-\paragraph{Fleets can charge at the physical limit rather than a fixed de-rate.} The de-rate a
-production pack ships with is chosen for a worst case that is almost never the present case;
-evaluating at the \emph{current} state under a still-conservative bound recovers the difference
-continuously. \S\ref{sec:ground} quantifies what a thermal-management system buys at
-\gLoopGain{} points of delivered charge --- otherwise a design decision made on intuition.
+\paragraph{A vehicle can charge at the limit that applies to it, not the limit that applies to
+the worst vehicle.} A production pack's de-rate is a single number chosen for end of life, at a
+temperature extreme, on the weakest cell. A vehicle that is warm, mid-life and mid-charge is
+held to it anyway, because nothing on board can prove it deserves better. The certificate is
+that proof, evaluated at the current state under a bound that is still conservative, so nothing
+is traded away. \S\ref{sec:ground} measures one slice of the difference --- \gLoopGain{} points
+of delivered charge between a pack coupled to ambient and one with a loop --- and shows the
+frontier is sharp and predictable, at $T_{\max}-\delta_T = \gCeiling\,\degC$ rather than
+somewhere discovered empirically.
 
-\paragraph{Aircraft can be sized by a certificate rather than by flight testing.} The takeoff
-frontier of \S\ref{sec:aerial} is a design curve: which pack configurations can certify the
-transient the aircraft must actually fly, before an airframe is built. The refusal of
-\S\ref{sec:refusal} rejects a cell chemistry for a mission class in one evaluation.
+\paragraph{Aircraft and packs can be sized before they are built.} The takeoff frontier of
+\S\ref{sec:aerial} is a design curve, not a diagnostic: 6S2P cannot certify a $1.75\times$
+takeoff transient, 6S3P certifies it and completes \aSortieComplete\,\% of sorties, 6S4P
+completes \aSortieBigger\,\%. The refusal of \S\ref{sec:refusal} goes further and rejects a cell
+\emph{chemistry} for a mission class in a single evaluation, before an airframe exists. A guard
+that only ever answers questions about the vehicle it is installed in cannot do either.
 
-\paragraph{Vehicles that cannot be rescued can be given an abort rule with a number in it.}
-\S\ref{sec:ice} converts ``turn back when you are low'' into ``abort at \uIceThresh\,A of
-remaining reserve, which gives \uIceThreshPfive{} minutes of warning at the 5th percentile''. That is a rule
-a mission planner can defend, and it exists only because the two-sided certificate produces a
-reserve.
+\paragraph{Fleet capital planning gets an equation instead of a rule of thumb.} A delivery
+operator asking what it costs to fly forty sorties a day is asking a battery question, and
+\S\ref{sec:aerial} answers it: \aTurnImmediate\,\% of packs can charge on landing, the rest wait
+a median of \aTurnWaitMed{} minutes, one pack sustains \aTurnOnePack{} sorties/day, and holding
+the target requires \textbf{\aTurnPacks{} packs per airframe}. That is a procurement number
+derived from a thermal margin, and it was previously folklore.
 
-\paragraph{Spacecraft can fly a fixed parameter set for a decade and know what it costs.}
-\S\ref{sec:space} measures that cost directly against a daily oracle and finds it to be
-\sNoGroundGap{} SOC points --- that is, nothing. For a mission that cannot recalibrate, this is
-the difference between a guarantee and a hope.
+\paragraph{Vehicles that cannot be rescued get an abort rule with a number in it.}
+\S\ref{sec:ice} replaces ``turn back when you are low'' --- a fixed state-of-charge reserve that
+is simultaneously too cautious in warm water with a fresh pack and not cautious enough in cold
+water with an aged one --- with ``abort at \uIceThresh\,A of remaining reserve'', which gives
+\uIceThreshPfive{} minutes of warning at the 5th percentile and covers the return in every
+episode tested. The threshold carries temperature and ageing implicitly because it is computed
+from them.
 
-\paragraph{And the guarantee is cheap enough to be everywhere.} \worstLatency\,$\mu$s of
-deterministic, branch-bounded computation on a scalar model fits inside any microcontroller a
-battery management system already contains. There is no solver to certify, no library to
-qualify, and no failure mode in which the computation does not finish.
+\paragraph{A mission can fly a fixed parameter set for a decade and know exactly what it cost.}
+\S\ref{sec:space} runs \sLeoCycles{} LEO cycles and \sNoGroundDays{} deep-space charges against
+an oracle recalibrated daily, and measures the price of never recalibrating at
+\sNoGroundGap{} SOC points. For a spacecraft that cannot be recalibrated in any case, the
+significant part is not that the price is small; it is that the guarantee does not depend on
+paying it.
+
+\paragraph{And the design space itself becomes searchable.} Three of this paper's results are
+design conclusions that fall out of running the certificate over a sweep rather than over a
+trajectory: a rotorcraft's binding constraint below freezing is voltage, not temperature
+(\S\ref{sec:aerial}); a sealed hull is limited by plating at every water temperature
+(\S\ref{sec:water}); and a lunar lander's survival is bought by emissivity, from
+\sNightBase{} to \sNightBest{} hours, and not by capacity (\S\ref{sec:space}). None required a
+new method. Each required only asking the certificate a question about a vehicle that does not
+exist yet, which costs \worstLatency\,$\mu$s per answer.
+
+\paragraph{The guarantee is cheap enough and simple enough to be everywhere.}
+\worstLatency\,$\mu$s of deterministic, branch-bounded arithmetic on a scalar model fits inside
+any microcontroller a battery management system already contains. It allocates nothing, calls no
+library, and has no path on which it fails to terminate. There is no solver to qualify and no
+iteration cap to justify --- which matters most exactly where qualification is hardest, and is
+the difference between arguing that a safety component usually finishes and proving that it
+always does.
 
 \section{Limitations}\label{sec:limits}
 

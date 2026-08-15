@@ -66,6 +66,7 @@ def main():
     if not cells_only:
         run("figures_vehicles.py", "vehicle figures")
         run("verify_vehicles.py", "checking the vehicle manuscript against the results")
+        run("make_paper_macros.py", "regenerating the paper's numbers from the results")
     print(f"\nall stages complete in {(time.time()-t0)/60:.1f} min")
 
 
