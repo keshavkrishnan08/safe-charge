@@ -1,0 +1,682 @@
+{
+  "v4_1_leo": {
+    "name": "leo_eclipse_cycling",
+    "trials": 28307,
+    "violations": 0,
+    "rate_pct": 0.0,
+    "cp95_upper_pct": 0.010582448722373794,
+    "years": 5.0,
+    "period_min": 92.9,
+    "eclipse_min": 35.0,
+    "cycles_per_year": 5661.571582346609,
+    "worst_T": 24.635130925483026,
+    "enforced_plating_excursions": 2453,
+    "first_quarter_soc": 0.7559967972317143,
+    "last_quarter_soc": 0.7587477098585234
+  },
+  "v4_2_geo": {
+    "rows": [
+      {
+        "eclipse_min": 10.0,
+        "trials": 180,
+        "completed": 44,
+        "completion_rate": 0.24444444444444444,
+        "unsafe_while_certified": 0,
+        "median_depth_of_discharge": 0.0
+      },
+      {
+        "eclipse_min": 30.0,
+        "trials": 180,
+        "completed": 35,
+        "completion_rate": 0.19444444444444445,
+        "unsafe_while_certified": 0,
+        "median_depth_of_discharge": 0.0
+      },
+      {
+        "eclipse_min": 50.0,
+        "trials": 180,
+        "completed": 26,
+        "completion_rate": 0.14444444444444443,
+        "unsafe_while_certified": 0,
+        "median_depth_of_discharge": 0.0
+      },
+      {
+        "eclipse_min": 65.0,
+        "trials": 180,
+        "completed": 0,
+        "completion_rate": 0.0,
+        "unsafe_while_certified": 0,
+        "median_depth_of_discharge": 0.0
+      },
+      {
+        "eclipse_min": 72.0,
+        "trials": 180,
+        "completed": 0,
+        "completion_rate": 0.0,
+        "unsafe_while_certified": 0,
+        "median_depth_of_discharge": 0.0
+      }
+    ],
+    "eclipses_per_year": 90,
+    "max_eclipse_min": 72.0,
+    "total_trials": 900,
+    "total_unsafe": 0
+  },
+  "v4_3_deep_space": {
+    "name": "deep_space_cruise",
+    "trials": 3000,
+    "violations": 0,
+    "rate_pct": 0.0,
+    "cp95_upper_pct": 0.09980790119965555,
+    "T_sink_range_K": [
+      4.0,
+      250.0
+    ],
+    "cooling": "eps = 0.88, A = 42.0 cm^2, T_sink = 4 K",
+    "radiative_monotone_in_T": true,
+    "worst_T": 24.84827927435401,
+    "enforced_plating_excursions": 0,
+    "mean_soc": 0.733203683129315
+  },
+  "v4_4_mars": {
+    "rows": [
+      {
+        "local_hour": 2,
+        "T_air": -80.0,
+        "trials": 400,
+        "violations": 0,
+        "enforced": 0,
+        "mean_soc": 0.4988183402994653,
+        "peak_T": -20.793074798286707
+      },
+      {
+        "local_hour": 6,
+        "T_air": -70.0,
+        "trials": 400,
+        "violations": 0,
+        "enforced": 0,
+        "mean_soc": 0.5296699762245828,
+        "peak_T": -10.682547663120321
+      },
+      {
+        "local_hour": 10,
+        "T_air": -35.0,
+        "trials": 400,
+        "violations": 0,
+        "enforced": 0,
+        "mean_soc": 0.6878098101863556,
+        "peak_T": 24.42617563322757
+      },
+      {
+        "local_hour": 13,
+        "T_air": -10.0,
+        "trials": 400,
+        "violations": 0,
+        "enforced": 0,
+        "mean_soc": 0.7507649814494335,
+        "peak_T": 27.499416258623082
+      },
+      {
+        "local_hour": 16,
+        "T_air": -25.0,
+        "trials": 400,
+        "violations": 0,
+        "enforced": 0,
+        "mean_soc": 0.7248240017588736,
+        "peak_T": 27.498807271950028
+      },
+      {
+        "local_hour": 20,
+        "T_air": -55.0,
+        "trials": 400,
+        "violations": 0,
+        "enforced": 0,
+        "mean_soc": 0.5936394831941303,
+        "peak_T": 4.188183470867414
+      }
+    ],
+    "sol_min": 1479.6,
+    "cooling": "eps = 0.85, A = 42.0 cm^2, T_sink = 4 K + hA = 0.0060 W/K at -60 C",
+    "sum_monotone_in_T": true,
+    "total_trials": 2400,
+    "total_violations": 0
+  },
+  "v4_5_lunar_night": {
+    "rows": [
+      {
+        "heater_W": 20.0,
+        "pack_mult": 1,
+        "pack_kWh": 2.904,
+        "trials": 80,
+        "unsafe_while_certified": 0,
+        "binding": {
+          "cold-sag": 80
+        },
+        "median_survival_h": 6.25,
+        "survives_night": false,
+        "night_fraction": 0.01765536723163842
+      },
+      {
+        "heater_W": 20.0,
+        "pack_mult": 2,
+        "pack_kWh": 5.808,
+        "trials": 80,
+        "unsafe_while_certified": 0,
+        "binding": {
+          "cold-sag": 80
+        },
+        "median_survival_h": 7.458333333333334,
+        "survives_night": false,
+        "night_fraction": 0.02106873822975518
+      },
+      {
+        "heater_W": 20.0,
+        "pack_mult": 4,
+        "pack_kWh": 11.616,
+        "trials": 80,
+        "unsafe_while_certified": 0,
+        "binding": {
+          "cold-sag": 80
+        },
+        "median_survival_h": 9.083333333333334,
+        "survives_night": false,
+        "night_fraction": 0.025659133709981168
+      },
+      {
+        "heater_W": 30.0,
+        "pack_mult": 1,
+        "pack_kWh": 2.904,
+        "trials": 80,
+        "unsafe_while_certified": 0,
+        "binding": {
+          "cold-sag": 80
+        },
+        "median_survival_h": 5.75,
+        "survives_night": false,
+        "night_fraction": 0.016242937853107344
+      },
+      {
+        "heater_W": 30.0,
+        "pack_mult": 2,
+        "pack_kWh": 5.808,
+        "trials": 80,
+        "unsafe_while_certified": 0,
+        "binding": {
+          "cold-sag": 80
+        },
+        "median_survival_h": 6.666666666666667,
+        "survives_night": false,
+        "night_fraction": 0.018832391713747648
+      },
+      {
+        "heater_W": 30.0,
+        "pack_mult": 4,
+        "pack_kWh": 11.616,
+        "trials": 80,
+        "unsafe_while_certified": 0,
+        "binding": {
+          "cold-sag": 80
+        },
+        "median_survival_h": 8.125,
+        "survives_night": false,
+        "night_fraction": 0.022951977401129944
+      },
+      {
+        "heater_W": 45.0,
+        "pack_mult": 1,
+        "pack_kWh": 2.904,
+        "trials": 80,
+        "unsafe_while_certified": 0,
+        "binding": {
+          "cold-sag": 80
+        },
+        "median_survival_h": 5.333333333333333,
+        "survives_night": false,
+        "night_fraction": 0.015065913370998116
+      },
+      {
+        "heater_W": 45.0,
+        "pack_mult": 2,
+        "pack_kWh": 5.808,
+        "trials": 80,
+        "unsafe_while_certified": 0,
+        "binding": {
+          "cold-sag": 80
+        },
+        "median_survival_h": 6.125,
+        "survives_night": false,
+        "night_fraction": 0.01730225988700565
+      },
+      {
+        "heater_W": 45.0,
+        "pack_mult": 4,
+        "pack_kWh": 11.616,
+        "trials": 80,
+        "unsafe_while_certified": 0,
+        "binding": {
+          "cold-sag": 80
+        },
+        "median_survival_h": 7.125,
+        "survives_night": false,
+        "night_fraction": 0.020127118644067795
+      },
+      {
+        "heater_W": 60.0,
+        "pack_mult": 1,
+        "pack_kWh": 2.904,
+        "trials": 80,
+        "unsafe_while_certified": 0,
+        "binding": {
+          "cold-sag": 80
+        },
+        "median_survival_h": 5.25,
+        "survives_night": false,
+        "night_fraction": 0.014830508474576272
+      },
+      {
+        "heater_W": 60.0,
+        "pack_mult": 2,
+        "pack_kWh": 5.808,
+        "trials": 80,
+        "unsafe_while_certified": 0,
+        "binding": {
+          "cold-sag": 80
+        },
+        "median_survival_h": 5.625,
+        "survives_night": false,
+        "night_fraction": 0.015889830508474576
+      },
+      {
+        "heater_W": 60.0,
+        "pack_mult": 4,
+        "pack_kWh": 11.616,
+        "trials": 80,
+        "unsafe_while_certified": 0,
+        "binding": {
+          "cold-sag": 80
+        },
+        "median_survival_h": 6.666666666666667,
+        "survives_night": false,
+        "night_fraction": 0.018832391713747648
+      },
+      {
+        "heater_W": 90.0,
+        "pack_mult": 1,
+        "pack_kWh": 2.904,
+        "trials": 80,
+        "unsafe_while_certified": 0,
+        "binding": {
+          "cold-sag": 80
+        },
+        "median_survival_h": 7.25,
+        "survives_night": false,
+        "night_fraction": 0.020480225988700564
+      },
+      {
+        "heater_W": 90.0,
+        "pack_mult": 2,
+        "pack_kWh": 5.808,
+        "trials": 80,
+        "unsafe_while_certified": 0,
+        "binding": {
+          "cold-sag": 80
+        },
+        "median_survival_h": 5.333333333333333,
+        "survives_night": false,
+        "night_fraction": 0.015065913370998116
+      },
+      {
+        "heater_W": 90.0,
+        "pack_mult": 4,
+        "pack_kWh": 11.616,
+        "trials": 80,
+        "unsafe_while_certified": 0,
+        "binding": {
+          "cold-sag": 80
+        },
+        "median_survival_h": 6.0,
+        "survives_night": false,
+        "night_fraction": 0.01694915254237288
+      }
+    ],
+    "insulation": [
+      {
+        "eps": 0.72,
+        "median_survival_h": 5.291666666666666,
+        "unsafe": 0,
+        "survives_night": false
+      },
+      {
+        "eps": 0.4,
+        "median_survival_h": 20.958333333333332,
+        "unsafe": 0,
+        "survives_night": false
+      },
+      {
+        "eps": 0.2,
+        "median_survival_h": 39.54166666666667,
+        "unsafe": 0,
+        "survives_night": false
+      },
+      {
+        "eps": 0.1,
+        "median_survival_h": 50.29166666666667,
+        "unsafe": 0,
+        "survives_night": false
+      },
+      {
+        "eps": 0.05,
+        "median_survival_h": 54.333333333333336,
+        "unsafe": 0,
+        "survives_night": false
+      },
+      {
+        "eps": 0.02,
+        "median_survival_h": 53.833333333333336,
+        "unsafe": 0,
+        "survives_night": false
+      }
+    ],
+    "best_insulated_survival_h": 54.333333333333336,
+    "best_insulated_eps": 0.05,
+    "energy_limit_h": 61.30666666666666,
+    "insulation_saturates_at_energy_limit": true,
+    "insulation_configs_surviving": 0,
+    "night_hours": 354.0,
+    "configurations_surviving": 0,
+    "configurations": 15,
+    "min_surviving_config": null,
+    "total_unsafe": 0
+  },
+  "v4_6_radiation": {
+    "rows": [
+      {
+        "tid_krad": 0.0,
+        "trials": 416,
+        "violations": 0,
+        "enforced": 0,
+        "mean_soc": 0.7254488702000874,
+        "peak_T": 19.120948779560067,
+        "R_growth": 1.0
+      },
+      {
+        "tid_krad": 50.0,
+        "trials": 416,
+        "violations": 0,
+        "enforced": 0,
+        "mean_soc": 0.728006250296038,
+        "peak_T": 19.53759746742108,
+        "R_growth": 1.055
+      },
+      {
+        "tid_krad": 100.0,
+        "trials": 416,
+        "violations": 0,
+        "enforced": 0,
+        "mean_soc": 0.7238435757288612,
+        "peak_T": 19.23256396214593,
+        "R_growth": 1.11
+      },
+      {
+        "tid_krad": 200.0,
+        "trials": 416,
+        "violations": 0,
+        "enforced": 0,
+        "mean_soc": 0.7173287402091849,
+        "peak_T": 19.258401289839583,
+        "R_growth": 1.22
+      },
+      {
+        "tid_krad": 300.0,
+        "trials": 416,
+        "violations": 0,
+        "enforced": 0,
+        "mean_soc": 0.719171983343833,
+        "peak_T": 19.499935868210535,
+        "R_growth": 1.33
+      },
+      {
+        "tid_krad": 500.0,
+        "trials": 416,
+        "violations": 0,
+        "enforced": 0,
+        "mean_soc": 0.7116267300784218,
+        "peak_T": 19.398649259815066,
+        "R_growth": 1.55
+      }
+    ],
+    "total_trials": 2500,
+    "total_violations": 0,
+    "soc_vs_dose": {
+      "rho": -0.8857142857142858,
+      "p": 0.03285
+    }
+  },
+  "v4_7_seu": {
+    "flips": 40000,
+    "census": {
+      "benign": 30170,
+      "conservative": 3156,
+      "aggressive": 4354,
+      "caught_by_range_check": 2320
+    },
+    "caught_fraction": 0.058,
+    "benign_or_conservative_fraction": 0.83315,
+    "aggressive_fraction": 0.10885,
+    "aggressive_uncaught": 4354,
+    "worst_certified_overshoot_C": 0.0,
+    "range_check_cost": "3 comparisons, 0 model evaluations",
+    "honest_note": "no one-step theorem survives corruption of its own input; the measurable quantity is the exposure and what a range check on the state word removes"
+  },
+  "v4_8_no_ground_loop": {
+    "days": 1825,
+    "years": 4.996577686516085,
+    "bound": {
+      "violations": 0,
+      "mean_soc": 0.7169568115507606,
+      "cp95_pct": 0.16401506166400237
+    },
+    "oracle": {
+      "violations": 0,
+      "mean_soc": 0.7169568949074431,
+      "cp95_pct": 0.16401506166400237
+    },
+    "safety_identical": true,
+    "soc_gap_points": 8.335668244541239e-06,
+    "wilcoxon": {
+      "n": 37,
+      "p": 0.0,
+      "hodges_lehmann": 3.5388810946113125e-06,
+      "rank_biserial": 1.0,
+      "W": 0.0
+    }
+  },
+  "v4_9_array_degradation": {
+    "rows": [
+      {
+        "year": 0,
+        "array_fraction": 1.0,
+        "trials": 360,
+        "violations": 0,
+        "mean_soc": 0.7474759595018098,
+        "array_ceiling_A": 36.0,
+        "clipped_fraction": 1.0
+      },
+      {
+        "year": 3,
+        "array_fraction": 0.9411919999999999,
+        "trials": 360,
+        "violations": 0,
+        "mean_soc": 0.7471177405357818,
+        "array_ceiling_A": 33.882912,
+        "clipped_fraction": 1.0
+      },
+      {
+        "year": 5,
+        "array_fraction": 0.9039207967999999,
+        "trials": 360,
+        "violations": 0,
+        "mean_soc": 0.7478246308545754,
+        "array_ceiling_A": 32.5411486848,
+        "clipped_fraction": 1.0
+      },
+      {
+        "year": 10,
+        "array_fraction": 0.8170728068875467,
+        "trials": 360,
+        "violations": 0,
+        "mean_soc": 0.7480237796289149,
+        "array_ceiling_A": 29.41462104795168,
+        "clipped_fraction": 1.0
+      },
+      {
+        "year": 15,
+        "array_fraction": 0.7385691026454038,
+        "trials": 360,
+        "violations": 0,
+        "mean_soc": 0.7473625760943149,
+        "array_ceiling_A": 26.588487695234534,
+        "clipped_fraction": 1.0
+      },
+      {
+        "year": 25,
+        "array_fraction": 0.6034647297788966,
+        "trials": 360,
+        "violations": 0,
+        "mean_soc": 0.7472062132335721,
+        "array_ceiling_A": 21.72473027204028,
+        "clipped_fraction": 1.0
+      },
+      {
+        "year": 40,
+        "array_fraction": 0.44570040395095073,
+        "trials": 360,
+        "violations": 0,
+        "mean_soc": 0.7471019215821125,
+        "array_ceiling_A": 16.045214542234227,
+        "clipped_fraction": 1.0
+      },
+      {
+        "year": 60,
+        "array_fraction": 0.2975531426921204,
+        "trials": 360,
+        "violations": 0,
+        "mean_soc": 0.7478222401414422,
+        "array_ceiling_A": 10.711913136916335,
+        "clipped_fraction": 1.0
+      }
+    ],
+    "total_trials": 1800,
+    "soc_spread": 0.0009218580468023374,
+    "array_never_binding": true,
+    "years_swept": 60,
+    "final_array_fraction": 0.2975531426921204,
+    "total_violations": 0,
+    "soc_vs_year": {
+      "rho": -0.1666666666666667,
+      "p": 0.70065
+    },
+    "array_becomes_binding_year": null,
+    "clipping_vs_year": {
+      "rho": NaN,
+      "p": NaN
+    }
+  },
+  "v4_10_radiator": {
+    "rows": [
+      {
+        "radiator_fraction": 1.0,
+        "eps": 0.88,
+        "trials": 228,
+        "violations": 0,
+        "mean_soc": 0.7364098715782906,
+        "peak_T": 19.365522300757156
+      },
+      {
+        "radiator_fraction": 0.75,
+        "eps": 0.66,
+        "trials": 228,
+        "violations": 0,
+        "mean_soc": 0.7472872502829184,
+        "peak_T": 19.734465368330838
+      },
+      {
+        "radiator_fraction": 0.5,
+        "eps": 0.44,
+        "trials": 228,
+        "violations": 0,
+        "mean_soc": 0.7553634061984718,
+        "peak_T": 19.625650271529896
+      },
+      {
+        "radiator_fraction": 0.25,
+        "eps": 0.22,
+        "trials": 228,
+        "violations": 0,
+        "mean_soc": 0.758312508946202,
+        "peak_T": 20.428160754104763
+      },
+      {
+        "radiator_fraction": 0.1,
+        "eps": 0.08800000000000001,
+        "trials": 228,
+        "violations": 0,
+        "mean_soc": 0.7585099734666144,
+        "peak_T": 22.925965725236463
+      },
+      {
+        "radiator_fraction": 0.03,
+        "eps": 0.0264,
+        "trials": 228,
+        "violations": 0,
+        "mean_soc": 0.7585228866088851,
+        "peak_T": 24.906016790173343
+      },
+      {
+        "radiator_fraction": 0.01,
+        "eps": 0.0088,
+        "trials": 228,
+        "violations": 0,
+        "mean_soc": 0.7585239021023996,
+        "peak_T": 24.982879773281677
+      }
+    ],
+    "total_trials": 1600,
+    "total_violations": 0,
+    "charge_rises_as_radiator_shrinks": true,
+    "cold_limited_not_heat_limited": true,
+    "soc_vs_radiator": {
+      "rho": -1.0,
+      "p": 0.0002
+    }
+  },
+  "v4_11_bus_anchor": {
+    "leo-smallsat": {
+      "load_W": 60.0,
+      "trials": 300,
+      "mean_anchor_A": 2.419354838709677,
+      "unsafe_while_certified": 0,
+      "cp95_pct": 0.993608194445772,
+      "null_input_brownouts": 300,
+      "null_input_mean_steps_served": 0.0
+    },
+    "geo-comsat": {
+      "load_W": 3000.0,
+      "trials": 300,
+      "mean_anchor_A": 9.375,
+      "unsafe_while_certified": 0,
+      "cp95_pct": 0.993608194445772,
+      "null_input_brownouts": 300,
+      "null_input_mean_steps_served": 0.0
+    },
+    "lunar-night-lander": {
+      "load_W": 45.0,
+      "trials": 300,
+      "mean_anchor_A": 1.875,
+      "unsafe_while_certified": 0,
+      "cp95_pct": 0.993608194445772,
+      "null_input_brownouts": 300,
+      "null_input_mean_steps_served": 0.0
+    }
+  }
+}

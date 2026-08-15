@@ -1,0 +1,838 @@
+{
+  "x1_structure": {
+    "cases": [
+      {
+        "case": "robotaxi-urban",
+        "domain": "ground",
+        "mode": "charge",
+        "census": {
+          "single-interval": 2000,
+          "disconnected": 0,
+          "empty": 2000
+        }
+      },
+      {
+        "case": "autonomous-shuttle",
+        "domain": "ground",
+        "mode": "charge",
+        "census": {
+          "single-interval": 2032,
+          "disconnected": 0,
+          "empty": 1968
+        }
+      },
+      {
+        "case": "haul-truck",
+        "domain": "ground",
+        "mode": "charge",
+        "census": {
+          "single-interval": 2015,
+          "disconnected": 0,
+          "empty": 1985
+        }
+      },
+      {
+        "case": "delivery-quadrotor",
+        "domain": "aerial",
+        "mode": "discharge",
+        "census": {
+          "single-interval": 2758,
+          "disconnected": 0,
+          "empty": 1242
+        }
+      },
+      {
+        "case": "evtol-air-taxi",
+        "domain": "aerial",
+        "mode": "discharge",
+        "census": {
+          "single-interval": 1906,
+          "disconnected": 0,
+          "empty": 2094
+        }
+      },
+      {
+        "case": "quadrotor-turnaround",
+        "domain": "aerial",
+        "mode": "charge",
+        "census": {
+          "single-interval": 2316,
+          "disconnected": 0,
+          "empty": 1684
+        }
+      },
+      {
+        "case": "survey-auv",
+        "domain": "underwater",
+        "mode": "discharge",
+        "census": {
+          "single-interval": 4000,
+          "disconnected": 0,
+          "empty": 0
+        }
+      },
+      {
+        "case": "buoyancy-glider",
+        "domain": "underwater",
+        "mode": "discharge",
+        "census": {
+          "single-interval": 4000,
+          "disconnected": 0,
+          "empty": 0
+        }
+      },
+      {
+        "case": "under-ice-auv",
+        "domain": "underwater",
+        "mode": "discharge",
+        "census": {
+          "single-interval": 4000,
+          "disconnected": 0,
+          "empty": 0
+        }
+      },
+      {
+        "case": "survey-auv-dock",
+        "domain": "underwater",
+        "mode": "charge",
+        "census": {
+          "single-interval": 3046,
+          "disconnected": 0,
+          "empty": 954
+        }
+      },
+      {
+        "case": "leo-smallsat",
+        "domain": "space",
+        "mode": "charge",
+        "census": {
+          "single-interval": 2845,
+          "disconnected": 0,
+          "empty": 1155
+        }
+      },
+      {
+        "case": "geo-comsat",
+        "domain": "space",
+        "mode": "discharge",
+        "census": {
+          "single-interval": 3199,
+          "disconnected": 0,
+          "empty": 801
+        }
+      },
+      {
+        "case": "deep-space-cruiser",
+        "domain": "space",
+        "mode": "charge",
+        "census": {
+          "single-interval": 2653,
+          "disconnected": 0,
+          "empty": 1347
+        }
+      },
+      {
+        "case": "mars-rover",
+        "domain": "space",
+        "mode": "charge",
+        "census": {
+          "single-interval": 2697,
+          "disconnected": 0,
+          "empty": 1303
+        }
+      },
+      {
+        "case": "lunar-night-lander",
+        "domain": "space",
+        "mode": "discharge",
+        "census": {
+          "single-interval": 3449,
+          "disconnected": 0,
+          "empty": 551
+        }
+      },
+      {
+        "case": "high-radiation-orbiter",
+        "domain": "space",
+        "mode": "charge",
+        "census": {
+          "single-interval": 2654,
+          "disconnected": 0,
+          "empty": 1346
+        }
+      }
+    ],
+    "per_domain": {
+      "ground": {
+        "single-interval": 6047,
+        "disconnected": 0,
+        "empty": 5953
+      },
+      "aerial": {
+        "single-interval": 6980,
+        "disconnected": 0,
+        "empty": 5020
+      },
+      "underwater": {
+        "single-interval": 15046,
+        "disconnected": 0,
+        "empty": 954
+      },
+      "space": {
+        "single-interval": 17497,
+        "disconnected": 0,
+        "empty": 6503
+      }
+    },
+    "total": {
+      "single-interval": 45570,
+      "disconnected": 0,
+      "empty": 18430
+    },
+    "scans": 64000,
+    "grid": 180,
+    "disconnected": 0,
+    "all_single_interval": true
+  },
+  "x2_reduction": {
+    "reference_states": 30000,
+    "reference_mismatches": 0,
+    "reference_worst_abs": 0.0,
+    "bit_exact": true,
+    "charge_platforms": [
+      {
+        "case": "robotaxi-urban",
+        "states": 3000,
+        "infeasible": 1465,
+        "max_lower_edge": 0.0,
+        "lower_edge_is_zero": true
+      },
+      {
+        "case": "autonomous-shuttle",
+        "states": 3000,
+        "infeasible": 1493,
+        "max_lower_edge": 0.0,
+        "lower_edge_is_zero": true
+      },
+      {
+        "case": "haul-truck",
+        "states": 3000,
+        "infeasible": 1446,
+        "max_lower_edge": 0.0,
+        "lower_edge_is_zero": true
+      },
+      {
+        "case": "quadrotor-turnaround",
+        "states": 3000,
+        "infeasible": 1282,
+        "max_lower_edge": 0.0,
+        "lower_edge_is_zero": true
+      },
+      {
+        "case": "survey-auv-dock",
+        "states": 3000,
+        "infeasible": 728,
+        "max_lower_edge": 0.0,
+        "lower_edge_is_zero": true
+      },
+      {
+        "case": "leo-smallsat",
+        "states": 3000,
+        "infeasible": 910,
+        "max_lower_edge": 0.0,
+        "lower_edge_is_zero": true
+      },
+      {
+        "case": "deep-space-cruiser",
+        "states": 3000,
+        "infeasible": 984,
+        "max_lower_edge": 0.0,
+        "lower_edge_is_zero": true
+      },
+      {
+        "case": "mars-rover",
+        "states": 3000,
+        "infeasible": 958,
+        "max_lower_edge": 0.0,
+        "lower_edge_is_zero": true
+      },
+      {
+        "case": "high-radiation-orbiter",
+        "states": 3000,
+        "infeasible": 1063,
+        "max_lower_edge": 0.0,
+        "lower_edge_is_zero": true
+      }
+    ],
+    "all_lower_edges_zero": true
+  },
+  "x3_cost": {
+    "rows": [
+      {
+        "case": "robotaxi-urban",
+        "domain": "ground",
+        "mode": "charge",
+        "eval_counts": {
+          "1": 284,
+          "20": 237,
+          "2": 79
+        },
+        "max_evals": 20,
+        "us_median": 26.8847233382985,
+        "us_p99": 28.633466698617358,
+        "us_max": 29.046666701712333
+      },
+      {
+        "case": "autonomous-shuttle",
+        "domain": "ground",
+        "mode": "charge",
+        "eval_counts": {
+          "1": 308,
+          "2": 74,
+          "20": 218
+        },
+        "max_evals": 20,
+        "us_median": 26.02486332762055,
+        "us_p99": 26.59045586672922,
+        "us_max": 26.6055566802
+      },
+      {
+        "case": "haul-truck",
+        "domain": "ground",
+        "mode": "charge",
+        "eval_counts": {
+          "20": 245,
+          "1": 293,
+          "2": 62
+        },
+        "max_evals": 20,
+        "us_median": 27.3381933705726,
+        "us_p99": 28.66741666997162,
+        "us_max": 28.685416667334113
+      },
+      {
+        "case": "delivery-quadrotor",
+        "domain": "aerial",
+        "mode": "discharge",
+        "eval_counts": {
+          "22": 323,
+          "40": 262,
+          "1": 15
+        },
+        "max_evals": 40,
+        "us_median": 85.0465266557876,
+        "us_p99": 86.16133973700926,
+        "us_max": 86.24347334261984
+      },
+      {
+        "case": "evtol-air-taxi",
+        "domain": "aerial",
+        "mode": "discharge",
+        "eval_counts": {
+          "22": 432,
+          "40": 120,
+          "1": 48
+        },
+        "max_evals": 40,
+        "us_median": 75.05249998454624,
+        "us_p99": 78.53282254460889,
+        "us_max": 78.83472334166679
+      },
+      {
+        "case": "quadrotor-turnaround",
+        "domain": "aerial",
+        "mode": "charge",
+        "eval_counts": {
+          "2": 133,
+          "1": 272,
+          "20": 195
+        },
+        "max_evals": 20,
+        "us_median": 25.94875002008242,
+        "us_p99": 27.416670807482053,
+        "us_max": 27.56847000758474
+      },
+      {
+        "case": "survey-auv",
+        "domain": "underwater",
+        "mode": "discharge",
+        "eval_counts": {
+          "40": 588,
+          "22": 12
+        },
+        "max_evals": 40,
+        "us_median": 118.21278002268325,
+        "us_p99": 122.80602026342724,
+        "us_max": 122.87888666226839
+      },
+      {
+        "case": "buoyancy-glider",
+        "domain": "underwater",
+        "mode": "discharge",
+        "eval_counts": {
+          "40": 600
+        },
+        "max_evals": 40,
+        "us_median": 119.67639002250507,
+        "us_p99": 123.89495639557329,
+        "us_max": 123.94638998860803
+      },
+      {
+        "case": "under-ice-auv",
+        "domain": "underwater",
+        "mode": "discharge",
+        "eval_counts": {
+          "40": 581,
+          "22": 19
+        },
+        "max_evals": 40,
+        "us_median": 118.00638666803329,
+        "us_p99": 122.79663333126034,
+        "us_max": 122.80583333146448
+      },
+      {
+        "case": "survey-auv-dock",
+        "domain": "underwater",
+        "mode": "charge",
+        "eval_counts": {
+          "20": 323,
+          "2": 135,
+          "1": 142
+        },
+        "max_evals": 20,
+        "us_median": 34.55541669003045,
+        "us_p99": 37.43150386920509,
+        "us_max": 37.55013667008218
+      },
+      {
+        "case": "leo-smallsat",
+        "domain": "space",
+        "mode": "charge",
+        "eval_counts": {
+          "20": 349,
+          "1": 182,
+          "2": 69
+        },
+        "max_evals": 20,
+        "us_median": 36.60347332091381,
+        "us_p99": 38.42704947261761,
+        "us_max": 38.617916676836714
+      },
+      {
+        "case": "geo-comsat",
+        "domain": "space",
+        "mode": "discharge",
+        "eval_counts": {
+          "40": 482,
+          "1": 64,
+          "22": 54
+        },
+        "max_evals": 40,
+        "us_median": 105.2666666995113,
+        "us_p99": 108.74738918694977,
+        "us_max": 108.8688899956954
+      },
+      {
+        "case": "deep-space-cruiser",
+        "domain": "space",
+        "mode": "charge",
+        "eval_counts": {
+          "2": 59,
+          "1": 209,
+          "20": 332
+        },
+        "max_evals": 20,
+        "us_median": 36.742499990699194,
+        "us_p99": 52.00073305362214,
+        "us_max": 52.47666665430491
+      },
+      {
+        "case": "mars-rover",
+        "domain": "space",
+        "mode": "charge",
+        "eval_counts": {
+          "20": 308,
+          "1": 221,
+          "2": 71
+        },
+        "max_evals": 20,
+        "us_median": 37.10902669505837,
+        "us_p99": 38.9720433333423,
+        "us_max": 38.97944334312342
+      },
+      {
+        "case": "lunar-night-lander",
+        "domain": "space",
+        "mode": "discharge",
+        "eval_counts": {
+          "40": 515,
+          "1": 85
+        },
+        "max_evals": 40,
+        "us_median": 106.23360998579301,
+        "us_p99": 111.9795725486862,
+        "us_max": 112.03097334752479
+      },
+      {
+        "case": "high-radiation-orbiter",
+        "domain": "space",
+        "mode": "charge",
+        "eval_counts": {
+          "20": 313,
+          "1": 208,
+          "2": 79
+        },
+        "max_evals": 20,
+        "us_median": 32.97055668857259,
+        "us_p99": 33.316120524735496,
+        "us_max": 33.35055332475652
+      }
+    ],
+    "charge_max_evals": 20,
+    "discharge_max_evals": 40,
+    "theoretical_charge": 20,
+    "theoretical_discharge": 40,
+    "worst_p99_us": 123.89495639557329,
+    "worst_case": "buoyancy-glider",
+    "bounded": true
+  },
+  "x4_reserve": {
+    "per_case": {
+      "delivery-quadrotor": {
+        "trials": 400,
+        "uncensored": 400,
+        "censored": 0,
+        "width_vs_endurance": {
+          "rho": 0.7438224865921315,
+          "p": 0.0
+        },
+        "normalised_vs_endurance": {
+          "rho": 0.7438224865921315,
+          "p": 0.0
+        },
+        "envelope_driven": 400,
+        "energy_driven": 0,
+        "envelope_driven_frac": 1.0,
+        "width_vs_endurance_envelope": {
+          "rho": 0.7438224865921315,
+          "p": 0.0
+        },
+        "width_vs_endurance_energy": {
+          "rho": NaN,
+          "p": NaN
+        },
+        "energy_clock_vs_endurance": {
+          "rho": 0.6060073320845296,
+          "p": 0.0
+        },
+        "better_clock": "envelope",
+        "mean_width_A": 14.93247022839321,
+        "median_endurance_s": 356.0
+      },
+      "evtol-air-taxi": {
+        "trials": 400,
+        "uncensored": 400,
+        "censored": 0,
+        "width_vs_endurance": {
+          "rho": 0.8787247647646926,
+          "p": 0.0
+        },
+        "normalised_vs_endurance": {
+          "rho": 0.8787247647646926,
+          "p": 0.0
+        },
+        "envelope_driven": 400,
+        "energy_driven": 0,
+        "envelope_driven_frac": 1.0,
+        "width_vs_endurance_envelope": {
+          "rho": 0.8787247647646926,
+          "p": 0.0
+        },
+        "width_vs_endurance_energy": {
+          "rho": NaN,
+          "p": NaN
+        },
+        "energy_clock_vs_endurance": {
+          "rho": 0.11531467603566525,
+          "p": 0.0208
+        },
+        "better_clock": "envelope",
+        "mean_width_A": 97.9663545517152,
+        "median_endurance_s": 10.5
+      },
+      "survey-auv": {
+        "trials": 400,
+        "uncensored": 400,
+        "censored": 0,
+        "width_vs_endurance": {
+          "rho": 0.022768045086854777,
+          "p": 0.6306
+        },
+        "normalised_vs_endurance": {
+          "rho": 0.022768045086854777,
+          "p": 0.6306
+        },
+        "envelope_driven": 0,
+        "energy_driven": 400,
+        "envelope_driven_frac": 0.0,
+        "width_vs_endurance_envelope": {
+          "rho": NaN,
+          "p": NaN
+        },
+        "width_vs_endurance_energy": {
+          "rho": 0.022768045086854777,
+          "p": 0.6306
+        },
+        "energy_clock_vs_endurance": {
+          "rho": 0.9900674398035382,
+          "p": 0.0
+        },
+        "better_clock": "energy",
+        "mean_width_A": 40.647121722673475,
+        "median_endurance_s": 19770.0
+      },
+      "under-ice-auv": {
+        "trials": 400,
+        "uncensored": 400,
+        "censored": 0,
+        "width_vs_endurance": {
+          "rho": -0.1243261859539976,
+          "p": 0.013
+        },
+        "normalised_vs_endurance": {
+          "rho": -0.1243261859539976,
+          "p": 0.013
+        },
+        "envelope_driven": 400,
+        "energy_driven": 0,
+        "envelope_driven_frac": 1.0,
+        "width_vs_endurance_envelope": {
+          "rho": -0.1243261859539976,
+          "p": 0.013
+        },
+        "width_vs_endurance_energy": {
+          "rho": NaN,
+          "p": NaN
+        },
+        "energy_clock_vs_endurance": {
+          "rho": 0.9900894166853967,
+          "p": 0.0
+        },
+        "better_clock": "energy",
+        "mean_width_A": 39.87159492135717,
+        "median_endurance_s": 12360.0
+      },
+      "geo-comsat": {
+        "trials": 400,
+        "uncensored": 400,
+        "censored": 0,
+        "width_vs_endurance": {
+          "rho": 0.36734471447547795,
+          "p": 0.0
+        },
+        "normalised_vs_endurance": {
+          "rho": 0.36734471447547795,
+          "p": 0.0
+        },
+        "envelope_driven": 149,
+        "energy_driven": 251,
+        "envelope_driven_frac": 0.3725,
+        "width_vs_endurance_envelope": {
+          "rho": 0.9028200289198258,
+          "p": 0.0
+        },
+        "width_vs_endurance_energy": {
+          "rho": -0.050550193356587766,
+          "p": 0.4216
+        },
+        "energy_clock_vs_endurance": {
+          "rho": 0.083980454795029,
+          "p": 0.0988
+        },
+        "better_clock": "envelope",
+        "mean_width_A": 21.653110663911793,
+        "median_endurance_s": 3840.0
+      },
+      "lunar-night-lander": {
+        "trials": 400,
+        "uncensored": 400,
+        "censored": 0,
+        "width_vs_endurance": {
+          "rho": 0.8671385763260473,
+          "p": 0.0
+        },
+        "normalised_vs_endurance": {
+          "rho": 0.8671385763260473,
+          "p": 0.0
+        },
+        "envelope_driven": 400,
+        "energy_driven": 0,
+        "envelope_driven_frac": 1.0,
+        "width_vs_endurance_envelope": {
+          "rho": 0.8671385763260473,
+          "p": 0.0
+        },
+        "width_vs_endurance_energy": {
+          "rho": NaN,
+          "p": NaN
+        },
+        "energy_clock_vs_endurance": {
+          "rho": -0.5027891927777047,
+          "p": 0.0
+        },
+        "better_clock": "envelope",
+        "mean_width_A": 66.52246546292736,
+        "median_endurance_s": 25200.0
+      }
+    },
+    "pooled": {
+      "rho": 0.9160981080246343,
+      "p": 0.0,
+      "n": 2400
+    },
+    "cases_with_envelope_closures": 5,
+    "best_clock_rho": {
+      "delivery-quadrotor": 0.7438224865921315,
+      "evtol-air-taxi": 0.8787247647646926,
+      "survey-auv": 0.9900674398035382,
+      "under-ice-auv": 0.9900894166853967,
+      "geo-comsat": 0.36734471447547795,
+      "lunar-night-lander": 0.8671385763260473
+    },
+    "best_clock_p": {
+      "delivery-quadrotor": 0.0,
+      "evtol-air-taxi": 0.0,
+      "survey-auv": 0.0,
+      "under-ice-auv": 0.0,
+      "geo-comsat": 0.0,
+      "lunar-night-lander": 0.0
+    },
+    "weakest_case": "geo-comsat",
+    "weakest_rho": 0.36734471447547795,
+    "every_case_has_a_predictive_clock": true,
+    "raw_all_positive": false,
+    "note": "two clocks: the interval width predicts time-to-closure where the envelope is what closes, and (soc - soc_floor) Q / u_lo predicts it where the pack simply empties. Every platform has one of them significantly positive, the GEO satellite most weakly. A vehicle should act on the minimum of the two, which is conservative whether or not either is individually tight."
+  },
+  "x5_adequacy": {
+    "n_required": {
+      "1.0%": 299,
+      "0.1%": 2995,
+      "0.01%": 29956
+    },
+    "claims": [
+      {
+        "claim": "V1-2 robotaxi 350 kW",
+        "violations": 0,
+        "trials": 4000,
+        "certifies_below_pct": 0.07486526880178257,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": true,
+        "enough_for_0p01pct": false
+      },
+      {
+        "claim": "V1-6 robotaxi 5 y duty",
+        "violations": 0,
+        "trials": 21915,
+        "certifies_below_pct": 0.013668845666803264,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": true,
+        "enough_for_0p01pct": false
+      },
+      {
+        "claim": "V1-8 regen pulses",
+        "violations": 0,
+        "trials": 1500,
+        "certifies_below_pct": 0.19951618622789935,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": false,
+        "enough_for_0p01pct": false
+      },
+      {
+        "claim": "V2-1 anchored flight",
+        "violations": 0,
+        "trials": 600,
+        "certifies_below_pct": 0.4980443380361299,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": false,
+        "enough_for_0p01pct": false
+      },
+      {
+        "claim": "V2-3 reserve warns",
+        "violations": 0,
+        "trials": 1200,
+        "certifies_below_pct": 0.24933300375187262,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": false,
+        "enough_for_0p01pct": false
+      },
+      {
+        "claim": "V2-9 turnaround charging",
+        "violations": 0,
+        "trials": 4000,
+        "certifies_below_pct": 0.07486526880178257,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": true,
+        "enough_for_0p01pct": false
+      },
+      {
+        "claim": "V2-11 aerial adversary",
+        "violations": 0,
+        "trials": 320,
+        "certifies_below_pct": 0.9317979408884125,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": false,
+        "enough_for_0p01pct": false
+      },
+      {
+        "claim": "V3-1 sealed hull",
+        "violations": 0,
+        "trials": 3000,
+        "certifies_below_pct": 0.09980790119965555,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": true,
+        "enough_for_0p01pct": false
+      },
+      {
+        "claim": "V3-4 6-month deployment",
+        "violations": 0,
+        "trials": 547,
+        "certifies_below_pct": 0.5461689080659027,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": false,
+        "enough_for_0p01pct": false
+      },
+      {
+        "claim": "V3-7 under-ice warning",
+        "violations": 0,
+        "trials": 1000,
+        "certifies_below_pct": 0.29912495450953314,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": false,
+        "enough_for_0p01pct": false
+      },
+      {
+        "claim": "V4-1 LEO 5 y",
+        "violations": 0,
+        "trials": 28307,
+        "certifies_below_pct": 0.010582448722373794,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": true,
+        "enough_for_0p01pct": false
+      },
+      {
+        "claim": "V4-3 deep-space cruise",
+        "violations": 0,
+        "trials": 3000,
+        "certifies_below_pct": 0.09980790119965555,
+        "enough_for_1pct": true,
+        "enough_for_0p1pct": true,
+        "enough_for_0p01pct": false
+      }
+    ],
+    "claims_found": 12,
+    "claims_expected": 12,
+    "all_certify_below_1pct": true,
+    "total_trials": 69389,
+    "total_violations": 0
+  }
+}

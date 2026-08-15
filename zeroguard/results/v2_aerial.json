@@ -1,0 +1,728 @@
+{
+  "v2_1_anchor_vs_null": {
+    "frontier": [
+      {
+        "c_rate": 0.6,
+        "load_W": 146.88,
+        "status": "ok",
+        "width": 7.5894701248034835
+      },
+      {
+        "c_rate": 0.8,
+        "load_W": 195.84000000000003,
+        "status": "ok",
+        "width": 4.9193097782554105
+      },
+      {
+        "c_rate": 1.0,
+        "load_W": 244.79999999999998,
+        "status": "ok",
+        "width": 1.9136212997836992
+      },
+      {
+        "c_rate": 1.1,
+        "load_W": 269.28000000000003,
+        "status": "ok",
+        "width": 0.23707517003640532
+      },
+      {
+        "c_rate": 1.2,
+        "load_W": 293.76,
+        "status": "infeasible",
+        "width": 0.0
+      },
+      {
+        "c_rate": 1.4,
+        "load_W": 342.7199999999999,
+        "status": "infeasible",
+        "width": 0.0
+      },
+      {
+        "c_rate": 1.7,
+        "load_W": 416.15999999999997,
+        "status": "infeasible",
+        "width": 0.0
+      },
+      {
+        "c_rate": 2.0,
+        "load_W": 489.59999999999997,
+        "status": "infeasible",
+        "width": 0.0
+      },
+      {
+        "c_rate": 2.5,
+        "load_W": 612.0,
+        "status": "infeasible",
+        "width": 0.0
+      }
+    ],
+    "energy_cell_refuses_above_c": 1.2,
+    "trials": 600,
+    "anchored_unsafe_while_certified": 0,
+    "anchored_cp95_pct": 0.4980443380361299,
+    "null_input_brownouts": 600,
+    "null_input_brownout_rate": 1.0,
+    "null_input_mean_steps_served": 0.0,
+    "anchored_median_endurance_min": 17.316666666666666
+  },
+  "v2_2_interval_structure": {
+    "states": 20000,
+    "census": {
+      "single-interval": 11344,
+      "disconnected": 0,
+      "empty": 8656
+    },
+    "disconnected": 0,
+    "all_intervals": true,
+    "edges_within_one_grid_step": 11344,
+    "worst_edge_dev_grid_steps": 0.9998205902229547
+  },
+  "v2_3_reserve_lead": {
+    "trials": 1200,
+    "closures": 1200,
+    "breaches_with_no_warning": 0,
+    "cp95_no_warning_pct": 0.24933300375187262,
+    "lead_s_min": 0.0,
+    "lead_s_p05": 16.0,
+    "lead_s_median": 24.0,
+    "lead_s_p95": 62.09999999999991,
+    "lead_s_max": 612.0,
+    "episodes_with_lead": 1200,
+    "all_warned": true
+  },
+  "v2_4_sortie": {
+    "trials": 800,
+    "takeoff_frontier": [
+      {
+        "parallel": 2,
+        "cells": 12,
+        "x1.00": "ok",
+        "x1.35": "ok",
+        "x1.75": "infeasible",
+        "x2.00": "infeasible",
+        "energy_Wh": 130.68
+      },
+      {
+        "parallel": 3,
+        "cells": 18,
+        "x1.00": "ok",
+        "x1.35": "ok",
+        "x1.75": "ok",
+        "x2.00": "ok",
+        "energy_Wh": 196.01999999999998
+      },
+      {
+        "parallel": 4,
+        "cells": 24,
+        "x1.00": "ok",
+        "x1.35": "ok",
+        "x1.75": "ok",
+        "x2.00": "ok",
+        "energy_Wh": 261.36
+      }
+    ],
+    "completion_rate_6S4P": 0.785,
+    "trials_6S4P": 200,
+    "completed": 274,
+    "completion_rate": 0.3425,
+    "unsafe_while_certified": 0,
+    "cp95_unsafe_pct": 0.3737662826100663,
+    "closure_phase_census": {
+      "takeoff": 511,
+      "land": 13,
+      "descend": 2
+    },
+    "phase_reserve": {
+      "takeoff": {
+        "mean_width": 3.0724630741735517,
+        "n": 800
+      },
+      "climb": {
+        "mean_width": 16.613218180247838,
+        "n": 289
+      },
+      "cruise-out": {
+        "mean_width": 31.218126077190316,
+        "n": 289
+      },
+      "hover-drop": {
+        "mean_width": 26.227704989423383,
+        "n": 289
+      },
+      "cruise-back": {
+        "mean_width": 31.45799751127817,
+        "n": 289
+      },
+      "descend": {
+        "mean_width": 27.37748460787478,
+        "n": 289
+      },
+      "land": {
+        "mean_width": 21.14251316125961,
+        "n": 287
+      }
+    },
+    "profile": [
+      {
+        "name": "takeoff",
+        "seconds": 20.0,
+        "power_mult": 1.75
+      },
+      {
+        "name": "climb",
+        "seconds": 60.0,
+        "power_mult": 1.45
+      },
+      {
+        "name": "cruise-out",
+        "seconds": 300.0,
+        "power_mult": 0.72
+      },
+      {
+        "name": "hover-drop",
+        "seconds": 45.0,
+        "power_mult": 1.0
+      },
+      {
+        "name": "cruise-back",
+        "seconds": 300.0,
+        "power_mult": 0.68
+      },
+      {
+        "name": "descend",
+        "seconds": 50.0,
+        "power_mult": 0.85
+      },
+      {
+        "name": "land",
+        "seconds": 20.0,
+        "power_mult": 1.15
+      }
+    ]
+  },
+  "v2_5_payload_altitude": {
+    "grid": [
+      {
+        "payload_kg": 0.0,
+        "altitude_m": 0.0,
+        "hover_W": 303.6739603722535,
+        "mean_width": 23.827169683836402,
+        "median_endurance_min": 18.583333333333332,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 0.0,
+        "altitude_m": 500.0,
+        "hover_W": 311.09297834783456,
+        "mean_width": 22.872218521102333,
+        "median_endurance_min": 18.116666666666667,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 0.0,
+        "altitude_m": 1500.0,
+        "hover_W": 326.7526514678602,
+        "mean_width": 22.892221370525657,
+        "median_endurance_min": 17.05,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 0.0,
+        "altitude_m": 2500.0,
+        "hover_W": 343.5990397917311,
+        "mean_width": 22.022496201015308,
+        "median_endurance_min": 15.966666666666667,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 0.0,
+        "altitude_m": 3500.0,
+        "hover_W": 361.75376503464645,
+        "mean_width": 20.72670042439364,
+        "median_endurance_min": 14.916666666666666,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 0.5,
+        "altitude_m": 0.0,
+        "hover_W": 385.50403853207916,
+        "mean_width": 19.826823082405607,
+        "median_endurance_min": 13.833333333333334,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 0.5,
+        "altitude_m": 500.0,
+        "hover_W": 394.92223622022675,
+        "mean_width": 18.753860207501567,
+        "median_endurance_min": 13.65,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 0.5,
+        "altitude_m": 1500.0,
+        "hover_W": 414.801672779298,
+        "mean_width": 17.690985914734192,
+        "median_endurance_min": 12.783333333333333,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 0.5,
+        "altitude_m": 2500.0,
+        "hover_W": 436.1876049994032,
+        "mean_width": 16.898291633290935,
+        "median_endurance_min": 12.15,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 0.5,
+        "altitude_m": 3500.0,
+        "hover_W": 459.2344276212865,
+        "mean_width": 15.75556234890595,
+        "median_endurance_min": 11.0,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 1.0,
+        "altitude_m": 0.0,
+        "hover_W": 473.5953908228352,
+        "mean_width": 15.102785337860693,
+        "median_endurance_min": 10.616666666666667,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 1.0,
+        "altitude_m": 500.0,
+        "hover_W": 485.1657365757599,
+        "mean_width": 14.119286379469557,
+        "median_endurance_min": 10.35,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 1.0,
+        "altitude_m": 1500.0,
+        "hover_W": 509.5878141300725,
+        "mean_width": 12.849794163834304,
+        "median_endurance_min": 9.7,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 1.0,
+        "altitude_m": 2500.0,
+        "hover_W": 535.8606359828805,
+        "mean_width": 11.746604358362962,
+        "median_endurance_min": 9.15,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 1.0,
+        "altitude_m": 3500.0,
+        "hover_W": 564.1738775468262,
+        "mean_width": 9.427042227768103,
+        "median_endurance_min": 8.466666666666667,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 1.5,
+        "altitude_m": 0.0,
+        "hover_W": 567.530977057994,
+        "mean_width": 9.261604848647256,
+        "median_endurance_min": 8.433333333333334,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 1.5,
+        "altitude_m": 500.0,
+        "hover_W": 581.3962505747978,
+        "mean_width": 8.054096757742808,
+        "median_endurance_min": 8.0,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 1.5,
+        "altitude_m": 1500.0,
+        "hover_W": 610.6623410071898,
+        "mean_width": 6.965485764479963,
+        "median_endurance_min": 7.383333333333334,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 1.5,
+        "altitude_m": 2500.0,
+        "hover_W": 642.1462628213118,
+        "mean_width": 5.759300831450381,
+        "median_endurance_min": 6.583333333333333,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 1.5,
+        "altitude_m": 3500.0,
+        "hover_W": 676.0753127230583,
+        "mean_width": 4.467797929256919,
+        "median_endurance_min": 5.833333333333333,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 2.0,
+        "altitude_m": 0.0,
+        "hover_W": 666.9675067945986,
+        "mean_width": 4.208016284181503,
+        "median_endurance_min": 5.966666666666667,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 2.0,
+        "altitude_m": 500.0,
+        "hover_W": 683.2621008914118,
+        "mean_width": 4.036763046848354,
+        "median_endurance_min": 5.6,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 2.0,
+        "altitude_m": 1500.0,
+        "hover_W": 717.6558734930492,
+        "mean_width": 2.76876633695676,
+        "median_endurance_min": 4.933333333333334,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 2.0,
+        "altitude_m": 2500.0,
+        "hover_W": 754.6560614745684,
+        "mean_width": 1.6037750674062408,
+        "median_endurance_min": 0.0,
+        "unsafe": 0
+      },
+      {
+        "payload_kg": 2.0,
+        "altitude_m": 3500.0,
+        "hover_W": 794.5297859683153,
+        "mean_width": 0.7205946663860222,
+        "median_endurance_min": 0.0,
+        "unsafe": 0
+      }
+    ],
+    "trials_per_cell": 180,
+    "total_unsafe": 0,
+    "width_vs_payload": {
+      "rho": -0.9805806756909201,
+      "p": 0.0
+    },
+    "width_vs_altitude_pooled": {
+      "rho": -0.19219381243542033,
+      "p": 0.35905
+    },
+    "width_vs_altitude_within_payload": [
+      {
+        "payload_kg": 0.0,
+        "rho": -0.8999999999999998,
+        "p": 0.08385,
+        "n": 5
+      },
+      {
+        "payload_kg": 0.5,
+        "rho": -0.9999999999999999,
+        "p": 0.0171,
+        "n": 5
+      },
+      {
+        "payload_kg": 1.0,
+        "rho": -0.9999999999999999,
+        "p": 0.0171,
+        "n": 5
+      },
+      {
+        "payload_kg": 1.5,
+        "rho": -0.9999999999999999,
+        "p": 0.0171,
+        "n": 5
+      },
+      {
+        "payload_kg": 2.0,
+        "rho": -0.9999999999999999,
+        "p": 0.0171,
+        "n": 5
+      }
+    ],
+    "altitude_negative_in_every_stratum": true,
+    "width_vs_hover_power": {
+      "rho": -0.9984615384615384,
+      "p": 0.0
+    }
+  },
+  "v2_6_gusts": {
+    "rows": [
+      {
+        "sigma": 0.0,
+        "trials": 500,
+        "unsafe_while_certified": 0,
+        "sustain_steps": 3,
+        "closures": 375,
+        "median_lead_s": 32.0,
+        "median_debounce_cost_s": 4.0,
+        "cp95_pct": 0.5973551516349596
+      },
+      {
+        "sigma": 0.05,
+        "trials": 500,
+        "unsafe_while_certified": 0,
+        "sustain_steps": 3,
+        "closures": 373,
+        "median_lead_s": 32.0,
+        "median_debounce_cost_s": 12.0,
+        "cp95_pct": 0.5973551516349596
+      },
+      {
+        "sigma": 0.1,
+        "trials": 500,
+        "unsafe_while_certified": 0,
+        "sustain_steps": 3,
+        "closures": 389,
+        "median_lead_s": 32.0,
+        "median_debounce_cost_s": 24.0,
+        "cp95_pct": 0.5973551516349596
+      },
+      {
+        "sigma": 0.2,
+        "trials": 500,
+        "unsafe_while_certified": 0,
+        "sustain_steps": 3,
+        "closures": 376,
+        "median_lead_s": 31.0,
+        "median_debounce_cost_s": 40.0,
+        "cp95_pct": 0.5973551516349596
+      },
+      {
+        "sigma": 0.35,
+        "trials": 500,
+        "unsafe_while_certified": 0,
+        "sustain_steps": 3,
+        "closures": 394,
+        "median_lead_s": 34.0,
+        "median_debounce_cost_s": 68.0,
+        "cp95_pct": 0.5973551516349596
+      },
+      {
+        "sigma": 0.5,
+        "trials": 500,
+        "unsafe_while_certified": 0,
+        "sustain_steps": 3,
+        "closures": 437,
+        "median_lead_s": 38.0,
+        "median_debounce_cost_s": 96.0,
+        "cp95_pct": 0.5973551516349596
+      }
+    ],
+    "total_trials": 3000,
+    "total_unsafe": 0
+  },
+  "v2_7_cold_soak": {
+    "rows": [
+      {
+        "T_air": -30.0,
+        "trials": 400,
+        "binding": {
+          "thermal": 0,
+          "voltage": 228,
+          "actuator": 0,
+          "closed": 172
+        },
+        "mean_width": 2.094067034905194,
+        "unsafe": 0
+      },
+      {
+        "T_air": -20.0,
+        "trials": 400,
+        "binding": {
+          "thermal": 0,
+          "voltage": 298,
+          "actuator": 0,
+          "closed": 102
+        },
+        "mean_width": 7.113547790589044,
+        "unsafe": 0
+      },
+      {
+        "T_air": -10.0,
+        "trials": 400,
+        "binding": {
+          "thermal": 0,
+          "voltage": 354,
+          "actuator": 0,
+          "closed": 46
+        },
+        "mean_width": 13.6416694831521,
+        "unsafe": 0
+      },
+      {
+        "T_air": 0.0,
+        "trials": 400,
+        "binding": {
+          "thermal": 0,
+          "voltage": 279,
+          "actuator": 120,
+          "closed": 1
+        },
+        "mean_width": 20.20038005321537,
+        "unsafe": 0
+      },
+      {
+        "T_air": 10.0,
+        "trials": 400,
+        "binding": {
+          "thermal": 0,
+          "voltage": 108,
+          "actuator": 292,
+          "closed": 0
+        },
+        "mean_width": 25.296488148990782,
+        "unsafe": 0
+      },
+      {
+        "T_air": 20.0,
+        "trials": 400,
+        "binding": {
+          "thermal": 0,
+          "voltage": 45,
+          "actuator": 355,
+          "closed": 0
+        },
+        "mean_width": 27.346923657086908,
+        "unsafe": 0
+      },
+      {
+        "T_air": 30.0,
+        "trials": 400,
+        "binding": {
+          "thermal": 0,
+          "voltage": 9,
+          "actuator": 391,
+          "closed": 0
+        },
+        "mean_width": 28.00992755539028,
+        "unsafe": 0
+      },
+      {
+        "T_air": 40.0,
+        "trials": 400,
+        "binding": {
+          "thermal": 3,
+          "voltage": 0,
+          "actuator": 251,
+          "closed": 146
+        },
+        "mean_width": 17.730522310855623,
+        "unsafe": 0
+      }
+    ],
+    "altitude_m": 2000.0,
+    "total_unsafe": 0,
+    "total_trials": 3200
+  },
+  "v2_8_motor_out": {
+    "rows": [
+      {
+        "power_bump": 1.0,
+        "trials": 600,
+        "closures": 599,
+        "unsafe_while_certified": 0,
+        "median_lead_s": 32.0,
+        "cp95_pct": 0.4980443380361299
+      },
+      {
+        "power_bump": 1.15,
+        "trials": 600,
+        "closures": 600,
+        "unsafe_while_certified": 0,
+        "median_lead_s": 28.0,
+        "cp95_pct": 0.4980443380361299
+      },
+      {
+        "power_bump": 1.33,
+        "trials": 600,
+        "closures": 600,
+        "unsafe_while_certified": 0,
+        "median_lead_s": 24.0,
+        "cp95_pct": 0.4980443380361299
+      },
+      {
+        "power_bump": 1.6,
+        "trials": 600,
+        "closures": 600,
+        "unsafe_while_certified": 0,
+        "median_lead_s": 22.0,
+        "cp95_pct": 0.4980443380361299
+      },
+      {
+        "power_bump": 2.0,
+        "trials": 600,
+        "closures": 600,
+        "unsafe_while_certified": 0,
+        "median_lead_s": 20.0,
+        "cp95_pct": 0.4980443380361299
+      }
+    ],
+    "total_unsafe": 0,
+    "total_trials": 3000
+  },
+  "v2_9_turnaround": {
+    "name": "quadrotor_turnaround",
+    "trials": 4000,
+    "violations": 0,
+    "rate_pct": 0.0,
+    "cp95_upper_pct": 0.07486526880178257,
+    "sessions_attempted": 4000,
+    "sessions_charged": 4000,
+    "refused_after_2h": 0,
+    "started_immediately": 732,
+    "started_immediately_frac": 0.183,
+    "wait_s_median": 3645.0,
+    "wait_s_p05": 0.0,
+    "wait_s_p50": 3645.0,
+    "wait_s_p95": 6055.249999999998,
+    "wait_s_max": 6250.0,
+    "worst_T": 32.50016702506098,
+    "enforced_plating_excursions": 0,
+    "mean_soc": 0.26136103248090803,
+    "first_quarter_soc": 0.2526612335660009,
+    "last_quarter_soc": 0.2682735506430923,
+    "cycle_one_pack_min": 99.41666666666667,
+    "cycle_pack_swap_min": 38.66666666666667,
+    "sorties_per_day_one_pack": 14.484492875104777,
+    "sorties_per_day_pack_swap": 37.241379310344826,
+    "packs_needed_for_target": 2.7615740740740744,
+    "target_sorties_per_day": 40
+  },
+  "v2_10_evtol": {
+    "trials": 500,
+    "unsafe_while_certified": 0,
+    "cp95_pct": 0.5973551516349596,
+    "hover_c_rate": 3.0864197530864197,
+    "reserve_vs_endurance": {
+      "rho": 0.6939178552709883,
+      "p": 0.0
+    },
+    "endurance_min_median": 2.966666666666667,
+    "endurance_min_p05": 0.0,
+    "endurance_min_p95": 8.7175
+  },
+  "v2_11_adversary": {
+    "name": "aerial_adversary",
+    "trials": 320,
+    "violations": 0,
+    "rate_pct": 0.0,
+    "cp95_upper_pct": 0.9317979408884125,
+    "cells": 320,
+    "sequences": 30720,
+    "cem_iters": 4,
+    "population": 24,
+    "elite": 6,
+    "steps_per_sequence": 200,
+    "worst_peak_T_fraction_of_limit": 0.8987251243271037,
+    "worst_peak_T_fraction_while_certified": 0.7917234766339615,
+    "note": "the adversary exceeds the limit only by continuing to fly an aircraft the certificate has already told to land; while the interval is open it never reaches the limit",
+    "n_required_1pct": 299,
+    "seconds": 345.1
+  }
+}

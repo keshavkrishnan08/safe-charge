@@ -27,6 +27,16 @@ STAGES = [
     ("E11 closing the design-register gaps", "exp/e11_closure.py"),
 ]
 
+# The vehicle program: Anchored Collapse across four media. `x_crossdomain` reads the four
+# domain result files, so it runs last.
+VEHICLE_STAGES = [
+    ("V1  ground: robotaxis, shuttles, autonomous trucks", "exp/v1_ground.py"),
+    ("V2  aerial: delivery rotorcraft and eVTOL", "exp/v2_aerial.py"),
+    ("V3  underwater: survey AUVs, gliders, under-ice", "exp/v3_underwater.py"),
+    ("V4  space: LEO, GEO, deep space, Mars, lunar night, radiation", "exp/v4_space.py"),
+    ("X   cross-domain connectedness", "exp/x_crossdomain.py"),
+]
+
 
 def run(path, label):
     t0 = time.time()
@@ -40,12 +50,22 @@ def run(path, label):
 
 def main():
     figs_only = "--figures-only" in sys.argv
+    cells_only = "--cells-only" in sys.argv
+    vehicles_only = "--vehicles-only" in sys.argv
     t0 = time.time()
     if not figs_only:
-        for label, path in STAGES:
-            run(path, label)
-    run("figures.py", "figures")
-    run("verify_claims.py", "checking the manuscript against the results")
+        if not vehicles_only:
+            for label, path in STAGES:
+                run(path, label)
+        if not cells_only:
+            for label, path in VEHICLE_STAGES:
+                run(path, label)
+    if not vehicles_only:
+        run("figures.py", "figures")
+        run("verify_claims.py", "checking the manuscript against the results")
+    if not cells_only:
+        run("figures_vehicles.py", "vehicle figures")
+        run("verify_vehicles.py", "checking the vehicle manuscript against the results")
     print(f"\nall stages complete in {(time.time()-t0)/60:.1f} min")
 
 

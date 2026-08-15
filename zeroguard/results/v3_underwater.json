@@ -1,0 +1,512 @@
+{
+  "v3_1_sealed_hull": {
+    "name": "auv_sealed_hull",
+    "trials": 3000,
+    "violations": 0,
+    "rate_pct": 0.0,
+    "cp95_upper_pct": 0.09980790119965555,
+    "hull_UA_W_per_K": 0.006896551724137931,
+    "car_hA_W_per_K": 0.07987488186898703,
+    "conductance_ratio": 0.08634193331828452,
+    "water_C": 2.0,
+    "worst_T": 37.49999881520477,
+    "enforced_plating_excursions": 0,
+    "mean_soc": 0.7585253130600451
+  },
+  "v3_2_cold_binding": {
+    "rows": [
+      {
+        "T_water": -1.8,
+        "census": {
+          "plating-margin": 327,
+          "plating-cap": 273
+        },
+        "trials": 600,
+        "violations": 0,
+        "plating_fraction": 1.0,
+        "plating_cap_fraction": 0.455,
+        "thermal_fraction": 0.0,
+        "mean_soc": 0.758525341020856
+      },
+      {
+        "T_water": 2.0,
+        "census": {
+          "plating-margin": 334,
+          "plating-cap": 266
+        },
+        "trials": 600,
+        "violations": 0,
+        "plating_fraction": 1.0,
+        "plating_cap_fraction": 0.44333333333333336,
+        "thermal_fraction": 0.0,
+        "mean_soc": 0.7585253440210803
+      },
+      {
+        "T_water": 4.0,
+        "census": {
+          "plating-margin": 307,
+          "plating-cap": 293
+        },
+        "trials": 600,
+        "violations": 0,
+        "plating_fraction": 1.0,
+        "plating_cap_fraction": 0.48833333333333334,
+        "thermal_fraction": 0.0,
+        "mean_soc": 0.7585253204844801
+      },
+      {
+        "T_water": 8.0,
+        "census": {
+          "plating-margin": 385,
+          "plating-cap": 215
+        },
+        "trials": 600,
+        "violations": 0,
+        "plating_fraction": 1.0,
+        "plating_cap_fraction": 0.35833333333333334,
+        "thermal_fraction": 0.0,
+        "mean_soc": 0.7585252783471508
+      },
+      {
+        "T_water": 12.0,
+        "census": {
+          "plating-margin": 393,
+          "plating-cap": 207
+        },
+        "trials": 600,
+        "violations": 0,
+        "plating_fraction": 1.0,
+        "plating_cap_fraction": 0.345,
+        "thermal_fraction": 0.0,
+        "mean_soc": 0.7585252699032736
+      },
+      {
+        "T_water": 18.0,
+        "census": {
+          "plating-margin": 432,
+          "plating-cap": 168
+        },
+        "trials": 600,
+        "violations": 0,
+        "plating_fraction": 1.0,
+        "plating_cap_fraction": 0.28,
+        "thermal_fraction": 0.0,
+        "mean_soc": 0.7585252917695877
+      },
+      {
+        "T_water": 25.0,
+        "census": {
+          "plating-margin": 392,
+          "plating-cap": 208
+        },
+        "trials": 600,
+        "violations": 0,
+        "plating_fraction": 1.0,
+        "plating_cap_fraction": 0.3466666666666667,
+        "thermal_fraction": 0.0,
+        "mean_soc": 0.7585253504663241
+      }
+    ],
+    "total_violations": 0,
+    "total_trials": 4200,
+    "plating_binds_everywhere": true,
+    "thermal_never_binds": true,
+    "cap_share_vs_temperature": {
+      "rho": -0.7857142857142859,
+      "p": 0.0505
+    },
+    "cold_cap_fraction": 0.44333333333333336,
+    "warm_cap_fraction": 0.3466666666666667
+  },
+  "v3_3_hotel_anchor": {
+    "idle-on-seabed": {
+      "hotel_W": 25.0,
+      "thrust_W": 0.0,
+      "trials": 800,
+      "mean_anchor_A": 0.5952380952380951,
+      "unsafe_while_certified": 0,
+      "cp95_pct": 0.3737662826100663,
+      "null_input_brownouts": 800,
+      "median_endurance_h": 20.0
+    },
+    "survey": {
+      "hotel_W": 25.0,
+      "thrust_W": 90.0,
+      "trials": 800,
+      "mean_anchor_A": 2.738095238095238,
+      "unsafe_while_certified": 0,
+      "cp95_pct": 0.3737662826100663,
+      "null_input_brownouts": 800,
+      "median_endurance_h": 6.6
+    },
+    "transit": {
+      "hotel_W": 25.0,
+      "thrust_W": 240.0,
+      "trials": 800,
+      "mean_anchor_A": 6.309523809523809,
+      "unsafe_while_certified": 0,
+      "cp95_pct": 0.3737662826100663,
+      "null_input_brownouts": 800,
+      "median_endurance_h": 2.5
+    }
+  },
+  "v3_4_deployment": {
+    "name": "auv_deployment",
+    "trials": 547,
+    "violations": 0,
+    "rate_pct": 0.0,
+    "cp95_upper_pct": 0.5461689080659027,
+    "months": 6.0,
+    "recharges_per_day": 3.0,
+    "worst_T": 37.46767947965981,
+    "enforced_plating_excursions": 0,
+    "first_quarter_soc": 0.75852532888986,
+    "last_quarter_soc": 0.7585253356274995
+  },
+  "v3_5_dormancy": {
+    "rows": [
+      {
+        "dormant_months": 0,
+        "trials": 171,
+        "violations": 0,
+        "mean_soc": 0.7585253190825496
+      },
+      {
+        "dormant_months": 6,
+        "trials": 171,
+        "violations": 0,
+        "mean_soc": 0.7585253283585625
+      },
+      {
+        "dormant_months": 12,
+        "trials": 171,
+        "violations": 0,
+        "mean_soc": 0.7585253293089511
+      },
+      {
+        "dormant_months": 24,
+        "trials": 171,
+        "violations": 0,
+        "mean_soc": 0.7585253295664576
+      },
+      {
+        "dormant_months": 48,
+        "trials": 171,
+        "violations": 0,
+        "mean_soc": 0.758525333814916
+      },
+      {
+        "dormant_months": 96,
+        "trials": 171,
+        "violations": 0,
+        "mean_soc": 0.7585253369151062
+      },
+      {
+        "dormant_months": 120,
+        "trials": 171,
+        "violations": 0,
+        "mean_soc": 0.7585253391293497
+      }
+    ],
+    "total_violations": 0,
+    "total_trials": 1197,
+    "soc_spread": 2.0046800108808327e-08,
+    "insensitive": true,
+    "soc_vs_dormancy": {
+      "rho": NaN,
+      "p": NaN
+    }
+  },
+  "v3_6_depth": {
+    "rows": [
+      {
+        "depth_m": 0,
+        "T_water": 15.0,
+        "hull_UA": 0.008,
+        "trials": 400,
+        "violations": 0,
+        "binding": {
+          "plating-cap": 400
+        },
+        "mean_soc": 0.7585253359914972
+      },
+      {
+        "depth_m": 200,
+        "T_water": 9.884898576264234,
+        "hull_UA": 0.007906666666666666,
+        "trials": 400,
+        "violations": 0,
+        "binding": {
+          "plating-cap": 400
+        },
+        "mean_soc": 0.758525318043767
+      },
+      {
+        "depth_m": 600,
+        "T_water": 4.900692081929588,
+        "hull_UA": 0.00772,
+        "trials": 400,
+        "violations": 0,
+        "binding": {
+          "plating-cap": 400
+        },
+        "mean_soc": 0.7585252684706227
+      },
+      {
+        "depth_m": 1500,
+        "T_water": 2.3057306961281183,
+        "hull_UA": 0.0073,
+        "trials": 400,
+        "violations": 0,
+        "binding": {
+          "plating-cap": 400
+        },
+        "mean_soc": 0.7585252981452638
+      },
+      {
+        "depth_m": 3000,
+        "T_water": 2.0071900968119216,
+        "hull_UA": 0.0066,
+        "trials": 400,
+        "violations": 0,
+        "binding": {
+          "plating-cap": 400
+        },
+        "mean_soc": 0.7585252912212616
+      },
+      {
+        "depth_m": 6000,
+        "T_water": 2.0000039767301665,
+        "hull_UA": 0.005200000000000001,
+        "trials": 400,
+        "violations": 0,
+        "binding": {
+          "plating-cap": 400
+        },
+        "mean_soc": 0.7585252597103943
+      }
+    ],
+    "total_violations": 0,
+    "total_trials": 2400,
+    "soc_spread": 7.628110287871692e-08,
+    "plating_binds_at_every_depth": true,
+    "soc_vs_depth": {
+      "rho": NaN,
+      "p": NaN
+    }
+  },
+  "v3_7_under_ice": {
+    "trials": 1000,
+    "transit_min": 20.0,
+    "breaches_with_no_warning": 0,
+    "cp95_no_warning_pct": 0.29912495450953314,
+    "episodes_with_lead": 1000,
+    "closure_trigger": {
+      "lead_covers_transit": 0,
+      "lead_covers_transit_rate": 0.0,
+      "lead_min_min": 5.0,
+      "lead_p05_min": 6.0,
+      "lead_median_min": 7.0,
+      "lead_p95_min": 8.0
+    },
+    "reserve_trigger_sweep": [
+      {
+        "threshold_A": 0.0,
+        "episodes": 1000,
+        "median_warning_min": 0.0,
+        "p05_warning_min": 0.0,
+        "covers_transit_rate": 0.0
+      },
+      {
+        "threshold_A": 0.5,
+        "episodes": 1000,
+        "median_warning_min": 3.0,
+        "p05_warning_min": 2.0,
+        "covers_transit_rate": 0.0
+      },
+      {
+        "threshold_A": 1.0,
+        "episodes": 1000,
+        "median_warning_min": 6.0,
+        "p05_warning_min": 5.0,
+        "covers_transit_rate": 0.0
+      },
+      {
+        "threshold_A": 2.0,
+        "episodes": 1000,
+        "median_warning_min": 11.0,
+        "p05_warning_min": 10.0,
+        "covers_transit_rate": 0.0
+      },
+      {
+        "threshold_A": 4.0,
+        "episodes": 1000,
+        "median_warning_min": 20.0,
+        "p05_warning_min": 18.0,
+        "covers_transit_rate": 0.543
+      },
+      {
+        "threshold_A": 8.0,
+        "episodes": 1000,
+        "median_warning_min": 34.0,
+        "p05_warning_min": 31.0,
+        "covers_transit_rate": 1.0
+      },
+      {
+        "threshold_A": 12.0,
+        "episodes": 1000,
+        "median_warning_min": 47.0,
+        "p05_warning_min": 42.0,
+        "covers_transit_rate": 1.0
+      },
+      {
+        "threshold_A": 16.0,
+        "episodes": 1000,
+        "median_warning_min": 58.0,
+        "p05_warning_min": 52.0,
+        "covers_transit_rate": 1.0
+      },
+      {
+        "threshold_A": 20.0,
+        "episodes": 1000,
+        "median_warning_min": 69.0,
+        "p05_warning_min": 61.0,
+        "covers_transit_rate": 1.0
+      }
+    ],
+    "threshold_for_transit_A": 8.0,
+    "closure_alone_is_insufficient": true
+  },
+  "v3_8_transients": {
+    "rows": [
+      {
+        "burst_multiplier": 2.0,
+        "trials": 200,
+        "closures": 0,
+        "unsafe_while_certified": 0
+      },
+      {
+        "burst_multiplier": 3.0,
+        "trials": 200,
+        "closures": 0,
+        "unsafe_while_certified": 0
+      },
+      {
+        "burst_multiplier": 5.0,
+        "trials": 200,
+        "closures": 10,
+        "unsafe_while_certified": 0
+      },
+      {
+        "burst_multiplier": 8.0,
+        "trials": 200,
+        "closures": 48,
+        "unsafe_while_certified": 0
+      }
+    ],
+    "total_trials": 800,
+    "total_unsafe": 0
+  },
+  "v3_9_no_recalibration": {
+    "days": 180,
+    "cycles": 540,
+    "bound": {
+      "violations": 0,
+      "mean_soc": 0.7585253328550537,
+      "cp95_pct": 0.5532292551836959
+    },
+    "oracle": {
+      "violations": 0,
+      "mean_soc": 0.7585253328550537,
+      "cp95_pct": 0.5532292551836959
+    },
+    "safety_identical": true,
+    "soc_gap_points": 0.0,
+    "wilcoxon": {
+      "n": 2,
+      "p": 0.49235,
+      "hodges_lehmann": 2.7755575615628914e-16,
+      "rank_biserial": 1.0,
+      "W": 0.0
+    }
+  },
+  "v3_10_glider_vs_auv": {
+    "platforms": {
+      "buoyancy-glider": {
+        "load_W": 0.5,
+        "mean_anchor_A": 0.016666666666666666,
+        "mean_width_A": 26.247029571830062,
+        "structure": {
+          "single-interval": 600,
+          "disconnected": 0,
+          "empty": 0
+        },
+        "unsafe_while_certified": 0,
+        "trials": 600,
+        "reserve_ratio": 1574.8217743098037
+      },
+      "under-ice-auv": {
+        "load_W": 175.0,
+        "mean_anchor_A": 4.166666666666667,
+        "mean_width_A": 31.893341437464116,
+        "structure": {
+          "single-interval": 600,
+          "disconnected": 0,
+          "empty": 0
+        },
+        "unsafe_while_certified": 0,
+        "trials": 600,
+        "reserve_ratio": 7.654401944991387
+      }
+    },
+    "load_ratio": 350.0,
+    "anchor_ratio": 250.00000000000003,
+    "both_single_interval": true
+  },
+  "v3_11_buoyancy_pump": {
+    "rows": [
+      {
+        "pump_W": 0.0,
+        "burst_ratio": 0.0,
+        "trials": 120,
+        "closures": 0,
+        "unsafe_while_certified": 0,
+        "median_dives": 34.0
+      },
+      {
+        "pump_W": 5.0,
+        "burst_ratio": 10.0,
+        "trials": 120,
+        "closures": 0,
+        "unsafe_while_certified": 0,
+        "median_dives": 34.0
+      },
+      {
+        "pump_W": 15.0,
+        "burst_ratio": 30.0,
+        "trials": 120,
+        "closures": 0,
+        "unsafe_while_certified": 0,
+        "median_dives": 34.0
+      },
+      {
+        "pump_W": 30.0,
+        "burst_ratio": 60.0,
+        "trials": 120,
+        "closures": 21,
+        "unsafe_while_certified": 0,
+        "median_dives": 34.0
+      },
+      {
+        "pump_W": 60.0,
+        "burst_ratio": 120.0,
+        "trials": 120,
+        "closures": 71,
+        "unsafe_while_certified": 0,
+        "median_dives": 30.0
+      }
+    ],
+    "total_trials": 600,
+    "total_unsafe": 0
+  }
+}

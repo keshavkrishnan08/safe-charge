@@ -67,18 +67,49 @@ def wilcoxon_paired(a, b, seed=0, reps=20000):
     return dict(n=n, p=p, hodges_lehmann=hl, rank_biserial=rb, W=W)
 
 
+def _rank(a):
+    """Mid-ranks, so tied values share a rank instead of being ordered by array position.
+
+    `argsort(argsort(a))` is the fast rank transform and it is wrong in the presence of ties:
+    it breaks them by index, which turns a *constant* series into a perfectly ordered one. V3-5
+    swept ten years of dormancy, every node returned the same delivered charge because a
+    different constraint was binding throughout, and this function duly reported rho = +1.000,
+    p = 0.0002 for a relationship that does not exist. Mid-ranks make a constant series
+    constant, and `spearman_perm` then reports it as undefined rather than as perfect."""
+    a = np.asarray(a, float)
+    order = np.argsort(a, kind="mergesort")
+    r = np.empty(a.size, float)
+    r[order] = np.arange(a.size, dtype=float)
+    # average the ranks within each run of equal values
+    s = a[order]
+    i = 0
+    while i < s.size:
+        j = i
+        while j + 1 < s.size and s[j + 1] == s[i]:
+            j += 1
+        if j > i:
+            r[order[i:j + 1]] = 0.5 * (i + j)
+        i = j + 1
+    return r
+
+
 def spearman_perm(x, y, reps=20000, seed=0):
-    """Spearman rho with a permutation p-value, for monotonicity claims across a sweep."""
+    """Spearman rho with a permutation p-value, for monotonicity claims across a sweep.
+
+    Returns rho = nan when either series is constant: there is no monotone relationship to
+    report, and reporting one would be worse than reporting nothing.
+    """
     x, y = np.asarray(x, float), np.asarray(y, float)
-    rx = np.argsort(np.argsort(x)).astype(float)
-    ry = np.argsort(np.argsort(y)).astype(float)
+    rx, ry = _rank(x), _rank(y)
+    if rx.std() == 0.0 or ry.std() == 0.0:
+        return dict(rho=float("nan"), p=float("nan"), n=int(x.size), degenerate=True)
     rho = float(np.corrcoef(rx, ry)[0, 1])
     rng = np.random.default_rng(seed)
     null = np.empty(reps)
     for i in range(reps):
         null[i] = np.corrcoef(rx, rng.permutation(ry))[0, 1]
     p = float((np.abs(null) >= abs(rho)).mean())
-    return dict(rho=rho, p=p, n=x.size)
+    return dict(rho=rho, p=p, n=int(x.size), degenerate=False)
 
 
 def summarize_safety(name, k, n, extra=None):
