@@ -37,6 +37,7 @@ VEHICLE_STAGES = [
     ("X   cross-domain connectedness", "exp/x_crossdomain.py"),
     ("N1  the assumptions against NASA PCoE measurements", "exp/n1_nasa_validation.py"),
     ("B1  against CC-CV, a shipped de-rate, and MPC", "exp/b1_baselines.py"),
+    ("B2  against each domain's own stopping rule", "exp/b2_domain_baselines.py"),
 ]
 
 

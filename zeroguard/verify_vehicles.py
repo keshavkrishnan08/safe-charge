@@ -59,6 +59,25 @@ G, A_, U, S, X = ("v1_ground.json", "v2_aerial.json", "v3_underwater.json",
                   "v4_space.json", "x_crossdomain.json")
 N = "n1_nasa_validation.json"
 B = "b1_baselines.json"
+B2 = "b2_domain_baselines.json"
+
+# ---- domain stopping rules: where the certificate wins, and where it does not ------------
+pred("B2    on a rotorcraft no fixed SOC reserve reaches even the 80 % recovery target that "
+     "the certificate's reserve does",
+     lambda: (dig(B2, "delivery-quadrotor", "curve", "80",
+                  "mission_per_family")["certificate reserve"]
+              > dig(B2, "delivery-quadrotor", "curve", "80",
+                    "mission_per_family")["fixed SOC reserve"]),
+     "the fixed SOC rule matched the certificate on the rotorcraft")
+pred("B2    and where the mission is charge-limited, a fixed SOC rule is NOT beaten -- reported",
+     lambda: (dig(B2, "under-ice-auv", "comparison")["reserve_gain_pct"] <= 0
+              or dig(B2, "geo-comsat", "comparison")["reserve_gain_pct"] <= 0),
+     "the honest negative result in the charge-limited domains has gone missing")
+pred("B2    the combined min-of-two-clocks rule is never far behind the best single rule",
+     lambda: all(q is None or q >= -12.0 for q in
+                 [dig(B2, c, "comparison").get("combined_gain_pct")
+                  for c in ("delivery-quadrotor", "under-ice-auv", "geo-comsat")]),
+     "the recommended combined rule lost badly to a single-clock rule somewhere")
 
 # ---- baselines: compared to what? -------------------------------------------------------
 eq("B1    the certificate violates nothing where the shipped de-rate also violates nothing",

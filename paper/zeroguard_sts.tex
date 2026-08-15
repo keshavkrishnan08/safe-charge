@@ -405,6 +405,14 @@ classical choice, not propositional extensionality. The proofs turned out to nee
 the paper assumes: they are stated over an arbitrary type carrying a $\le$ relation, with no
 order axiom used anywhere, so they hold without transitivity, antisymmetry or totality.
 
+Writing the proofs also \emph{weakened} the method's hypotheses. The safety guarantee turns out
+never to touch the cap/floor structure at all: \texttt{bisect\_sound\_any\_predicate} holds for
+an \emph{arbitrary} predicate, monotone or not, connected or not. So (A2) buys
+\textbf{optimality, not safety} --- a non-monotone constraint set costs delivered charge, because
+the bisection finds only the first admissible interval, and it cannot cost the guarantee. For
+anyone applying this to a plant whose constraint structure they have not verified, that is the
+difference between a method they must first prove things about and one they can simply run.
+
 The property worth checking mechanically is not the collapse theorem but
 \texttt{bisect\_sound}: \emph{every} state the bisection can reach has a feasible lower
 endpoint. Convergence says how good the answer is; this says whether it is safe, and it holds
@@ -886,17 +894,19 @@ wait for closure & 0 min (by definition) & 0 min & \uIceCover\,\% \\
 \end{tabular}
 \end{table}
 
-It is worth stating what this rule replaces. Current practice for autonomous underwater
-endurance is a fixed reserve fraction --- turn back at 30\,\% state of charge, say --- chosen
-conservatively because the quantity that actually matters, how much admissible current remains,
-is not observable. A fixed SOC reserve is simultaneously too conservative in warm water with a
-fresh pack and not conservative enough in cold water with an aged one, and nothing tells the
-vehicle which situation it is in.
+It is worth stating what this rule replaces, and being careful about it, because
+\S\ref{sec:domainbaselines} tests the replacement and finds it does \emph{not} dominate here.
+Current practice for autonomous underwater endurance is a fixed reserve fraction --- turn back
+at 30\,\% state of charge, say --- chosen conservatively because the quantity that matters, how
+much admissible current remains, is not observable. The natural claim is that such a constant
+must be simultaneously too cautious with a fresh warm pack and not cautious enough with a cold
+aged one.
 
-The reserve threshold is directly observable, updates every control step at
-\worstLatency\,$\mu$s, and carries the temperature and ageing state implicitly because it is
-computed from them. That is the difference between a mission rule that is defensible and one
-that is merely traditional.
+Measured, that claim does not hold underwater. Across a population spanning the full parameter
+envelope, a well-chosen fixed threshold matches the reserve rule at equal safety
+(\S\ref{sec:domainbaselines}) --- because an AUV's mission ends when the pack empties, and state
+of charge is a perfectly good predictor of that. The reserve threshold's advantage appears where
+the mission ends for some \emph{other} reason, which underwater it does not.
 
 \subsection{Four decades of load, one certificate}
 
@@ -1124,6 +1134,74 @@ specialised QP or an explicit-MPC lookup would be faster; the comparison is agai
 approach as it is usually implemented, not against the best conceivable optimiser. What no
 optimiser removes is the data-dependence: the argument here is about the \emph{shape} of the
 cost, not its constant.
+
+
+
+\section{Against each domain's own stopping rule}\label{sec:domainbaselines}
+
+\S\ref{sec:baselines} compared the certificate against CC-CV and MPC on a charging pack. That is
+the right comparison for the ground domain and the wrong one for every other, because the
+decision a flying, swimming or orbiting vehicle makes is not \emph{how much current} but
+\emph{when to stop}. Each domain has an incumbent rule and each is a fixed fraction: land at
+20--30\,\% state of charge, turn back at 30\,\%, do not discharge past 50--60\,\% depth in GEO.
+
+Comparing against them requires care about what ``safer'' means. It is not ``no violation'' ---
+a rule that stops immediately violates nothing. It is \emph{did the vehicle get home}. So every
+rule is scored on two axes: mission delivered, and the fraction of episodes that retained enough
+envelope to complete a stated recovery manoeuvre after stopping. Rules are then compared
+\textbf{at matched safety}, which is the only fair way to compare points on a trade-off curve.
+All rules are evaluated on the \emph{same} trajectories, so the comparison carries no sampling
+noise.
+
+\begin{table}[t]\centering\small
+\caption{Mission delivered (median, minutes) at two recovery targets, \bTwoTrials{} missions per
+domain. ``--'' means no threshold in that family reaches the target. The certificate's reserve
+wins where the envelope is what closes and loses where the pack simply empties --- which is the
+two-clock result of \S\ref{sec:cross} appearing again as an operational number.}
+\label{tab:domainbaselines}
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+\textbf{Domain} & \textbf{Recovery target} & \textbf{Fixed SOC} & \textbf{Reserve} &
+\textbf{Both} \\
+\midrule
+Delivery quadrotor & 80\,\% & \bTwoAirSocEighty{} & \textbf{\bTwoAirResEighty{}} & \bTwoAirBothEighty{} \\
+                   & 95\,\% & \bTwoAirSocNinetyfive{} & \bTwoAirResNinetyfive{} & \bTwoAirBothNinetyfive{} \\
+\addlinespace
+Under-ice AUV      & 80\,\% & \textbf{\bTwoSeaSocEighty{}} & \bTwoSeaResEighty{} & \bTwoSeaBothEighty{} \\
+                   & 95\,\% & \textbf{\bTwoSeaSocNinetyfive{}} & \bTwoSeaResNinetyfive{} & \bTwoSeaBothNinetyfive{} \\
+\addlinespace
+GEO comsat         & 80\,\% & \textbf{\bTwoGeoSocEighty{}} & \bTwoGeoResEighty{} & \bTwoGeoBothEighty{} \\
+                   & 95\,\% & \textbf{\bTwoGeoSocNinetyfive{}} & \bTwoGeoResNinetyfive{} & \bTwoGeoBothNinetyfive{} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Where it wins.} On the rotorcraft the certificate's reserve delivers
+\bTwoAirGainEighty\,\% more mission than the best fixed SOC threshold at an 80\,\% recovery
+target. The reason is the one \S\ref{sec:aerial} already identified: a quadrotor's envelope
+closes on voltage sag, not on charge, so state of charge is simply not the quantity that is
+running out. A fixed SOC reserve does not fire before closure at all --- it is not conservative,
+it is \emph{uninformative}.
+
+\paragraph{Where it does not.} Underwater and in GEO eclipse, a well-chosen fixed SOC threshold
+matches or beats the reserve rule at every safety target tested. Those missions end when the
+pack empties, and state of charge predicts that directly and cheaply. \textbf{This contradicts a
+claim we made before measuring it} --- that a fixed reserve must be badly miscalibrated across a
+heterogeneous population --- and \S\ref{sec:water} has been corrected accordingly. Across the
+full parameter envelope a constant threshold does fine, because the thing it is predicting
+really is close to a constant fraction of charge.
+
+\paragraph{What to actually do.} Neither clock dominates, which is precisely the prediction of
+\S\ref{sec:cross}: the width predicts time-to-closure where the envelope closes, the charge
+clock where the pack empties. Acting on the \emph{minimum} of the two is never far from the best
+single rule in any domain, and is the only rule that works in all three --- because it degrades
+to whichever clock is informative. That is the recommendation, and it is now a measured one
+rather than an argued one.
+
+\paragraph{Above 90\,\% recovery on the rotorcraft, nothing works.} No rule in any family
+reaches a 90\,\% target. The quadrotor's interval closes abruptly enough that no threshold on
+either clock buys reliable warning, which is a limitation of the vehicle rather than of the
+rule, and is reported rather than hidden by choosing a friendlier target.
 
 
 \section{External validation: the assumptions against measured cells}\label{sec:external}

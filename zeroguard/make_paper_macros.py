@@ -16,7 +16,7 @@ RES = os.path.join(HERE, "results")
 OUT = os.path.join(os.path.dirname(HERE), "paper", "vehicle_macros.tex")
 
 D = {}
-for k, f in (("b", "b1_baselines.json"), ("n", "n1_nasa_validation.json"), ("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
+for k, f in (("b2", "b2_domain_baselines.json"), ("b", "b1_baselines.json"), ("n", "n1_nasa_validation.json"), ("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
              ("s", "v4_space.json"), ("x", "x_crossdomain.json"),
              ("e1", "e1_generality.json"), ("e2", "e2_boundary.json")):
     p = os.path.join(RES, f)
@@ -311,6 +311,28 @@ if "b" in D:
         if k in cc:
             m(f"bSoc{tag}", num(cc[k]["mean_soc"], 3))
             m(f"bViol{tag}", str(cc[k]["violations"]))
+
+# ---- domain stopping-rule baselines -----------------------------------------------------
+if "b2" in D:
+    q = D["b2"]
+    m("bTwoTrials", num(q["trials_per_domain"], 0, True))
+    for case, tag in (("delivery-quadrotor", "Air"), ("under-ice-auv", "Sea"),
+                      ("geo-comsat", "Geo")):
+        if case not in q:
+            continue
+        cv = q[case]["curve"]
+        # LaTeX command names may contain letters only -- no digits. An earlier version
+        # emitted \b2AirSoc80, which TeX parses as the \b accent applied to "2AirSoc80".
+        for tgt, tword in (("80", "Eighty"), ("95", "Ninetyfive")):
+            mp = cv[tgt]["mission_per_family"]
+            for fam, ft in (("fixed SOC reserve", "Soc"), ("certificate reserve", "Res"),
+                            ("both (min of two clocks)", "Both")):
+                v = mp[fam]
+                m(f"bTwo{tag}{ft}{tword}", ("--" if v is None else num(v / 60.0, 1)))
+        c8 = cv["80"]["mission_per_family"]
+        if c8["fixed SOC reserve"] and c8["certificate reserve"]:
+            g = 100 * (c8["certificate reserve"] / c8["fixed SOC reserve"] - 1)
+            m(f"bTwo{tag}GainEighty", f"{g:+.0f}")
 
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
 with open(OUT, "w") as f:

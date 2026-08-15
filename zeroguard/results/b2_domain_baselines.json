@@ -1,0 +1,1451 @@
+{
+  "trials_per_domain": 300,
+  "delivery-quadrotor": {
+    "label": "aerial: delivery quadrotor",
+    "rules": {
+      "soc<=45%": {
+        "rule": "soc<=45%",
+        "trials": 300,
+        "mission_median_s": 374.0,
+        "mission_mean_s": 423.93333333333334,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "soc<=40%": {
+        "rule": "soc<=40%",
+        "trials": 300,
+        "mission_median_s": 471.0,
+        "mission_mean_s": 500.08,
+        "recovered": 224,
+        "recovery_rate": 0.7466666666666667
+      },
+      "soc<=35%": {
+        "rule": "soc<=35%",
+        "trials": 300,
+        "mission_median_s": 515.0,
+        "mission_mean_s": 533.2466666666667,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "soc<=30%": {
+        "rule": "soc<=30%",
+        "trials": 300,
+        "mission_median_s": 515.0,
+        "mission_mean_s": 533.2466666666667,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "soc<=25%": {
+        "rule": "soc<=25%",
+        "trials": 300,
+        "mission_median_s": 515.0,
+        "mission_mean_s": 533.2466666666667,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "soc<=20%": {
+        "rule": "soc<=20%",
+        "trials": 300,
+        "mission_median_s": 515.0,
+        "mission_mean_s": 533.2466666666667,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "reserve<=0.5A": {
+        "rule": "reserve<=0.5A",
+        "trials": 300,
+        "mission_median_s": 511.0,
+        "mission_mean_s": 528.9933333333333,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "reserve<=1A": {
+        "rule": "reserve<=1A",
+        "trials": 300,
+        "mission_median_s": 505.0,
+        "mission_mean_s": 524.8333333333334,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "reserve<=2A": {
+        "rule": "reserve<=2A",
+        "trials": 300,
+        "mission_median_s": 495.0,
+        "mission_mean_s": 516.5866666666667,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "reserve<=4A": {
+        "rule": "reserve<=4A",
+        "trials": 300,
+        "mission_median_s": 477.0,
+        "mission_mean_s": 501.1666666666667,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "reserve<=6A": {
+        "rule": "reserve<=6A",
+        "trials": 300,
+        "mission_median_s": 458.0,
+        "mission_mean_s": 486.6,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "reserve<=8A": {
+        "rule": "reserve<=8A",
+        "trials": 300,
+        "mission_median_s": 438.0,
+        "mission_mean_s": 469.50666666666666,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "reserve<=12A": {
+        "rule": "reserve<=12A",
+        "trials": 300,
+        "mission_median_s": 357.0,
+        "mission_mean_s": 419.06666666666666,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=45%, reserve<=0.5A)": {
+        "rule": "min(soc<=45%, reserve<=0.5A)",
+        "trials": 300,
+        "mission_median_s": 374.0,
+        "mission_mean_s": 423.93333333333334,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=45%, reserve<=1A)": {
+        "rule": "min(soc<=45%, reserve<=1A)",
+        "trials": 300,
+        "mission_median_s": 374.0,
+        "mission_mean_s": 423.93333333333334,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=45%, reserve<=2A)": {
+        "rule": "min(soc<=45%, reserve<=2A)",
+        "trials": 300,
+        "mission_median_s": 374.0,
+        "mission_mean_s": 423.93333333333334,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=45%, reserve<=4A)": {
+        "rule": "min(soc<=45%, reserve<=4A)",
+        "trials": 300,
+        "mission_median_s": 374.0,
+        "mission_mean_s": 423.93333333333334,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=45%, reserve<=6A)": {
+        "rule": "min(soc<=45%, reserve<=6A)",
+        "trials": 300,
+        "mission_median_s": 374.0,
+        "mission_mean_s": 423.93333333333334,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=45%, reserve<=8A)": {
+        "rule": "min(soc<=45%, reserve<=8A)",
+        "trials": 300,
+        "mission_median_s": 371.0,
+        "mission_mean_s": 420.68,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=45%, reserve<=12A)": {
+        "rule": "min(soc<=45%, reserve<=12A)",
+        "trials": 300,
+        "mission_median_s": 329.0,
+        "mission_mean_s": 395.70666666666665,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=40%, reserve<=0.5A)": {
+        "rule": "min(soc<=40%, reserve<=0.5A)",
+        "trials": 300,
+        "mission_median_s": 471.0,
+        "mission_mean_s": 500.08,
+        "recovered": 224,
+        "recovery_rate": 0.7466666666666667
+      },
+      "min(soc<=40%, reserve<=1A)": {
+        "rule": "min(soc<=40%, reserve<=1A)",
+        "trials": 300,
+        "mission_median_s": 471.0,
+        "mission_mean_s": 500.08,
+        "recovered": 224,
+        "recovery_rate": 0.7466666666666667
+      },
+      "min(soc<=40%, reserve<=2A)": {
+        "rule": "min(soc<=40%, reserve<=2A)",
+        "trials": 300,
+        "mission_median_s": 471.0,
+        "mission_mean_s": 499.99333333333334,
+        "recovered": 224,
+        "recovery_rate": 0.7466666666666667
+      },
+      "min(soc<=40%, reserve<=4A)": {
+        "rule": "min(soc<=40%, reserve<=4A)",
+        "trials": 300,
+        "mission_median_s": 471.0,
+        "mission_mean_s": 497.2266666666667,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=40%, reserve<=6A)": {
+        "rule": "min(soc<=40%, reserve<=6A)",
+        "trials": 300,
+        "mission_median_s": 458.0,
+        "mission_mean_s": 486.6,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=40%, reserve<=8A)": {
+        "rule": "min(soc<=40%, reserve<=8A)",
+        "trials": 300,
+        "mission_median_s": 438.0,
+        "mission_mean_s": 469.50666666666666,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=40%, reserve<=12A)": {
+        "rule": "min(soc<=40%, reserve<=12A)",
+        "trials": 300,
+        "mission_median_s": 357.0,
+        "mission_mean_s": 419.06666666666666,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=35%, reserve<=0.5A)": {
+        "rule": "min(soc<=35%, reserve<=0.5A)",
+        "trials": 300,
+        "mission_median_s": 511.0,
+        "mission_mean_s": 528.9933333333333,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "min(soc<=35%, reserve<=1A)": {
+        "rule": "min(soc<=35%, reserve<=1A)",
+        "trials": 300,
+        "mission_median_s": 505.0,
+        "mission_mean_s": 524.8333333333334,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "min(soc<=35%, reserve<=2A)": {
+        "rule": "min(soc<=35%, reserve<=2A)",
+        "trials": 300,
+        "mission_median_s": 495.0,
+        "mission_mean_s": 516.5866666666667,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "min(soc<=35%, reserve<=4A)": {
+        "rule": "min(soc<=35%, reserve<=4A)",
+        "trials": 300,
+        "mission_median_s": 477.0,
+        "mission_mean_s": 501.1666666666667,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=35%, reserve<=6A)": {
+        "rule": "min(soc<=35%, reserve<=6A)",
+        "trials": 300,
+        "mission_median_s": 458.0,
+        "mission_mean_s": 486.6,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=35%, reserve<=8A)": {
+        "rule": "min(soc<=35%, reserve<=8A)",
+        "trials": 300,
+        "mission_median_s": 438.0,
+        "mission_mean_s": 469.50666666666666,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=35%, reserve<=12A)": {
+        "rule": "min(soc<=35%, reserve<=12A)",
+        "trials": 300,
+        "mission_median_s": 357.0,
+        "mission_mean_s": 419.06666666666666,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=30%, reserve<=0.5A)": {
+        "rule": "min(soc<=30%, reserve<=0.5A)",
+        "trials": 300,
+        "mission_median_s": 511.0,
+        "mission_mean_s": 528.9933333333333,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "min(soc<=30%, reserve<=1A)": {
+        "rule": "min(soc<=30%, reserve<=1A)",
+        "trials": 300,
+        "mission_median_s": 505.0,
+        "mission_mean_s": 524.8333333333334,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "min(soc<=30%, reserve<=2A)": {
+        "rule": "min(soc<=30%, reserve<=2A)",
+        "trials": 300,
+        "mission_median_s": 495.0,
+        "mission_mean_s": 516.5866666666667,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "min(soc<=30%, reserve<=4A)": {
+        "rule": "min(soc<=30%, reserve<=4A)",
+        "trials": 300,
+        "mission_median_s": 477.0,
+        "mission_mean_s": 501.1666666666667,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=30%, reserve<=6A)": {
+        "rule": "min(soc<=30%, reserve<=6A)",
+        "trials": 300,
+        "mission_median_s": 458.0,
+        "mission_mean_s": 486.6,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=30%, reserve<=8A)": {
+        "rule": "min(soc<=30%, reserve<=8A)",
+        "trials": 300,
+        "mission_median_s": 438.0,
+        "mission_mean_s": 469.50666666666666,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=30%, reserve<=12A)": {
+        "rule": "min(soc<=30%, reserve<=12A)",
+        "trials": 300,
+        "mission_median_s": 357.0,
+        "mission_mean_s": 419.06666666666666,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=25%, reserve<=0.5A)": {
+        "rule": "min(soc<=25%, reserve<=0.5A)",
+        "trials": 300,
+        "mission_median_s": 511.0,
+        "mission_mean_s": 528.9933333333333,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "min(soc<=25%, reserve<=1A)": {
+        "rule": "min(soc<=25%, reserve<=1A)",
+        "trials": 300,
+        "mission_median_s": 505.0,
+        "mission_mean_s": 524.8333333333334,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "min(soc<=25%, reserve<=2A)": {
+        "rule": "min(soc<=25%, reserve<=2A)",
+        "trials": 300,
+        "mission_median_s": 495.0,
+        "mission_mean_s": 516.5866666666667,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "min(soc<=25%, reserve<=4A)": {
+        "rule": "min(soc<=25%, reserve<=4A)",
+        "trials": 300,
+        "mission_median_s": 477.0,
+        "mission_mean_s": 501.1666666666667,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=25%, reserve<=6A)": {
+        "rule": "min(soc<=25%, reserve<=6A)",
+        "trials": 300,
+        "mission_median_s": 458.0,
+        "mission_mean_s": 486.6,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=25%, reserve<=8A)": {
+        "rule": "min(soc<=25%, reserve<=8A)",
+        "trials": 300,
+        "mission_median_s": 438.0,
+        "mission_mean_s": 469.50666666666666,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=25%, reserve<=12A)": {
+        "rule": "min(soc<=25%, reserve<=12A)",
+        "trials": 300,
+        "mission_median_s": 357.0,
+        "mission_mean_s": 419.06666666666666,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=20%, reserve<=0.5A)": {
+        "rule": "min(soc<=20%, reserve<=0.5A)",
+        "trials": 300,
+        "mission_median_s": 511.0,
+        "mission_mean_s": 528.9933333333333,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "min(soc<=20%, reserve<=1A)": {
+        "rule": "min(soc<=20%, reserve<=1A)",
+        "trials": 300,
+        "mission_median_s": 505.0,
+        "mission_mean_s": 524.8333333333334,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "min(soc<=20%, reserve<=2A)": {
+        "rule": "min(soc<=20%, reserve<=2A)",
+        "trials": 300,
+        "mission_median_s": 495.0,
+        "mission_mean_s": 516.5866666666667,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "min(soc<=20%, reserve<=4A)": {
+        "rule": "min(soc<=20%, reserve<=4A)",
+        "trials": 300,
+        "mission_median_s": 477.0,
+        "mission_mean_s": 501.1666666666667,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=20%, reserve<=6A)": {
+        "rule": "min(soc<=20%, reserve<=6A)",
+        "trials": 300,
+        "mission_median_s": 458.0,
+        "mission_mean_s": 486.6,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=20%, reserve<=8A)": {
+        "rule": "min(soc<=20%, reserve<=8A)",
+        "trials": 300,
+        "mission_median_s": 438.0,
+        "mission_mean_s": 469.50666666666666,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "min(soc<=20%, reserve<=12A)": {
+        "rule": "min(soc<=20%, reserve<=12A)",
+        "trials": 300,
+        "mission_median_s": 357.0,
+        "mission_mean_s": 419.06666666666666,
+        "recovered": 259,
+        "recovery_rate": 0.8633333333333333
+      },
+      "run_to_closure": {
+        "rule": "run_to_closure",
+        "trials": 300,
+        "mission_median_s": 515.0,
+        "mission_mean_s": 533.2466666666667,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      }
+    },
+    "comparison": {
+      "target_recovery": 0.95,
+      "best_per_family": {
+        "fixed SOC reserve": null,
+        "certificate reserve": null,
+        "both (min of two clocks)": null
+      },
+      "mission_per_family": {
+        "fixed SOC reserve": null,
+        "certificate reserve": null,
+        "both (min of two clocks)": null
+      },
+      "recovery_per_family": {
+        "fixed SOC reserve": null,
+        "certificate reserve": null,
+        "both (min of two clocks)": null
+      },
+      "soc_rule_can_reach_target": false,
+      "reserve_rule_can_reach_target": false
+    },
+    "curve": {
+      "80": {
+        "target_recovery": 0.8,
+        "best_per_family": {
+          "fixed SOC reserve": "soc<=45%",
+          "certificate reserve": "reserve<=4A",
+          "both (min of two clocks)": "min(soc<=35%, reserve<=4A)"
+        },
+        "mission_per_family": {
+          "fixed SOC reserve": 374.0,
+          "certificate reserve": 477.0,
+          "both (min of two clocks)": 477.0
+        },
+        "recovery_per_family": {
+          "fixed SOC reserve": 0.8633333333333333,
+          "certificate reserve": 0.8633333333333333,
+          "both (min of two clocks)": 0.8633333333333333
+        },
+        "soc_rule_can_reach_target": true,
+        "reserve_rule_can_reach_target": true,
+        "reserve_gain_s": 103.0,
+        "reserve_gain_pct": 27.540106951871657,
+        "combined_gain_s": 103.0,
+        "combined_gain_pct": 27.540106951871657
+      },
+      "90": {
+        "target_recovery": 0.9,
+        "best_per_family": {
+          "fixed SOC reserve": null,
+          "certificate reserve": null,
+          "both (min of two clocks)": null
+        },
+        "mission_per_family": {
+          "fixed SOC reserve": null,
+          "certificate reserve": null,
+          "both (min of two clocks)": null
+        },
+        "recovery_per_family": {
+          "fixed SOC reserve": null,
+          "certificate reserve": null,
+          "both (min of two clocks)": null
+        },
+        "soc_rule_can_reach_target": false,
+        "reserve_rule_can_reach_target": false
+      },
+      "95": {
+        "target_recovery": 0.95,
+        "best_per_family": {
+          "fixed SOC reserve": null,
+          "certificate reserve": null,
+          "both (min of two clocks)": null
+        },
+        "mission_per_family": {
+          "fixed SOC reserve": null,
+          "certificate reserve": null,
+          "both (min of two clocks)": null
+        },
+        "recovery_per_family": {
+          "fixed SOC reserve": null,
+          "certificate reserve": null,
+          "both (min of two clocks)": null
+        },
+        "soc_rule_can_reach_target": false,
+        "reserve_rule_can_reach_target": false
+      },
+      "99": {
+        "target_recovery": 0.99,
+        "best_per_family": {
+          "fixed SOC reserve": null,
+          "certificate reserve": null,
+          "both (min of two clocks)": null
+        },
+        "mission_per_family": {
+          "fixed SOC reserve": null,
+          "certificate reserve": null,
+          "both (min of two clocks)": null
+        },
+        "recovery_per_family": {
+          "fixed SOC reserve": null,
+          "certificate reserve": null,
+          "both (min of two clocks)": null
+        },
+        "soc_rule_can_reach_target": false,
+        "reserve_rule_can_reach_target": false
+      }
+    },
+    "recovery_steps": 15,
+    "recovery_s": 30.0
+  },
+  "under-ice-auv": {
+    "label": "underwater: under-ice AUV",
+    "rules": {
+      "soc<=50%": {
+        "rule": "soc<=50%",
+        "trials": 300,
+        "mission_median_s": 3870.0,
+        "mission_mean_s": 5021.8,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "soc<=40%": {
+        "rule": "soc<=40%",
+        "trials": 300,
+        "mission_median_s": 6780.0,
+        "mission_mean_s": 7153.4,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "soc<=30%": {
+        "rule": "soc<=30%",
+        "trials": 300,
+        "mission_median_s": 9540.0,
+        "mission_mean_s": 9584.8,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "soc<=25%": {
+        "rule": "soc<=25%",
+        "trials": 300,
+        "mission_median_s": 10890.0,
+        "mission_mean_s": 10838.8,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "soc<=20%": {
+        "rule": "soc<=20%",
+        "trials": 300,
+        "mission_median_s": 12090.0,
+        "mission_mean_s": 12060.2,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "reserve<=2A": {
+        "rule": "reserve<=2A",
+        "trials": 300,
+        "mission_median_s": 12960.0,
+        "mission_mean_s": 12936.2,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      },
+      "reserve<=4A": {
+        "rule": "reserve<=4A",
+        "trials": 300,
+        "mission_median_s": 12480.0,
+        "mission_mean_s": 12408.0,
+        "recovered": 143,
+        "recovery_rate": 0.4766666666666667
+      },
+      "reserve<=8A": {
+        "rule": "reserve<=8A",
+        "trials": 300,
+        "mission_median_s": 11610.0,
+        "mission_mean_s": 11539.8,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "reserve<=12A": {
+        "rule": "reserve<=12A",
+        "trials": 300,
+        "mission_median_s": 10680.0,
+        "mission_mean_s": 10682.4,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "reserve<=16A": {
+        "rule": "reserve<=16A",
+        "trials": 300,
+        "mission_median_s": 8310.0,
+        "mission_mean_s": 8748.0,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "reserve<=20A": {
+        "rule": "reserve<=20A",
+        "trials": 300,
+        "mission_median_s": 7020.0,
+        "mission_mean_s": 7392.6,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=50%, reserve<=2A)": {
+        "rule": "min(soc<=50%, reserve<=2A)",
+        "trials": 300,
+        "mission_median_s": 3870.0,
+        "mission_mean_s": 5021.8,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=50%, reserve<=4A)": {
+        "rule": "min(soc<=50%, reserve<=4A)",
+        "trials": 300,
+        "mission_median_s": 3870.0,
+        "mission_mean_s": 5021.8,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=50%, reserve<=8A)": {
+        "rule": "min(soc<=50%, reserve<=8A)",
+        "trials": 300,
+        "mission_median_s": 3870.0,
+        "mission_mean_s": 5021.8,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=50%, reserve<=12A)": {
+        "rule": "min(soc<=50%, reserve<=12A)",
+        "trials": 300,
+        "mission_median_s": 3750.0,
+        "mission_mean_s": 4929.6,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=50%, reserve<=16A)": {
+        "rule": "min(soc<=50%, reserve<=16A)",
+        "trials": 300,
+        "mission_median_s": 2490.0,
+        "mission_mean_s": 4025.6,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=50%, reserve<=20A)": {
+        "rule": "min(soc<=50%, reserve<=20A)",
+        "trials": 300,
+        "mission_median_s": 1830.0,
+        "mission_mean_s": 3461.4,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=40%, reserve<=2A)": {
+        "rule": "min(soc<=40%, reserve<=2A)",
+        "trials": 300,
+        "mission_median_s": 6780.0,
+        "mission_mean_s": 7153.4,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=40%, reserve<=4A)": {
+        "rule": "min(soc<=40%, reserve<=4A)",
+        "trials": 300,
+        "mission_median_s": 6780.0,
+        "mission_mean_s": 7153.4,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=40%, reserve<=8A)": {
+        "rule": "min(soc<=40%, reserve<=8A)",
+        "trials": 300,
+        "mission_median_s": 6780.0,
+        "mission_mean_s": 7153.4,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=40%, reserve<=12A)": {
+        "rule": "min(soc<=40%, reserve<=12A)",
+        "trials": 300,
+        "mission_median_s": 6660.0,
+        "mission_mean_s": 7042.6,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=40%, reserve<=16A)": {
+        "rule": "min(soc<=40%, reserve<=16A)",
+        "trials": 300,
+        "mission_median_s": 5160.0,
+        "mission_mean_s": 5958.2,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=40%, reserve<=20A)": {
+        "rule": "min(soc<=40%, reserve<=20A)",
+        "trials": 300,
+        "mission_median_s": 4470.0,
+        "mission_mean_s": 5272.0,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=30%, reserve<=2A)": {
+        "rule": "min(soc<=30%, reserve<=2A)",
+        "trials": 300,
+        "mission_median_s": 9540.0,
+        "mission_mean_s": 9584.8,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=30%, reserve<=4A)": {
+        "rule": "min(soc<=30%, reserve<=4A)",
+        "trials": 300,
+        "mission_median_s": 9540.0,
+        "mission_mean_s": 9584.8,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=30%, reserve<=8A)": {
+        "rule": "min(soc<=30%, reserve<=8A)",
+        "trials": 300,
+        "mission_median_s": 9540.0,
+        "mission_mean_s": 9584.8,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=30%, reserve<=12A)": {
+        "rule": "min(soc<=30%, reserve<=12A)",
+        "trials": 300,
+        "mission_median_s": 9420.0,
+        "mission_mean_s": 9456.4,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=30%, reserve<=16A)": {
+        "rule": "min(soc<=30%, reserve<=16A)",
+        "trials": 300,
+        "mission_median_s": 7770.0,
+        "mission_mean_s": 8199.4,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=30%, reserve<=20A)": {
+        "rule": "min(soc<=30%, reserve<=20A)",
+        "trials": 300,
+        "mission_median_s": 6900.0,
+        "mission_mean_s": 7352.8,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=25%, reserve<=2A)": {
+        "rule": "min(soc<=25%, reserve<=2A)",
+        "trials": 300,
+        "mission_median_s": 10890.0,
+        "mission_mean_s": 10838.8,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=25%, reserve<=4A)": {
+        "rule": "min(soc<=25%, reserve<=4A)",
+        "trials": 300,
+        "mission_median_s": 10890.0,
+        "mission_mean_s": 10838.8,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=25%, reserve<=8A)": {
+        "rule": "min(soc<=25%, reserve<=8A)",
+        "trials": 300,
+        "mission_median_s": 10890.0,
+        "mission_mean_s": 10838.8,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=25%, reserve<=12A)": {
+        "rule": "min(soc<=25%, reserve<=12A)",
+        "trials": 300,
+        "mission_median_s": 10680.0,
+        "mission_mean_s": 10668.4,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=25%, reserve<=16A)": {
+        "rule": "min(soc<=25%, reserve<=16A)",
+        "trials": 300,
+        "mission_median_s": 8310.0,
+        "mission_mean_s": 8748.0,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=25%, reserve<=20A)": {
+        "rule": "min(soc<=25%, reserve<=20A)",
+        "trials": 300,
+        "mission_median_s": 7020.0,
+        "mission_mean_s": 7392.6,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=20%, reserve<=2A)": {
+        "rule": "min(soc<=20%, reserve<=2A)",
+        "trials": 300,
+        "mission_median_s": 12090.0,
+        "mission_mean_s": 12060.2,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=20%, reserve<=4A)": {
+        "rule": "min(soc<=20%, reserve<=4A)",
+        "trials": 300,
+        "mission_median_s": 12090.0,
+        "mission_mean_s": 12060.2,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=20%, reserve<=8A)": {
+        "rule": "min(soc<=20%, reserve<=8A)",
+        "trials": 300,
+        "mission_median_s": 11610.0,
+        "mission_mean_s": 11539.8,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=20%, reserve<=12A)": {
+        "rule": "min(soc<=20%, reserve<=12A)",
+        "trials": 300,
+        "mission_median_s": 10680.0,
+        "mission_mean_s": 10682.4,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=20%, reserve<=16A)": {
+        "rule": "min(soc<=20%, reserve<=16A)",
+        "trials": 300,
+        "mission_median_s": 8310.0,
+        "mission_mean_s": 8748.0,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "min(soc<=20%, reserve<=20A)": {
+        "rule": "min(soc<=20%, reserve<=20A)",
+        "trials": 300,
+        "mission_median_s": 7020.0,
+        "mission_mean_s": 7392.6,
+        "recovered": 300,
+        "recovery_rate": 1.0
+      },
+      "run_to_closure": {
+        "rule": "run_to_closure",
+        "trials": 300,
+        "mission_median_s": 13560.0,
+        "mission_mean_s": 13573.0,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      }
+    },
+    "comparison": {
+      "target_recovery": 0.95,
+      "best_per_family": {
+        "fixed SOC reserve": "soc<=20%",
+        "certificate reserve": "reserve<=8A",
+        "both (min of two clocks)": "min(soc<=20%, reserve<=2A)"
+      },
+      "mission_per_family": {
+        "fixed SOC reserve": 12090.0,
+        "certificate reserve": 11610.0,
+        "both (min of two clocks)": 12090.0
+      },
+      "recovery_per_family": {
+        "fixed SOC reserve": 1.0,
+        "certificate reserve": 1.0,
+        "both (min of two clocks)": 1.0
+      },
+      "soc_rule_can_reach_target": true,
+      "reserve_rule_can_reach_target": true,
+      "reserve_gain_s": -480.0,
+      "reserve_gain_pct": -3.970223325062035,
+      "combined_gain_s": 0.0,
+      "combined_gain_pct": 0.0
+    },
+    "curve": {
+      "80": {
+        "target_recovery": 0.8,
+        "best_per_family": {
+          "fixed SOC reserve": "soc<=20%",
+          "certificate reserve": "reserve<=8A",
+          "both (min of two clocks)": "min(soc<=20%, reserve<=2A)"
+        },
+        "mission_per_family": {
+          "fixed SOC reserve": 12090.0,
+          "certificate reserve": 11610.0,
+          "both (min of two clocks)": 12090.0
+        },
+        "recovery_per_family": {
+          "fixed SOC reserve": 1.0,
+          "certificate reserve": 1.0,
+          "both (min of two clocks)": 1.0
+        },
+        "soc_rule_can_reach_target": true,
+        "reserve_rule_can_reach_target": true,
+        "reserve_gain_s": -480.0,
+        "reserve_gain_pct": -3.970223325062035,
+        "combined_gain_s": 0.0,
+        "combined_gain_pct": 0.0
+      },
+      "90": {
+        "target_recovery": 0.9,
+        "best_per_family": {
+          "fixed SOC reserve": "soc<=20%",
+          "certificate reserve": "reserve<=8A",
+          "both (min of two clocks)": "min(soc<=20%, reserve<=2A)"
+        },
+        "mission_per_family": {
+          "fixed SOC reserve": 12090.0,
+          "certificate reserve": 11610.0,
+          "both (min of two clocks)": 12090.0
+        },
+        "recovery_per_family": {
+          "fixed SOC reserve": 1.0,
+          "certificate reserve": 1.0,
+          "both (min of two clocks)": 1.0
+        },
+        "soc_rule_can_reach_target": true,
+        "reserve_rule_can_reach_target": true,
+        "reserve_gain_s": -480.0,
+        "reserve_gain_pct": -3.970223325062035,
+        "combined_gain_s": 0.0,
+        "combined_gain_pct": 0.0
+      },
+      "95": {
+        "target_recovery": 0.95,
+        "best_per_family": {
+          "fixed SOC reserve": "soc<=20%",
+          "certificate reserve": "reserve<=8A",
+          "both (min of two clocks)": "min(soc<=20%, reserve<=2A)"
+        },
+        "mission_per_family": {
+          "fixed SOC reserve": 12090.0,
+          "certificate reserve": 11610.0,
+          "both (min of two clocks)": 12090.0
+        },
+        "recovery_per_family": {
+          "fixed SOC reserve": 1.0,
+          "certificate reserve": 1.0,
+          "both (min of two clocks)": 1.0
+        },
+        "soc_rule_can_reach_target": true,
+        "reserve_rule_can_reach_target": true,
+        "reserve_gain_s": -480.0,
+        "reserve_gain_pct": -3.970223325062035,
+        "combined_gain_s": 0.0,
+        "combined_gain_pct": 0.0
+      },
+      "99": {
+        "target_recovery": 0.99,
+        "best_per_family": {
+          "fixed SOC reserve": "soc<=20%",
+          "certificate reserve": "reserve<=8A",
+          "both (min of two clocks)": "min(soc<=20%, reserve<=2A)"
+        },
+        "mission_per_family": {
+          "fixed SOC reserve": 12090.0,
+          "certificate reserve": 11610.0,
+          "both (min of two clocks)": 12090.0
+        },
+        "recovery_per_family": {
+          "fixed SOC reserve": 1.0,
+          "certificate reserve": 1.0,
+          "both (min of two clocks)": 1.0
+        },
+        "soc_rule_can_reach_target": true,
+        "reserve_rule_can_reach_target": true,
+        "reserve_gain_s": -480.0,
+        "reserve_gain_pct": -3.970223325062035,
+        "combined_gain_s": 0.0,
+        "combined_gain_pct": 0.0
+      }
+    },
+    "recovery_steps": 20,
+    "recovery_s": 1200.0
+  },
+  "geo-comsat": {
+    "label": "space: GEO comsat in eclipse",
+    "rules": {
+      "soc<=60%": {
+        "rule": "soc<=60%",
+        "trials": 300,
+        "mission_median_s": 1350.0,
+        "mission_mean_s": 1986.8,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "soc<=55%": {
+        "rule": "soc<=55%",
+        "trials": 300,
+        "mission_median_s": 2190.0,
+        "mission_mean_s": 2519.8,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "soc<=50%": {
+        "rule": "soc<=50%",
+        "trials": 300,
+        "mission_median_s": 3000.0,
+        "mission_mean_s": 3105.4,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "soc<=45%": {
+        "rule": "soc<=45%",
+        "trials": 300,
+        "mission_median_s": 3750.0,
+        "mission_mean_s": 3752.6,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "soc<=40%": {
+        "rule": "soc<=40%",
+        "trials": 300,
+        "mission_median_s": 4470.0,
+        "mission_mean_s": 4444.4,
+        "recovered": 107,
+        "recovery_rate": 0.3566666666666667
+      },
+      "reserve<=4A": {
+        "rule": "reserve<=4A",
+        "trials": 300,
+        "mission_median_s": 4380.0,
+        "mission_mean_s": 4352.2,
+        "recovered": 102,
+        "recovery_rate": 0.34
+      },
+      "reserve<=8A": {
+        "rule": "reserve<=8A",
+        "trials": 300,
+        "mission_median_s": 3510.0,
+        "mission_mean_s": 3567.2,
+        "recovered": 178,
+        "recovery_rate": 0.5933333333333334
+      },
+      "reserve<=16A": {
+        "rule": "reserve<=16A",
+        "trials": 300,
+        "mission_median_s": 1860.0,
+        "mission_mean_s": 2062.6,
+        "recovered": 255,
+        "recovery_rate": 0.85
+      },
+      "reserve<=24A": {
+        "rule": "reserve<=24A",
+        "trials": 300,
+        "mission_median_s": 480.0,
+        "mission_mean_s": 1025.4,
+        "recovered": 291,
+        "recovery_rate": 0.97
+      },
+      "reserve<=32A": {
+        "rule": "reserve<=32A",
+        "trials": 300,
+        "mission_median_s": 0.0,
+        "mission_mean_s": 522.4,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=60%, reserve<=4A)": {
+        "rule": "min(soc<=60%, reserve<=4A)",
+        "trials": 300,
+        "mission_median_s": 1050.0,
+        "mission_mean_s": 1825.8,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=60%, reserve<=8A)": {
+        "rule": "min(soc<=60%, reserve<=8A)",
+        "trials": 300,
+        "mission_median_s": 690.0,
+        "mission_mean_s": 1598.2,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=60%, reserve<=16A)": {
+        "rule": "min(soc<=60%, reserve<=16A)",
+        "trials": 300,
+        "mission_median_s": 0.0,
+        "mission_mean_s": 1073.0,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=60%, reserve<=24A)": {
+        "rule": "min(soc<=60%, reserve<=24A)",
+        "trials": 300,
+        "mission_median_s": 0.0,
+        "mission_mean_s": 525.6,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=60%, reserve<=32A)": {
+        "rule": "min(soc<=60%, reserve<=32A)",
+        "trials": 300,
+        "mission_median_s": 0.0,
+        "mission_mean_s": 260.8,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=55%, reserve<=4A)": {
+        "rule": "min(soc<=55%, reserve<=4A)",
+        "trials": 300,
+        "mission_median_s": 1830.0,
+        "mission_mean_s": 2336.4,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=55%, reserve<=8A)": {
+        "rule": "min(soc<=55%, reserve<=8A)",
+        "trials": 300,
+        "mission_median_s": 1440.0,
+        "mission_mean_s": 2063.4,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=55%, reserve<=16A)": {
+        "rule": "min(soc<=55%, reserve<=16A)",
+        "trials": 300,
+        "mission_median_s": 540.0,
+        "mission_mean_s": 1347.8,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=55%, reserve<=24A)": {
+        "rule": "min(soc<=55%, reserve<=24A)",
+        "trials": 300,
+        "mission_median_s": 0.0,
+        "mission_mean_s": 674.6,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=55%, reserve<=32A)": {
+        "rule": "min(soc<=55%, reserve<=32A)",
+        "trials": 300,
+        "mission_median_s": 0.0,
+        "mission_mean_s": 355.6,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=50%, reserve<=4A)": {
+        "rule": "min(soc<=50%, reserve<=4A)",
+        "trials": 300,
+        "mission_median_s": 2580.0,
+        "mission_mean_s": 2900.2,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=50%, reserve<=8A)": {
+        "rule": "min(soc<=50%, reserve<=8A)",
+        "trials": 300,
+        "mission_median_s": 2190.0,
+        "mission_mean_s": 2562.6,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=50%, reserve<=16A)": {
+        "rule": "min(soc<=50%, reserve<=16A)",
+        "trials": 300,
+        "mission_median_s": 1170.0,
+        "mission_mean_s": 1616.8,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=50%, reserve<=24A)": {
+        "rule": "min(soc<=50%, reserve<=24A)",
+        "trials": 300,
+        "mission_median_s": 30.0,
+        "mission_mean_s": 829.6,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=50%, reserve<=32A)": {
+        "rule": "min(soc<=50%, reserve<=32A)",
+        "trials": 300,
+        "mission_median_s": 0.0,
+        "mission_mean_s": 444.0,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=45%, reserve<=4A)": {
+        "rule": "min(soc<=45%, reserve<=4A)",
+        "trials": 300,
+        "mission_median_s": 3390.0,
+        "mission_mean_s": 3516.8,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=45%, reserve<=8A)": {
+        "rule": "min(soc<=45%, reserve<=8A)",
+        "trials": 300,
+        "mission_median_s": 2940.0,
+        "mission_mean_s": 3049.4,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=45%, reserve<=16A)": {
+        "rule": "min(soc<=45%, reserve<=16A)",
+        "trials": 300,
+        "mission_median_s": 1680.0,
+        "mission_mean_s": 1856.6,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=45%, reserve<=24A)": {
+        "rule": "min(soc<=45%, reserve<=24A)",
+        "trials": 300,
+        "mission_median_s": 300.0,
+        "mission_mean_s": 960.0,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=45%, reserve<=32A)": {
+        "rule": "min(soc<=45%, reserve<=32A)",
+        "trials": 300,
+        "mission_median_s": 0.0,
+        "mission_mean_s": 508.0,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "min(soc<=40%, reserve<=4A)": {
+        "rule": "min(soc<=40%, reserve<=4A)",
+        "trials": 300,
+        "mission_median_s": 4050.0,
+        "mission_mean_s": 4075.8,
+        "recovered": 195,
+        "recovery_rate": 0.65
+      },
+      "min(soc<=40%, reserve<=8A)": {
+        "rule": "min(soc<=40%, reserve<=8A)",
+        "trials": 300,
+        "mission_median_s": 3390.0,
+        "mission_mean_s": 3404.6,
+        "recovered": 243,
+        "recovery_rate": 0.81
+      },
+      "min(soc<=40%, reserve<=16A)": {
+        "rule": "min(soc<=40%, reserve<=16A)",
+        "trials": 300,
+        "mission_median_s": 1800.0,
+        "mission_mean_s": 2023.2,
+        "recovered": 283,
+        "recovery_rate": 0.9433333333333334
+      },
+      "min(soc<=40%, reserve<=24A)": {
+        "rule": "min(soc<=40%, reserve<=24A)",
+        "trials": 300,
+        "mission_median_s": 450.0,
+        "mission_mean_s": 1023.0,
+        "recovered": 296,
+        "recovery_rate": 0.9866666666666667
+      },
+      "min(soc<=40%, reserve<=32A)": {
+        "rule": "min(soc<=40%, reserve<=32A)",
+        "trials": 300,
+        "mission_median_s": 0.0,
+        "mission_mean_s": 522.4,
+        "recovered": 299,
+        "recovery_rate": 0.9966666666666667
+      },
+      "run_to_closure": {
+        "rule": "run_to_closure",
+        "trials": 300,
+        "mission_median_s": 5070.0,
+        "mission_mean_s": 4961.0,
+        "recovered": 0,
+        "recovery_rate": 0.0
+      }
+    },
+    "comparison": {
+      "target_recovery": 0.95,
+      "best_per_family": {
+        "fixed SOC reserve": "soc<=45%",
+        "certificate reserve": "reserve<=24A",
+        "both (min of two clocks)": "min(soc<=45%, reserve<=4A)"
+      },
+      "mission_per_family": {
+        "fixed SOC reserve": 3750.0,
+        "certificate reserve": 480.0,
+        "both (min of two clocks)": 3390.0
+      },
+      "recovery_per_family": {
+        "fixed SOC reserve": 0.9966666666666667,
+        "certificate reserve": 0.97,
+        "both (min of two clocks)": 0.9966666666666667
+      },
+      "soc_rule_can_reach_target": true,
+      "reserve_rule_can_reach_target": true,
+      "reserve_gain_s": -3270.0,
+      "reserve_gain_pct": -87.2,
+      "combined_gain_s": -360.0,
+      "combined_gain_pct": -9.6
+    },
+    "curve": {
+      "80": {
+        "target_recovery": 0.8,
+        "best_per_family": {
+          "fixed SOC reserve": "soc<=45%",
+          "certificate reserve": "reserve<=16A",
+          "both (min of two clocks)": "min(soc<=45%, reserve<=4A)"
+        },
+        "mission_per_family": {
+          "fixed SOC reserve": 3750.0,
+          "certificate reserve": 1860.0,
+          "both (min of two clocks)": 3390.0
+        },
+        "recovery_per_family": {
+          "fixed SOC reserve": 0.9966666666666667,
+          "certificate reserve": 0.85,
+          "both (min of two clocks)": 0.9966666666666667
+        },
+        "soc_rule_can_reach_target": true,
+        "reserve_rule_can_reach_target": true,
+        "reserve_gain_s": -1890.0,
+        "reserve_gain_pct": -50.4,
+        "combined_gain_s": -360.0,
+        "combined_gain_pct": -9.6
+      },
+      "90": {
+        "target_recovery": 0.9,
+        "best_per_family": {
+          "fixed SOC reserve": "soc<=45%",
+          "certificate reserve": "reserve<=24A",
+          "both (min of two clocks)": "min(soc<=45%, reserve<=4A)"
+        },
+        "mission_per_family": {
+          "fixed SOC reserve": 3750.0,
+          "certificate reserve": 480.0,
+          "both (min of two clocks)": 3390.0
+        },
+        "recovery_per_family": {
+          "fixed SOC reserve": 0.9966666666666667,
+          "certificate reserve": 0.97,
+          "both (min of two clocks)": 0.9966666666666667
+        },
+        "soc_rule_can_reach_target": true,
+        "reserve_rule_can_reach_target": true,
+        "reserve_gain_s": -3270.0,
+        "reserve_gain_pct": -87.2,
+        "combined_gain_s": -360.0,
+        "combined_gain_pct": -9.6
+      },
+      "95": {
+        "target_recovery": 0.95,
+        "best_per_family": {
+          "fixed SOC reserve": "soc<=45%",
+          "certificate reserve": "reserve<=24A",
+          "both (min of two clocks)": "min(soc<=45%, reserve<=4A)"
+        },
+        "mission_per_family": {
+          "fixed SOC reserve": 3750.0,
+          "certificate reserve": 480.0,
+          "both (min of two clocks)": 3390.0
+        },
+        "recovery_per_family": {
+          "fixed SOC reserve": 0.9966666666666667,
+          "certificate reserve": 0.97,
+          "both (min of two clocks)": 0.9966666666666667
+        },
+        "soc_rule_can_reach_target": true,
+        "reserve_rule_can_reach_target": true,
+        "reserve_gain_s": -3270.0,
+        "reserve_gain_pct": -87.2,
+        "combined_gain_s": -360.0,
+        "combined_gain_pct": -9.6
+      },
+      "99": {
+        "target_recovery": 0.99,
+        "best_per_family": {
+          "fixed SOC reserve": "soc<=45%",
+          "certificate reserve": "reserve<=32A",
+          "both (min of two clocks)": "min(soc<=45%, reserve<=4A)"
+        },
+        "mission_per_family": {
+          "fixed SOC reserve": 3750.0,
+          "certificate reserve": 0.0,
+          "both (min of two clocks)": 3390.0
+        },
+        "recovery_per_family": {
+          "fixed SOC reserve": 0.9966666666666667,
+          "certificate reserve": 0.9966666666666667,
+          "both (min of two clocks)": 0.9966666666666667
+        },
+        "soc_rule_can_reach_target": true,
+        "reserve_rule_can_reach_target": true,
+        "reserve_gain_s": -3750.0,
+        "reserve_gain_pct": -100.0,
+        "combined_gain_s": -360.0,
+        "combined_gain_pct": -9.6
+      }
+    },
+    "recovery_steps": 10,
+    "recovery_s": 600.0
+  },
+  "domains_where_soc_rule_cannot_reach_target": [
+    "delivery-quadrotor"
+  ],
+  "all_domains_improved": false,
+  "median_combined_gain_pct": -4.8
+}
