@@ -44,54 +44,55 @@ Autonomous Vehicles, from Robotaxis to Deep Space}\\[5pt]
 
 \begin{abstract}
 \noindent
-Every autonomous vehicle that must operate unattended --- a robotaxi that never sees a
-technician, a delivery drone flying forty sorties a day, an autonomous underwater vehicle six
-months into a deployment, a spacecraft that has not been touched since integration --- runs into
-the same wall. Its battery must be pushed hard enough to be useful and held back enough to be
-safe, and the state that decides where that line falls is not measurable in the field. The
-standard answers are to identify the pack online, which requires excitation nobody can afford,
-or to solve a constrained optimisation every control step, whose iteration count a safety task
-slot cannot be sized around.
+An autonomous vehicle's battery must be pushed hard enough to be useful and held back enough to
+be safe, and the state deciding where that line falls --- series resistance, plating margin,
+true capacity --- is not measurable in the field. Every unattended vehicle inherits the same
+compromise: a fixed de-rate chosen offline for the worst cell at the worst temperature at end of
+life, applied whatever the present state happens to be. The standard alternatives are to
+identify the pack online, which needs excitation an operational vehicle cannot inject, or to
+solve a constrained optimisation each step, whose iteration count a safety task slot cannot be
+sized around.
 
-This paper develops a third answer and takes it across four physical media. Building on a solver-free safety filter for battery fast charging \cite{krishnan2026safe},
-we prove that when a system's constraints are monotone in a scalar input and one
-always-available input is safe,
-the admissible input set collapses to a single interval whose edges are found by bisection ---
-in a \emph{fixed} number of one-step model evaluations, with no optimiser, no convergence test,
-and no identification of the plant. The original form of this result assumes the safe input is
-zero, which is true of a cell being charged and false of essentially every vehicle doing its
-job: cut the current to a rotorcraft and it falls; cut it to a submersible and it loses the
-computer navigating it; cut it to a spacecraft in eclipse and the payload browns out.
+We prove that neither is necessary. Terminal voltage, temperature and the lithium-plating
+potential are each \emph{monotone} in applied current --- the first two by the sign of the
+overpotential and the strict positivity of $I^2R$, the third because the plating proxy is affine
+and decreasing in current --- so the admissible input set is a single \textbf{interval}, and its
+edges are found by bisection in a \emph{fixed} number of one-step model evaluations, with no
+optimiser, no convergence test, and no identification. The published form assumes the safe input
+is zero, which holds for a cell being charged and fails for any vehicle doing its job. That
+failure is a misdiagnosis: zero still satisfies every temperature and voltage constraint on a
+discharging pack; what zero cannot do is serve the load, which is a \emph{floor} rather than a
+cap. \textbf{Anchored Collapse} adds the floor family and a second bisection --- \evalDischarge{}
+fixed evaluations against \evalCharge{}.
 
-We show that this apparent failure is a misdiagnosis. Zero \emph{is} still safe for every
-temperature and voltage constraint on a discharging vehicle; what zero cannot do is serve the
-load, and that is a constraint of a different kind --- a floor rather than a cap --- for which
-the original theorem has no vocabulary. \textbf{Anchored Collapse} adds the floor family and a
-second bisection, raising the worst-case cost from \evalCharge{} to \evalDischarge{} model
-evaluations, both fixed. It reduces to the published filter \cite{krishnan2026safe} bit-for-bit on
-\reduceStates{} states.
+The result is a certificate that is measurably better than what ships. Against the conservative
+de-rate a production pack carries, it delivers \textbf{$+$\bGainPts{} points of charge
+($+$\bGainPct\,\%) at zero violations}, on cells where removing the de-rate outright violates in
+\bAggrViolPct\,\% of sessions. Against model-predictive control it returns the \emph{same}
+answer --- to \bMpcGap{} SOC points --- at \bZgEval{} model evaluations against \bMpcMaxEval{},
+and the \bZgEval{} is a proved bound while MPC's number is whatever its iteration cap allowed.
+Across \vPlatforms{} platforms in four media and \vExperiments{} experiments totalling
+\vTotalEpisodes{} episodes, nothing was breached while the certificate reported feasible, the
+admissible set was a single interval in all \scanTotal{} dense scans, and worst-case latency was
+\worstLatency\,$\mu$s --- \slotFraction\,\% of a 10\,ms ISO~26262 slot.
 
-Across \vPlatforms{} vehicle platforms in four media --- ground, air, water and vacuum --- and
-\vExperiments{} experiments totalling \vTotalEpisodes{} simulated episodes, no plant constraint
-was breached while the certificate reported feasible. The admissible set was a single interval
-in all \scanTotal{} dense scans. Worst-case latency across every platform was \worstLatency{}
-$\mu$s, or \slotFraction\,\% of a 10\,ms ISO~26262 task slot.
+Two things make the guarantee checkable rather than asserted. It is \textbf{machine-checked in
+Lean~4} --- \leanTheorems{} theorems, no \texttt{sorry}, no dependency on any axiom --- and the
+proofs turn out to need less than claimed: safety holds for an \emph{arbitrary} predicate, so
+monotonicity buys optimality, not safety. And the two assumptions are tested against \nCells{}
+cells measured by another laboratory: resistance growth stays inside the assumed bound in
+\nInsideEolFrac\,\% of \nEolMeas{} measurements over the life the certificate claims, and heat
+generation is confirmed monotone in current across \nDisCycles{} measured cycles
+($\rho = \nDisRho$), model-free.
 
-The theorem and the bisection's soundness are \textbf{machine-checked in Lean~4}: seven
-theorems, no \texttt{sorry}, and no dependency on any axiom. And the two assumptions the method
-rests on are tested against \nCells{} cells measured by another laboratory: real resistance
-growth stays inside the assumed bound in \nInsideEolFrac\,\% of \nEolMeas{} measurements over
-the life the certificate claims, and heat generation is confirmed monotone in current across
-\nDisCycles{} measured cycles ($\rho = \nDisRho$), model-free.
-
-Four results contradicted the hypotheses they were written to test, and are reported as
-findings rather than repaired: the certificate \emph{refuses} the calibrated cell for a
-rotorcraft before takeoff above \aRefuseC{}C of hover draw; in a sealed pressure hull the
-binding constraint is plating at every water temperature, which is the one constraint the
-theorem enforces but does not certify; in deep space a \emph{smaller} radiator delivers more
-charge, because the pack is cold-limited rather than heat-limited; and under an ice shelf closure leaves only \uIceClosureMed{} minutes before an actual breach
-against a \uIceTransit{}-minute transit to safety, which makes closure the wrong trigger and
-converts a negative result into a quantitative design rule.
+Five results contradicted the hypotheses they were written to test and are reported as findings:
+the certificate \emph{refuses} the calibrated cell for a rotorcraft before takeoff above
+\aRefuseC{}C of hover draw; in a sealed hull the binding constraint is plating at every water
+temperature --- the one constraint the theorem enforces but cannot certify; in deep space a
+\emph{smaller} radiator delivers more charge, the pack being cold-limited; under an ice shelf
+closure leaves \uIceClosureMed{} minutes against a \uIceTransit{}-minute transit, making closure
+the wrong trigger; and a fixed state-of-charge reserve, which we predicted would be badly
+miscalibrated, is \emph{not} beaten where the mission ends on charge.
 \end{abstract}
 
 \section{Introduction}
@@ -399,7 +400,7 @@ $u_{\mathrm{hi}}$. This ordering is checked on every discharge platform, not ass
 \subsection{Machine-checked}\label{sec:formal}
 
 Theorem~\ref{thm:anchored} and the soundness of the bisection are formalised in Lean~4 and
-checked mechanically (\texttt{formal/AnchoredCollapse.lean}). Seven theorems compile with no
+checked mechanically (\texttt{formal/AnchoredCollapse.lean}). \leanTheorems{} theorems compile with no
 \texttt{sorry}, and Lean reports that each \textbf{depends on no axioms at all} --- not
 classical choice, not propositional extensionality. The proofs turned out to need less than
 the paper assumes: they are stated over an arbitrary type carrying a $\le$ relation, with no

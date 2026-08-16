@@ -8,7 +8,7 @@ loudly if a *claim* changes rather than a digit.
 
     python zeroguard/make_paper_macros.py
 """
-import os, sys, json
+import os, sys, json, re
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -333,6 +333,15 @@ if "b2" in D:
         if c8["fixed SOC reserve"] and c8["certificate reserve"]:
             g = 100 * (c8["certificate reserve"] / c8["fixed SOC reserve"] - 1)
             m(f"bTwo{tag}GainEighty", f"{g:+.0f}")
+
+# ---- the Lean development, counted from the source so it cannot go stale ---------------
+LEAN = os.path.join(os.path.dirname(HERE), "formal", "AnchoredCollapse.lean")
+if os.path.exists(LEAN):
+    src = open(LEAN).read()
+    n_thm = len(re.findall(r"^theorem\s", src, re.M))
+    m("leanTheorems", {7: "seven", 8: "eight", 9: "nine", 10: "ten"}.get(n_thm, str(n_thm)))
+    m("leanTheoremsNum", str(n_thm))
+    m("leanSorries", str(src.count("sorry") - src.count("`sorry`") - src.count("no sorry")))
 
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
 with open(OUT, "w") as f:
