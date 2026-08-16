@@ -64,7 +64,32 @@ B3 = "b3_tuned_derate.json"
 D1 = "d1_drive_cycles.json"
 EMB = "e13_embedded.json"
 M1 = "m1_duration_margin.json"
+B4 = "b4_cbf.json"
 P1 = "p1_policy_filter.json"
+
+# ---- against the CBF quadratic program, which is this method's own family ---------------
+pred("B4    the exact CBF condition yields a single interval at every state",
+     lambda: dig(B4, "exact", "disconnected") == 0
+     and dig(B4, "exact", "states") >= 500,
+     "the exact CBF-admissible set was disconnected, so bisection would be unsound")
+pred("B4    and bisection finds its edges to within the scan resolution",
+     lambda: dig(B4, "exact", "within_scan_resolution"),
+     "the bisection edges disagree with a dense scan by more than the scan step")
+pred("B4    the linearisation really is optimistic, so the QP is approximating",
+     lambda: dig(B4, "max_lin_error_K") > 0.0,
+     "the linearisation was exact, and the paper must not claim otherwise")
+eq("B4    with a perfect model and no margin the exact filter breaches nothing",
+   lambda: dig(B4, "isolated", "zg", "violations"), 0)
+pred("B4    while the linearised filter at the matched condition does",
+     lambda: dig(B4, "linearisation_breaks")
+     and dig(B4, "isolated", "cbf@1", "violations") > 10,
+     "the linearised filter held at gamma = 1, so the soundness claim is not supported")
+pred("B4    the QP can be made safe, and the price is charge",
+     lambda: dig(B4, "iso_best_safe_gamma") < 1.0 and dig(B4, "iso_charge_gap_points") > 3.0,
+     "lowering gamma cost nothing, so there is no trade to report")
+pred("B4    and against the best safe gamma the certificate still delivers more",
+     lambda: dig(B4, "gain_over_best_safe_cbf_points") > 0.0,
+     "the CBF-QP matched or beat the certificate on charge at equal safety")
 P2 = "p2_pack_dynamic.json"
 
 # ---- a policy through the filter: containment and transparency --------------------------

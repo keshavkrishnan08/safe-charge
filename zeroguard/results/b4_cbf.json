@@ -1,0 +1,182 @@
+{
+  "trials": 400,
+  "gammas": [
+    0.05,
+    0.1,
+    0.2,
+    0.4,
+    0.7,
+    1.0
+  ],
+  "cbf": [
+    {
+      "gamma": 0.05,
+      "violations": 0,
+      "plating": 0,
+      "trials": 400,
+      "violation_rate": 0.0,
+      "mean_soc": 0.20336191405550316,
+      "evals": 2.0,
+      "cp95_upper_pct": 0.7461355528799563,
+      "max_lin_error": 0.0027496662145682083
+    },
+    {
+      "gamma": 0.1,
+      "violations": 0,
+      "plating": 0,
+      "trials": 400,
+      "violation_rate": 0.0,
+      "mean_soc": 0.23660788733941168,
+      "evals": 2.0,
+      "cp95_upper_pct": 0.7461355528799563,
+      "max_lin_error": 0.011064262054138851
+    },
+    {
+      "gamma": 0.2,
+      "violations": 0,
+      "plating": 0,
+      "trials": 400,
+      "violation_rate": 0.0,
+      "mean_soc": 0.3049793168207494,
+      "evals": 2.0,
+      "cp95_upper_pct": 0.7461355528799563,
+      "max_lin_error": 0.042125188688234505
+    },
+    {
+      "gamma": 0.4,
+      "violations": 0,
+      "plating": 0,
+      "trials": 400,
+      "violation_rate": 0.0,
+      "mean_soc": 0.4428817312603626,
+      "evals": 2.0,
+      "cp95_upper_pct": 0.7461355528799563,
+      "max_lin_error": 0.14746974915434147
+    },
+    {
+      "gamma": 0.7,
+      "violations": 0,
+      "plating": 0,
+      "trials": 400,
+      "violation_rate": 0.0,
+      "mean_soc": 0.5715478607878797,
+      "evals": 2.0,
+      "cp95_upper_pct": 0.7461355528799563,
+      "max_lin_error": 0.37911103321695
+    },
+    {
+      "gamma": 1.0,
+      "violations": 0,
+      "plating": 0,
+      "trials": 400,
+      "violation_rate": 0.0,
+      "mean_soc": 0.5411495771610051,
+      "evals": 2.0,
+      "cp95_upper_pct": 0.7461355528799563,
+      "max_lin_error": 0.6771661272439973
+    }
+  ],
+  "zeroguard": {
+    "violations": 0,
+    "plating": 0,
+    "trials": 400,
+    "violation_rate": 0.0,
+    "mean_soc": 0.6351553996151901,
+    "evals": 19.5854375,
+    "cp95_upper_pct": 0.7461355528799563
+  },
+  "safe_gammas": [
+    0.05,
+    0.1,
+    0.2,
+    0.4,
+    0.7,
+    1.0
+  ],
+  "any_gamma_safe": true,
+  "worst_cbf_rate": 0.0,
+  "max_lin_error_K": 0.6771661272439973,
+  "best_safe_gamma": 0.7,
+  "best_safe_cbf_soc": 0.5715478607878797,
+  "gain_over_best_safe_cbf_points": 6.360753882731041,
+  "exact": {
+    "states": 600,
+    "disconnected": 0,
+    "worst_deviation_A": 0.9020084984275343,
+    "scan_step_A": 1.3533834586466165,
+    "within_scan_resolution": true,
+    "bisection_resolution_A": 4.911271389573812e-10
+  },
+  "isolated": {
+    "cbf@0.05": {
+      "violations": 0,
+      "plating": 0,
+      "trials": 600,
+      "violation_rate": 0.0,
+      "cp95_upper_pct": 0.4980443380361299,
+      "mean_soc": 0.20835304111397424
+    },
+    "cbf@0.1": {
+      "violations": 0,
+      "plating": 0,
+      "trials": 600,
+      "violation_rate": 0.0,
+      "cp95_upper_pct": 0.4980443380361299,
+      "mean_soc": 0.24420836494375645
+    },
+    "cbf@0.2": {
+      "violations": 0,
+      "plating": 0,
+      "trials": 600,
+      "violation_rate": 0.0,
+      "cp95_upper_pct": 0.4980443380361299,
+      "mean_soc": 0.31897562963385867
+    },
+    "cbf@0.4": {
+      "violations": 0,
+      "plating": 0,
+      "trials": 600,
+      "violation_rate": 0.0,
+      "cp95_upper_pct": 0.4980443380361299,
+      "mean_soc": 0.47426076250475224
+    },
+    "cbf@0.7": {
+      "violations": 0,
+      "plating": 0,
+      "trials": 600,
+      "violation_rate": 0.0,
+      "cp95_upper_pct": 0.4980443380361299,
+      "mean_soc": 0.6967202759538127
+    },
+    "cbf@1": {
+      "violations": 42,
+      "plating": 0,
+      "trials": 600,
+      "violation_rate": 0.07,
+      "cp95_upper_pct": 8.96006605084781,
+      "mean_soc": 0.7800575651819349
+    },
+    "zg": {
+      "violations": 0,
+      "plating": 0,
+      "trials": 600,
+      "violation_rate": 0.0,
+      "cp95_upper_pct": 0.4980443380361299,
+      "mean_soc": 0.7818599006937172
+    }
+  },
+  "isolated_matched_gamma": 1.0,
+  "linearisation_breaks": true,
+  "linearisation_breach_rate": 0.07,
+  "linearisation_cp95": 8.96006605084781,
+  "exact_stays_safe": true,
+  "iso_safe_gammas": [
+    0.05,
+    0.1,
+    0.2,
+    0.4,
+    0.7
+  ],
+  "iso_best_safe_gamma": 0.7,
+  "iso_charge_gap_points": 8.513962473990455
+}

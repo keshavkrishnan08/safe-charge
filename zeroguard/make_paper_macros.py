@@ -16,7 +16,7 @@ RES = os.path.join(HERE, "results")
 OUT = os.path.join(os.path.dirname(HERE), "paper", "vehicle_macros.tex")
 
 D = {}
-for k, f in (("p1", "p1_policy_filter.json"), ("p2", "p2_pack_dynamic.json"),
+for k, f in (("b4", "b4_cbf.json"), ("p1", "p1_policy_filter.json"), ("p2", "p2_pack_dynamic.json"),
              ("m1", "m1_duration_margin.json"), ("d1", "d1_drive_cycles.json"), ("emb", "e13_embedded.json"),
              ("b3", "b3_tuned_derate.json"), ("b2", "b2_domain_baselines.json"), ("b", "b1_baselines.json"), ("n", "n1_nasa_validation.json"), ("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
              ("s", "v4_space.json"), ("x", "x_crossdomain.json"),
@@ -46,8 +46,10 @@ g, a, u, s, x = D["g"], D["a"], D["u"], D["s"], D["x"]
 # phases of P2 are not counted -- nothing is certified during them.
 _P1 = 400 * 4 * 2 + 7 * 80 * 2
 _P2 = 24 * 2 + 6 * 8 * 2
-m("vTotalEpisodes", f"{470_923 + _P1 + _P2:,}".replace(",", "{,}"))
-m("vExperiments", "51")
+# B4: 6 gammas x 400 deployed sessions, 400 for the certificate, and 7 x 600 isolated
+_B4 = 6 * 400 + 400 + 7 * 600
+m("vTotalEpisodes", f"{470_923 + _P1 + _P2 + _B4:,}".replace(",", "{,}"))
+m("vExperiments", "53")
 m("vPlatforms", "16")
 m("vClaims", "76")
 m("vFigures", "8")
@@ -415,6 +417,42 @@ if "m1" in D:
     for fn, tag in (("us06col.txt", "USsix"), ("uddscol.txt", "Udds"), ("hwycol.txt", "Hwfet")):
         if fn in mm["regen"]:
             m(f"mGain{tag}", num(mm["regen"][fn]["recovery_gain_points"], 1))
+
+# ---- against the control-barrier-function filter ----------------------------------------
+if "b4" in D:
+    c = D["b4"]
+    m("cTrials", num(c["trials"], 0, True))
+    m("cZgSoc", num(c["zeroguard"]["mean_soc"], 3))
+    m("cZgViol", str(c["zeroguard"]["violations"]))
+    m("cZgEval", num(c["zeroguard"]["evals"], 0))
+    m("cQpEval", num(c["cbf"][0]["evals"], 0))
+    m("cBestGamma", f"{c['best_safe_gamma']:g}")
+    m("cBestGammaSoc", num(c["best_safe_cbf_soc"], 3))
+    m("cGainOverCbf", num(c["gain_over_best_safe_cbf_points"], 1))
+    m("cLinError", num(c["max_lin_error_K"], 2))
+    ex = c["exact"]
+    m("cExactStates", num(ex["states"], 0, True))
+    m("cExactDisc", str(ex["disconnected"]))
+    m("cExactDev", num(ex["worst_deviation_A"], 3))
+    m("cExactScan", num(ex["scan_step_A"], 3))
+    it = c["isolated"]
+    m("cIsoTrials", num(it["zg"]["trials"], 0, True))
+    m("cIsoQpViol", str(it["cbf@1"]["violations"]))
+    m("cIsoQpRate", num(100 * c["linearisation_breach_rate"], 1))
+    m("cIsoQpCP", num(c["linearisation_cp95"], 2))
+    m("cIsoZgViol", str(it["zg"]["violations"]))
+    m("cIsoZgSoc", num(it["zg"]["mean_soc"], 3))
+    m("cIsoSafeGamma", f"{c['iso_best_safe_gamma']:g}")
+    m("cIsoGap", num(c["iso_charge_gap_points"], 1))
+    for g in c["gammas"]:
+        tag = str(g).replace("0.", "").replace(".", "")
+        tag = {"05": "Afive", "1": "Bone", "2": "Btwo", "4": "Bfour",
+               "7": "Bseven", "10": "Cone"}.get(tag, tag)
+        r = [x for x in c["cbf"] if x["gamma"] == g][0]
+        m(f"cQpSoc{tag}", num(r["mean_soc"], 3))
+        m(f"cQpViol{tag}", str(r["violations"]))
+        m(f"cIsoViol{tag}", str(it[f"cbf@{g:g}"]["violations"]))
+        m(f"cIsoSoc{tag}", num(it[f"cbf@{g:g}"]["mean_soc"], 3))
 
 # ---- a policy through the filter --------------------------------------------------------
 if "p1" in D:

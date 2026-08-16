@@ -25,3 +25,7 @@ data/nasa_battery.zip
 data/nasa/
 formal/.lake/
 data/cycles/
+
+# arXiv submission tarball -- regenerate from arxiv/ with:
+#   cd arxiv && tar czf ../arxiv-submission.tar.gz --exclude=METADATA.txt *
+arxiv-submission.tar.gz
