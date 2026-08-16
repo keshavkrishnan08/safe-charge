@@ -64,7 +64,37 @@ B3 = "b3_tuned_derate.json"
 D1 = "d1_drive_cycles.json"
 EMB = "e13_embedded.json"
 M1 = "m1_duration_margin.json"
+N2 = "n2_dfn.json"
 B4 = "b4_cbf.json"
+
+# ---- the certificate against a higher-fidelity plant ------------------------------------
+eq("N2    a ROM-built certificate keeps a DFN cell inside both certified constraints",
+   lambda: dig(N2, "closed_loop", "certified_violations"), 0)
+pred("N2    and the DFN really was driven near its limits, not idled",
+     lambda: dig(N2, "closed_loop", "worst_V") > 4.0
+     and dig(N2, "closed_loop", "worst_T") > 30.0,
+     "the DFN never approached a constraint, so holding it says nothing")
+eq("N2    the affine plating proxy keeps the DFN's real electrode potential above onset",
+   lambda: dig(N2, "closed_loop", "plating_onset_sessions"), 0)
+pred("N2    where a constraint is near binding the ROM's error fits inside the margin",
+     lambda: dig(N2, "open_loop", "covered_where_binding"),
+     "the ROM was optimistic beyond its margin where a constraint was close to active")
+pred("N2    and the paper does not claim it fits everywhere, because it does not",
+     lambda: not dig(N2, "open_loop", "covered_everywhere")
+     and dig(N2, "open_loop", "worst_under_V_frac_margin") > 1.0,
+     "the error fit everywhere after all; the stated caveat is now wrong and must be removed")
+pred("N2    the ROM errs conservative, by more than its own margin",
+     lambda: dig(N2, "open_loop", "over_margin_ratio") > 1.0,
+     "the ROM is not conservative against DFN, so the charge-given-away reading is wrong")
+pred("N2    the misspecification sweep actually moved the plant",
+     lambda: len({r["worst_V"] for r in dig(N2, "misspecification", "rows")}) > 4,
+     "every row of the sweep returned the same plant, so the tweak was a silent no-op")
+pred("N2    and it locates a floor rather than asserting one",
+     lambda: dig(N2, "misspecification", "any_breach"),
+     "nothing broke in the sweep, so no tolerance was measured")
+pred("N2    the test is labelled a model-class test, not an independent-cell one",
+     lambda: dig(N2, "model_class_test") and not dig(N2, "independent_cell"),
+     "the result file does not record the circularity caveat the paper depends on")
 P1 = "p1_policy_filter.json"
 
 # ---- against the CBF quadratic program, which is this method's own family ---------------

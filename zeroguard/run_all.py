@@ -42,6 +42,7 @@ VEHICLE_STAGES = [
     ("D1  the EPA's own driving schedules", "exp/d1_drive_cycles.py"),
     ("E13 deployability on a BMS microcontroller", "exp/e13_embedded.py"),
     ("M1  a margin that knows how long the operation lasts", "exp/m1_duration_margin.py"),
+    ("N2  the certificate against a Doyle-Fuller-Newman plant", "exp/n2_dfn.py"),
     ("B4  against the control-barrier-function filter", "exp/b4_cbf.py"),
     ("P1  the policy may be learned; the safety must not be", "exp/p1_policy_filter.py"),
     ("P2  the weakest cell, in motion", "exp/p2_pack_dynamic.py"),

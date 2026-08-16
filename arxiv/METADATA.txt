@@ -29,7 +29,7 @@ sized around.
 
 We prove that neither is necessary. Terminal voltage, temperature and the lithium-plating
 potential are each monotone in applied current -- the first two by the sign of the
-overpotential and the strict positivity of I^2 R, the third because the plating proxy is affine
+overpotential and the strict positivity of I^2R, the third because the plating proxy is affine
 and decreasing in current -- so the admissible input set is a single interval, and its
 edges are found by bisection in a fixed number of one-step model evaluations, with no
 optimiser, no convergence test, and no identification. The published form assumes the safe input
@@ -51,8 +51,8 @@ a categorical difference on safety, not the large speed-up a single chosen basel
 Against model-predictive control it returns the same answer -- to 0.66 SOC
 points -- at 20 model evaluations against 644, and the 20 is a proved
 bound while MPC's number is whatever its iteration cap allowed.
-Across 16 platforms in four media and 53 experiments totalling
-482,387 episodes, nothing was breached while the certificate reported feasible, the
+Across 16 platforms in four media and 56 experiments totalling
+482,475 episodes, nothing was breached while the certificate reported feasible, the
 admissible set was a single interval in all 64,000 dense scans, and worst-case latency was
 123.9 \mus -- 1.24 % of a 10 ms ISO~26262 slot.
 
@@ -73,6 +73,14 @@ sessions on its own and in 0 through the filter, while still delivering
 +16.7 SOC points more than the safe protocol it replaces. On a policy that was already
 safe the filter intervenes in 0.39 % of steps, and across a swept request its
 intervention is monotone and begins strictly before breaching does.
+
+The plants are ours, which is the objection that matters, so the certificate is also run against a
+Doyle-Fuller-Newman cell -- a different model class, with concentration gradients the
+reduced-order model has no state for. Across 40 charging sessions it breached neither
+certified constraint (peak 4.052 V against 4.20, 32.5 C against 45), and
+the affine plating proxy the paper enforces but never certifies kept DFN's actual negative
+electrode potential above the deposition onset in all of them. It holds with DFN transport
+properties misspecified by 20x and gives way at 50x.
 
 Two things make the guarantee checkable rather than asserted. It is machine-checked in
 Lean~4 -- nine theorems, no \textttsorry, no dependency on any axiom -- and the
@@ -98,7 +106,7 @@ breaks no certified constraint at all and plates 19.4 % of cells.
 
 NOTES FOR THE SUBMISSION FORM
 -----------------------------
-Comments field:  37 pages, 10 figures, 53 experiments. Theorem machine-checked
+Comments field:  38 pages, 10 figures, 56 experiments. Theorem machine-checked
                  in Lean 4 (no sorry, no axioms); proof scripts and all
                  experiment code included in the repository.
 

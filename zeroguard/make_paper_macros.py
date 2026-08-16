@@ -16,7 +16,7 @@ RES = os.path.join(HERE, "results")
 OUT = os.path.join(os.path.dirname(HERE), "paper", "vehicle_macros.tex")
 
 D = {}
-for k, f in (("b4", "b4_cbf.json"), ("p1", "p1_policy_filter.json"), ("p2", "p2_pack_dynamic.json"),
+for k, f in (("n2", "n2_dfn.json"), ("b4", "b4_cbf.json"), ("p1", "p1_policy_filter.json"), ("p2", "p2_pack_dynamic.json"),
              ("m1", "m1_duration_margin.json"), ("d1", "d1_drive_cycles.json"), ("emb", "e13_embedded.json"),
              ("b3", "b3_tuned_derate.json"), ("b2", "b2_domain_baselines.json"), ("b", "b1_baselines.json"), ("n", "n1_nasa_validation.json"), ("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
              ("s", "v4_space.json"), ("x", "x_crossdomain.json"),
@@ -48,8 +48,10 @@ _P1 = 400 * 4 * 2 + 7 * 80 * 2
 _P2 = 24 * 2 + 6 * 8 * 2
 # B4: 6 gammas x 400 deployed sessions, 400 for the certificate, and 7 x 600 isolated
 _B4 = 6 * 400 + 400 + 7 * 600
-m("vTotalEpisodes", f"{470_923 + _P1 + _P2 + _B4:,}".replace(",", "{,}"))
-m("vExperiments", "53")
+# N2: 6 open-loop DFN charges, 40 closed-loop, and 2 x 7 x 3 misspecification runs
+_N2 = 6 + 40 + 2 * 7 * 3
+m("vTotalEpisodes", f"{470_923 + _P1 + _P2 + _B4 + _N2:,}".replace(",", "{,}"))
+m("vExperiments", "56")
 m("vPlatforms", "16")
 m("vClaims", "76")
 m("vFigures", "8")
@@ -417,6 +419,35 @@ if "m1" in D:
     for fn, tag in (("us06col.txt", "USsix"), ("uddscol.txt", "Udds"), ("hwycol.txt", "Hwfet")):
         if fn in mm["regen"]:
             m(f"mGain{tag}", num(mm["regen"][fn]["recovery_gain_points"], 1))
+
+# ---- against a Doyle-Fuller-Newman plant ------------------------------------------------
+if "n2" in D:
+    d = D["n2"]
+    ol, cl, ms = d["open_loop"], d["closed_loop"], d["misspecification"]
+    m("dSet", d["param_set"])
+    m("dOverV", num(1000 * ol["worst_over_V"], 0))
+    m("dOverRatio", num(ol["over_margin_ratio"], 1))
+    m("dNearV", num(100 * ol["near_V_frac_margin"], 0))
+    m("dNearT", num(100 * ol["near_T_frac_margin"], 0))
+    m("dUnderV", num(100 * ol["worst_under_V_frac_margin"], 0))
+    m("dLowestPeakV", num(ol["rows"][0]["dfn_peak_V"], 2))
+    m("dVmargin", num(1000 * ol["dV_margin"], 0))
+    m("dSessions", str(cl["sessions"]))
+    m("dViolV", str(cl["voltage_violations"]))
+    m("dViolT", str(cl["temperature_violations"]))
+    m("dCertViol", str(cl["certified_violations"]))
+    m("dCP", num(cl["cp95_upper_pct"], 2))
+    m("dPeakV", num(cl["worst_V"], 3))
+    m("dPeakT", num(cl["worst_T"], 1))
+    m("dPlateClean", str(cl["sessions"] - cl["plating_onset_sessions"]))
+    m("dMinPhi", num(1000 * cl["worst_phi"], 1))
+    m("dVmaxLim", num(cl["V_max"], 2))
+    m("dTmaxLim", num(cl["T_max"], 0))
+    ec = ms["per_parameter"]["electrolyte conductivity"]
+    dif = ms["per_parameter"]["negative particle diffusivity"]
+    m("dEcHeld", num(1 / ec["held_to"], 0))
+    m("dEcBreak", num(1 / ec["breaks_at"], 0))
+    m("dDiffSwept", num(1 / dif["swept_to"], 0))
 
 # ---- against the control-barrier-function filter ----------------------------------------
 if "b4" in D:

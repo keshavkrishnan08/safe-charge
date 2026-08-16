@@ -7,3 +7,7 @@ numpy>=1.21
 osqp==1.1.3
 scipy>=1.9
 
+
+# N2 only: the Doyle-Fuller-Newman plant the certificate is validated against.
+# Nothing else in the repository imports it, and every other experiment runs without it.
+pybamm>=25.0

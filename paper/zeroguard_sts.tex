@@ -100,6 +100,14 @@ $+$\pGainSafe{} SOC points more than the safe protocol it replaces. On a policy 
 safe the filter intervenes in \pSafeClip\,\% of steps, and across a swept request its
 intervention is monotone and begins strictly before breaching does.
 
+The plants are ours, which is the objection that matters, so the certificate is also run against a
+\textbf{Doyle--Fuller--Newman} cell --- a different model class, with concentration gradients the
+reduced-order model has no state for. Across \dSessions{} charging sessions it breached neither
+certified constraint (peak \dPeakV\,V against \dVmaxLim, \dPeakT\,\degC{} against \dTmaxLim), and
+the affine plating proxy the paper enforces but never certifies kept DFN's \emph{actual} negative
+electrode potential above the deposition onset in all of them. It holds with DFN transport
+properties misspecified by \dEcHeld$\times$ and gives way at \dEcBreak$\times$.
+
 Two things make the guarantee checkable rather than asserted. It is \textbf{machine-checked in
 Lean~4} --- \leanTheorems{} theorems, no \texttt{sorry}, no dependency on any axiom --- and the
 proofs turn out to need less than claimed: safety holds for an \emph{arbitrary} predicate, so
@@ -1716,6 +1724,73 @@ minimum over cells plates \qSweepMinPlate{} anywhere in the sweep (\qSweepLumped
 preference.
 
 
+
+\section{Against a Doyle--Fuller--Newman plant}\label{sec:dfn}
+
+Every vehicle number in \S\ref{sec:ground}--\S\ref{sec:space} comes from a plant we wrote. The
+reduced-order model is defensible and it is still ours, so the question a battery reader asks is
+not whether this was tested on hardware but the sharper one underneath: \emph{how do you know the
+ROM is right?}
+
+DFN \cite{doyle1993,newman2004,fuller1994} is the field's reference model --- porous-electrode
+transport, solid-phase diffusion, Butler--Volmer kinetics, parameterised and validated against
+cells by others --- and it is a \emph{different model class}, not the same equations with
+different numbers. That is what makes it worth running. The envelope of \S\ref{sec:method} varies
+resistance, capacity and plating scale \emph{within} the ROM's structure; DFN inflicts
+misspecification the envelope was never written to cover: concentration gradients the ROM has no
+state for, kinetics it approximates, and a plating potential that is an actual electrode quantity
+rather than an affine proxy. The filter sees only measured SOC and temperature, propagating its
+own relaxation state between them, because that is all a battery management system has.
+
+\paragraph{What this is and is not.} The ROM's coefficients were fitted to the LG M50, and the
+PyBaMM parameter set used here (\dSet) describes that cell, so this is \textbf{not} an
+independent-cell test and must not be read as one. It is a model-class test: same cell, higher
+fidelity. \S\ref{sec:external} covers the other axis --- \nCells{} cells from another laboratory
+that nothing was ever fitted to. Neither substitutes for the other; together they bracket the two
+ways a model can be wrong.
+
+\paragraph{Open loop, and the sign is the whole answer.} Driving both models with the same
+current, the ROM disagrees with DFN on terminal voltage by up to \dOverV\,mV --- \dOverRatio$\times$
+the voltage margin. Read as a magnitude that is alarming, and read as a magnitude it is also
+meaningless, because \emph{the error is almost entirely in the conservative direction}: the ROM
+reads \emph{above} DFN, so the filter throttles earlier than it needed to. For a cap, only the
+ROM reading \emph{below} the truth endangers anything.
+
+Separating the two changes the conclusion. Optimism reaches \dUnderV\,\% of the voltage margin
+somewhere on the trajectory --- but that worst case is at 0.3C, where DFN peaks at
+\dLowestPeakV\,V against a \dVmaxLim\,V limit, so it is arithmetic rather than risk. Restricted to
+steps where DFN is actually near a limit, the ROM is optimistic by \dNearV\,\% of the voltage
+margin and \dNearT\,\% of the thermal margin. Inside both. An earlier version of this experiment
+reported $|\text{error}|$ and made \dOverRatio$\times$-margin \emph{conservatism} look like a
+\dOverRatio$\times$-margin safety gap, which is the opposite of what the data says.
+
+\paragraph{Closed loop.} With the certificate computed on the ROM and the plant a full DFN cell,
+across \dSessions{} charging sessions: \dViolV{} voltage breaches, \dViolT{} temperature
+breaches. DFN's own peak values were \dPeakV\,V against \dVmaxLim{} and \dPeakT\,\degC{} against
+\dTmaxLim, so the cell was worked, not idled.
+
+The plating result is the one worth pausing on. The ROM enforces an affine proxy; DFN reports the
+negative electrode surface potential difference, whose crossing of zero \emph{is} the
+thermodynamic onset of lithium deposition. In \dPlateClean{} of \dSessions{} sessions the real
+electrode potential stayed above onset, with a minimum of $+$\dMinPhi\,mV. The proxy the paper has
+enforced throughout, and has been careful never to certify, does the physical job it was built
+for --- measured against electrode physics rather than against itself.
+
+\paragraph{How wrong the physics can be.} Scaling DFN transport properties away from nominal
+misspecifies the plant structurally, in ways no scale factor in the ROM can represent. The
+certificate holds with electrolyte conductivity at \dEcHeld$\times$ below nominal and gives way at
+\dEcBreak$\times$; with negative particle diffusivity it held to the end of the sweep,
+\dDiffSwept$\times$ below nominal, so that figure is reported as where the sweep stopped and not
+as a measured floor.
+
+This sweep was wrong the first time and the failure is worth recording, because it produced a
+clean result rather than an error. Most DFN transport parameters are functions of concentration
+and temperature rather than scalars; the first implementation scaled only what passed an
+\texttt{isinstance} check for a float and silently left the rest alone. Every row came back
+identical --- which reads exactly like robustness, and would have been published as robustness the
+experiment never demonstrated. It is caught now by a check that the sweep moved the plant at all.
+
+
 \section{What makes this one method}\label{sec:cross}
 
 Forty-four experiments establish that the certificate holds in each medium. That is not the same
@@ -1879,8 +1954,12 @@ comes from a plant we wrote, and a filter tested against models chosen to satisf
 is weaker than one tested on hardware. Three things partially answer it: three of the four media
 \emph{break} the original hypothesis, one platform is refused outright, and fourteen of
 \vExperiments{} experiments contradicted the hypothesis they were written to test --- the
-register was not built so that everything passes. Running the filter in the loop on real cells
-is the natural next step and is not claimed here.
+register was not built so that everything passes. \S\ref{sec:dfn} answers the sharpest form of the objection without a bench: the certificate is
+run against a Doyle--Fuller--Newman plant, a different model class, and holds on both certified
+channels and on DFN's own electrode plating potential. That is not hardware and does not claim to
+be --- DFN is validated against cells by others, so what \S\ref{sec:dfn} buys is one link of that
+chain, not the whole of it. Running the filter in the loop on real cells remains the natural next
+step and is not claimed here.
 
 \paragraph{The external validation is of assumptions, not of vehicles.} NASA's cells are $\sim$2\,Ah
 LCO 18650s charged at 1.5\,A; none of them is a robotaxi, a rotorcraft or a spacecraft. What
@@ -1999,6 +2078,11 @@ V4-9$^\dagger$ & \ref{sec:space} & array decay shrinks the window, not the certi
 V4-10$^\dagger$ & \ref{sec:space} & radiator loss degrades gracefully & it \emph{improves} charge: cold-limited \\
 V4-11 & \ref{sec:space} & the eclipse bus load is a nonzero anchor & null-input browns out every case \\
 \addlinespace
+\multicolumn{4}{@{}l}{\textit{N2 --- Against higher-fidelity physics}}\\
+N2a$^\dagger$ & \ref{sec:dfn} & the ROM's transfer error fits inside the margin & only where a constraint binds; \dOverRatio$\times$ conservative elsewhere \\
+N2b & \ref{sec:dfn} & a ROM certificate keeps a DFN cell safe & \dCertViol/\dSessions{} certified, \dPlateClean/\dSessions{} on real plating \\
+N2c & \ref{sec:dfn} & it tolerates structural misspecification & holds to \dEcHeld$\times$, breaks at \dEcBreak$\times$ \\
+\addlinespace
 \multicolumn{4}{@{}l}{\textit{B4 --- Against the method's own family}}\\
 B4  & \ref{sec:cbf} & the CBF-QP is a rival to be beaten & $\dagger$ it is the \emph{linearised} form of this filter \\
 B4b & \ref{sec:cbf} & linearising the CBF condition is not free & \cIsoQpViol/\cIsoTrials{} at $\gamma{=}1$, exact plant, no margin \\
@@ -2016,7 +2100,7 @@ X5 & \ref{sec:cross} & every zero-failure claim has enough samples & \adequacyVi
 \end{longtable}}
 
 \vspace{4pt}
-\noindent Sixteen of \vExperiments{} are marked $\dagger$. A register in which nothing is marked
+\noindent Seventeen of \vExperiments{} are marked $\dagger$. A register in which nothing is marked
 is a register written after the results.
 
 \end{document}

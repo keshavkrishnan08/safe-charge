@@ -1,0 +1,295 @@
+{
+  "param_set": "OKane2022",
+  "dt_s": 30.0,
+  "T_amb_C": 25.0,
+  "model_class_test": true,
+  "independent_cell": false,
+  "open_loop": {
+    "rows": [
+      {
+        "c_rate": 0.3,
+        "steps": 80,
+        "over_V": 0.0,
+        "over_T": 0.6625826842026825,
+        "over_phi": 0.04498940343736474,
+        "under_V": 0.04097420609286928,
+        "under_T": 0.0,
+        "under_phi": 0.0,
+        "near_V": 0.0,
+        "near_T": 0.0,
+        "near_V_vs_margin": 0.0,
+        "near_T_vs_margin": 0.0,
+        "under_V_vs_margin": 1.3658068697623094,
+        "under_T_vs_margin": 0.0,
+        "dfn_peak_T": 26.480312923523286,
+        "dfn_peak_V": 3.7418244885908347,
+        "dfn_min_phi": 0.10551793843337555
+      },
+      {
+        "c_rate": 0.5,
+        "steps": 80,
+        "over_V": 0.03351948923937176,
+        "over_T": 1.1719932985517119,
+        "over_phi": 0.03919285205926265,
+        "under_V": 0.0023592640116265606,
+        "under_T": 0.0,
+        "under_phi": 0.0,
+        "near_V": 0.0,
+        "near_T": 0.0,
+        "near_V_vs_margin": 0.0,
+        "near_T_vs_margin": 0.0,
+        "under_V_vs_margin": 0.07864213372088535,
+        "under_T_vs_margin": 0.0,
+        "dfn_peak_T": 28.6640450186012,
+        "dfn_peak_V": 3.9055295683804854,
+        "dfn_min_phi": 0.08606076960315062
+      },
+      {
+        "c_rate": 0.8,
+        "steps": 80,
+        "over_V": 0.06998299677993058,
+        "over_T": 1.563593896425516,
+        "over_phi": 0.03988656486389473,
+        "under_V": 0.0,
+        "under_T": 0.0,
+        "under_phi": 0.0,
+        "near_V": 0.0,
+        "near_T": 0.0,
+        "near_V_vs_margin": 0.0,
+        "near_T_vs_margin": 0.0,
+        "under_V_vs_margin": 0.0,
+        "under_T_vs_margin": 0.0,
+        "dfn_peak_T": 33.27762903583874,
+        "dfn_peak_V": 4.145282342120817,
+        "dfn_min_phi": 0.03648907839785873
+      },
+      {
+        "c_rate": 1.0,
+        "steps": 73,
+        "over_V": 0.08856318617046055,
+        "over_T": 1.6197201279949667,
+        "over_phi": 0.04406942050571552,
+        "under_V": 0.0,
+        "under_T": 0.0,
+        "under_phi": 0.0,
+        "near_V": 0.0,
+        "near_T": 0.0,
+        "near_V_vs_margin": 0.0,
+        "near_T_vs_margin": 0.0,
+        "under_V_vs_margin": 0.0,
+        "under_T_vs_margin": 0.0,
+        "dfn_peak_T": 36.65425933627205,
+        "dfn_peak_V": 4.222910487341384,
+        "dfn_min_phi": 0.022485926828081676
+      },
+      {
+        "c_rate": 1.5,
+        "steps": 49,
+        "over_V": 0.11305606678571145,
+        "over_T": 1.1971246762931713,
+        "over_phi": 0.05623376192040154,
+        "under_V": 0.0,
+        "under_T": 0.0,
+        "under_phi": 0.0,
+        "near_V": 0.0,
+        "near_T": 0.0,
+        "near_V_vs_margin": 0.0,
+        "near_T_vs_margin": 0.0,
+        "under_V_vs_margin": 0.0,
+        "under_T_vs_margin": 0.0,
+        "dfn_peak_T": 45.030163974795755,
+        "dfn_peak_V": 4.258719795645373,
+        "dfn_min_phi": 0.01268383023854761
+      },
+      {
+        "c_rate": 2.0,
+        "steps": 37,
+        "over_V": 0.13219524185972098,
+        "over_T": 0.3745234615741495,
+        "over_phi": 0.07171569106151855,
+        "under_V": 0.0,
+        "under_T": 0.3224291324310258,
+        "under_phi": 0.0,
+        "near_V": 0.0,
+        "near_T": 0.17939491702084354,
+        "near_V_vs_margin": 0.0,
+        "near_T_vs_margin": 0.014351593361667483,
+        "under_V_vs_margin": 0.0,
+        "under_T_vs_margin": 0.02579433059448206,
+        "dfn_peak_T": 53.14480358499219,
+        "dfn_peak_V": 4.2852543483937415,
+        "dfn_min_phi": 0.007799397017078341
+      }
+    ],
+    "worst_under_V_frac_margin": 1.3658068697623094,
+    "worst_under_T_frac_margin": 0.02579433059448206,
+    "near_V_frac_margin": 0.0,
+    "near_T_frac_margin": 0.014351593361667483,
+    "worst_over_V": 0.13219524185972098,
+    "over_margin_ratio": 4.406508061990699,
+    "dV_margin": 0.03,
+    "dT_margin": 12.5,
+    "covered_where_binding": true,
+    "covered_everywhere": false
+  },
+  "closed_loop": {
+    "sessions": 40,
+    "solver_failures": 0,
+    "voltage_violations": 0,
+    "temperature_violations": 0,
+    "certified_violations": 0,
+    "cp95_upper_pct": 7.21575245055146,
+    "plating_onset_sessions": 0,
+    "worst_V": 4.052216481741265,
+    "worst_T": 32.463920562857766,
+    "worst_phi": 0.058540812877762506,
+    "mean_soc": 0.6901055293498832,
+    "V_max": 4.2,
+    "T_max": 45.0
+  },
+  "misspecification": {
+    "rows": [
+      {
+        "parameter": "electrolyte conductivity",
+        "factor": 1.0,
+        "breaches": 0,
+        "trials": 3,
+        "solver_failures": 0,
+        "worst_V": 4.049595385445782,
+        "worst_T": 32.46389989327781
+      },
+      {
+        "parameter": "electrolyte conductivity",
+        "factor": 0.5,
+        "breaches": 0,
+        "trials": 3,
+        "solver_failures": 0,
+        "worst_V": 4.055507335614855,
+        "worst_T": 32.487278033458836
+      },
+      {
+        "parameter": "electrolyte conductivity",
+        "factor": 0.25,
+        "breaches": 0,
+        "trials": 3,
+        "solver_failures": 0,
+        "worst_V": 4.070776909086213,
+        "worst_T": 32.52001492560248
+      },
+      {
+        "parameter": "electrolyte conductivity",
+        "factor": 0.1,
+        "breaches": 0,
+        "trials": 3,
+        "solver_failures": 0,
+        "worst_V": 4.114328584859336,
+        "worst_T": 32.95502368852988
+      },
+      {
+        "parameter": "electrolyte conductivity",
+        "factor": 0.05,
+        "breaches": 0,
+        "trials": 3,
+        "solver_failures": 0,
+        "worst_V": 4.146599412697589,
+        "worst_T": 33.42273720669874
+      },
+      {
+        "parameter": "electrolyte conductivity",
+        "factor": 0.02,
+        "breaches": 3,
+        "trials": 3,
+        "solver_failures": 0,
+        "worst_V": 4.329616220160419,
+        "worst_T": 34.584109709658264
+      },
+      {
+        "parameter": "electrolyte conductivity",
+        "factor": 0.01,
+        "breaches": 3,
+        "trials": 3,
+        "solver_failures": 0,
+        "worst_V": 4.637591910144479,
+        "worst_T": 34.85730018856958
+      },
+      {
+        "parameter": "negative particle diffusivity",
+        "factor": 1.0,
+        "breaches": 0,
+        "trials": 3,
+        "solver_failures": 0,
+        "worst_V": 4.049595385445782,
+        "worst_T": 32.46389989327781
+      },
+      {
+        "parameter": "negative particle diffusivity",
+        "factor": 0.5,
+        "breaches": 0,
+        "trials": 3,
+        "solver_failures": 0,
+        "worst_V": 4.052319644418503,
+        "worst_T": 32.46411991108653
+      },
+      {
+        "parameter": "negative particle diffusivity",
+        "factor": 0.25,
+        "breaches": 0,
+        "trials": 3,
+        "solver_failures": 0,
+        "worst_V": 4.055955141905928,
+        "worst_T": 32.46505666360446
+      },
+      {
+        "parameter": "negative particle diffusivity",
+        "factor": 0.1,
+        "breaches": 0,
+        "trials": 3,
+        "solver_failures": 0,
+        "worst_V": 4.061855670081139,
+        "worst_T": 32.46307657443032
+      },
+      {
+        "parameter": "negative particle diffusivity",
+        "factor": 0.05,
+        "breaches": 0,
+        "trials": 3,
+        "solver_failures": 0,
+        "worst_V": 4.068446132484955,
+        "worst_T": 32.46298259888448
+      },
+      {
+        "parameter": "negative particle diffusivity",
+        "factor": 0.02,
+        "breaches": 0,
+        "trials": 3,
+        "solver_failures": 0,
+        "worst_V": 4.100120267787272,
+        "worst_T": 32.50186214615178
+      },
+      {
+        "parameter": "negative particle diffusivity",
+        "factor": 0.01,
+        "breaches": 0,
+        "trials": 3,
+        "solver_failures": 0,
+        "worst_V": 4.163851185730479,
+        "worst_T": 32.532928188566245
+      }
+    ],
+    "breaks_at_factor": 0.02,
+    "per_parameter": {
+      "electrolyte conductivity": {
+        "breaks_at": 0.02,
+        "held_to": 0.05,
+        "swept_to": 0.01
+      },
+      "negative particle diffusivity": {
+        "breaks_at": null,
+        "held_to": 0.01,
+        "swept_to": 0.01
+      }
+    },
+    "any_breach": true,
+    "tolerated_factor": 0.05
+  }
+}
