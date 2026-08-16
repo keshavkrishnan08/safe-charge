@@ -16,7 +16,8 @@ RES = os.path.join(HERE, "results")
 OUT = os.path.join(os.path.dirname(HERE), "paper", "vehicle_macros.tex")
 
 D = {}
-for k, f in (("m1", "m1_duration_margin.json"), ("d1", "d1_drive_cycles.json"), ("emb", "e13_embedded.json"),
+for k, f in (("p1", "p1_policy_filter.json"), ("p2", "p2_pack_dynamic.json"),
+             ("m1", "m1_duration_margin.json"), ("d1", "d1_drive_cycles.json"), ("emb", "e13_embedded.json"),
              ("b3", "b3_tuned_derate.json"), ("b2", "b2_domain_baselines.json"), ("b", "b1_baselines.json"), ("n", "n1_nasa_validation.json"), ("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
              ("s", "v4_space.json"), ("x", "x_crossdomain.json"),
              ("e1", "e1_generality.json"), ("e2", "e2_boundary.json")):
@@ -40,8 +41,13 @@ def num(v, dp=0, comma=False):
 g, a, u, s, x = D["g"], D["a"], D["u"], D["s"], D["x"]
 
 # ---- scale -----------------------------------------------------------------------------
-m("vTotalEpisodes", "470{,}923")
-m("vExperiments", "49")
+# P1 adds 400 sessions x 4 policies x 2 modes plus a 7-point curve at 80 x 2; P2 adds
+# 24 pack charges under two rules and a 6-point spread sweep at 8 packs x 2 rules. The drive
+# phases of P2 are not counted -- nothing is certified during them.
+_P1 = 400 * 4 * 2 + 7 * 80 * 2
+_P2 = 24 * 2 + 6 * 8 * 2
+m("vTotalEpisodes", f"{470_923 + _P1 + _P2:,}".replace(",", "{,}"))
+m("vExperiments", "51")
 m("vPlatforms", "16")
 m("vClaims", "76")
 m("vFigures", "8")
@@ -409,6 +415,66 @@ if "m1" in D:
     for fn, tag in (("us06col.txt", "USsix"), ("uddscol.txt", "Udds"), ("hwycol.txt", "Hwfet")):
         if fn in mm["regen"]:
             m(f"mGain{tag}", num(mm["regen"][fn]["recovery_gain_points"], 1))
+
+# ---- a policy through the filter --------------------------------------------------------
+if "p1" in D:
+    q = D["p1"]
+    m("pTrials", num(q["trials"], 0, True))
+    m("pPolicies", str(len(q["policies"])))
+    m("pUnsafe", str(len(q["unsafe_policies"])))
+    m("pWorstRate", num(100 * q["worst_unfiltered_rate"], 0))
+    m("pContained", "yes" if q["all_contained"] else "no")
+    lp = q["policies"]["learned (charge only)"]
+    m("pLearnViol", str(lp["unfiltered"]["violations"]))
+    m("pLearnFilt", str(lp["filtered"]["violations"]))
+    m("pLearnBias", f"{q['learned_weights'][0]:+.1f}")
+    sp = q["policies"]["CC-CV 0.5C (production)"]
+    m("pSafeClip", num(100 * sp["filtered"]["clip_rate"], 2))
+    m("pSafeCost", num(abs(q["safe_policy_charge_cost_points"]), 3))
+    m("pGainSafe", num(q["gain_over_safe_protocol_points"], 1))
+    m("pCurveTrials", num(q["curve_trials"], 0))
+    m("pUntouchedC", num(q["max_untouched_C"], 1))
+    m("pUnsafeC", num(q["min_unsafe_C"], 1))
+    m("pMonotone", "yes" if q["curve_monotone"] else "no")
+    for r in q["transparency_curve"]:
+        tag = {0.3: "Athree", 0.5: "Afive", 0.8: "Aeight", 1.0: "Bone",
+               1.5: "Bfive", 2.0: "Ctwo", 3.0: "Cthree"}.get(r["c_rate"])
+        if tag:
+            m(f"pClip{tag}", num(100 * r["clip_rate"], 1))
+            m(f"pViol{tag}", str(r["unfiltered_violations"]))
+
+# ---- the weakest cell, in motion --------------------------------------------------------
+if "p2" in D:
+    q = D["p2"]
+    m("qCells", num(q["n_cells"], 0, True))
+    m("qPacks", str(q["total_packs"]))
+    m("qTotalCells", num(q["total_cells"], 0, True))
+    m("qLaps", str(q["laps"]))
+    m("qBind", num(100 * q["bind_fraction"], 0))
+    m("qMinBreach", str(q["min_rule_breaches"]))
+    m("qMinCP", num(q["min_rule_cp95_pct"], 2))
+    m("qMeanBreach", str(q["mean_rule_breaches"]))
+    m("qMinPlated", str(q["min_rule_cells_plated"]))
+    m("qMeanPlated", num(q["mean_rule_cells_plated"], 0, True))
+    m("qMeanPlatePct", num(q["mean_rule_plating_pct"], 1))
+    m("qMeanPlatePacks", str(q["mean_rule_packs_plating"]))
+    m("qSocCost", num(q["soc_cost_points"], 2))
+    m("qDistinct", str(q["max_distinct_binders"]))
+    m("qRank", num(q["binder_temp_rank"], 2))
+    m("qColdest", num(100 * q["binder_coldest_frac"], 0))
+    m("qWorstParam", str(q["binder_is_worst_param"]))
+    sw = q["spread_sweep"]
+    m("qSweepLo", num(sw[0]["spread_T_K"], 1))
+    m("qSweepHi", num(sw[-1]["spread_T_K"], 1))
+    m("qSweepPlateLo", str(sw[0]["mean_plated_cells"]))
+    m("qSweepPlateHi", str(sw[-1]["mean_plated_cells"]))
+    m("qSweepMinPlate", str(q["min_rule_plating_in_sweep"]))
+    m("qSweepLumped", num(q["lumped_plating_in_sweep"], 0, True))
+    m("qSweepPacks", str(q["sweep_packs"]))
+    us = q["cycles"]["US06"]
+    m("qSpreadT", num(us["spread_T_K"], 1))
+    m("qSpreadSoc", num(100 * us["spread_soc"], 1))
+    m("qSwitchRate", num(100 * us["switch_rate"], 0))
 
 # ---- the Lean development, counted from the source so it cannot go stale ---------------
 LEAN = os.path.join(os.path.dirname(HERE), "formal", "AnchoredCollapse.lean")

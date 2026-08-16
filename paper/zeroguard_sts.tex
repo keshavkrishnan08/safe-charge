@@ -82,6 +82,14 @@ Across \vPlatforms{} platforms in four media and \vExperiments{} experiments tot
 admissible set was a single interval in all \scanTotal{} dense scans, and worst-case latency was
 \worstLatency\,$\mu$s --- \slotFraction\,\% of a 10\,ms ISO~26262 slot.
 
+The arrangement the method is for is a filter wrapping a controller it does not trust, and both
+halves of that are measured. A policy fitted by cross-entropy search to maximise delivered charge
+with \emph{no safety term} breaches a certified constraint in \pLearnViol{} of \pTrials{}
+sessions on its own and in \pLearnFilt{} through the filter, while still delivering
+$+$\pGainSafe{} SOC points more than the safe protocol it replaces. On a policy that was already
+safe the filter intervenes in \pSafeClip\,\% of steps, and across a swept request its
+intervention is monotone and begins strictly before breaching does.
+
 Two things make the guarantee checkable rather than asserted. It is \textbf{machine-checked in
 Lean~4} --- \leanTheorems{} theorems, no \texttt{sorry}, no dependency on any axiom --- and the
 proofs turn out to need less than claimed: safety holds for an \emph{arbitrary} predicate, so
@@ -97,8 +105,12 @@ the certificate \emph{refuses} the calibrated cell for a rotorcraft before takeo
 temperature --- the one constraint the theorem enforces but cannot certify; in deep space a
 \emph{smaller} radiator delivers more charge, the pack being cold-limited; under an ice shelf
 closure leaves \uIceClosureMed{} minutes against a \uIceTransit{}-minute transit, making closure
-the wrong trigger; and a fixed state-of-charge reserve, which we predicted would be badly
-miscalibrated, is \emph{not} beaten where the mission ends on charge.
+the wrong trigger; a fixed state-of-charge reserve, which we predicted would be badly
+miscalibrated, is \emph{not} beaten where the mission ends on charge; and in a pack driven to
+divergence by those same EPA schedules, the cell that binds the certificate sits among the
+\emph{coldest} in the pack, not the hottest, because the plating cap tightens as a cell cools ---
+so the lumped pack model that every single-temperature simulation implicitly certifies against
+breaks no certified constraint at all and plates \qMeanPlatePct\,\% of cells.
 \end{abstract}
 
 \section{Introduction}
@@ -1465,6 +1477,142 @@ no recursion, no variable-length structure, \evalCharge{}--\evalDischarge{} mode
 That is smaller than the interrupt vector table on the parts in question.
 
 
+
+\section{A policy through the filter}\label{sec:policy}
+
+The position stated in \S\ref{sec:bottleneck} --- the policy may be learned, the safety must not
+be --- has so far been an argument rather than a result. Every experiment to this point either
+runs the certificate alone or sets it against a rival controller. None puts a policy
+\emph{through} it, which is the arrangement the method is for. A safety filter is not a
+controller; it sits between an arbitrary controller and the plant, and two properties decide
+whether it has done its job. They pull in opposite directions, which is why both have to be
+measured on the same runs.
+
+\textbf{Containment.} An unsafe policy, filtered, must become safe --- not safer.
+
+\textbf{Transparency.} A policy that was already safe must be left alone. A filter that clips a
+good controller is buying safety with performance that did not need to be spent, and the
+standard way to conceal that is to test only aggressive policies.
+
+\paragraph{Four policies, one plant.} Each is run unfiltered and filtered on identical plants
+and identical seeds over \pTrials{} sessions: a greedy controller that always demands
+$u_{\max}$; a naive thermal heuristic that runs at full current until the cell feels warm and
+then tapers, which is the shape of controller a competent engineer writes without a model; a
+\emph{learned} policy; and production CC--CV at 0.5C, included because transparency needs a
+policy that is genuinely safe to begin with.
+
+The learned policy is a smooth state feedback $u = u_{\max}\,\sigma(w^\top[1, \mathrm{soc},
+T, V])$ whose four weights are fitted by cross-entropy search to maximise delivered charge on a
+\emph{nominal} cell, with no safety term of any kind in the objective. That is the honest
+version of the experiment: not a policy trained to misbehave, but one trained to be greedy,
+fitted against the cell a practitioner would have on the bench, and given no reason to care.
+
+What the search returned is worth reporting rather than dressing up. It converged on the
+boundary --- a bias of \pLearnBias{} saturates the sigmoid, so the fitted policy is greedy in
+all but name, and its unfiltered behaviour is indistinguishable from the greedy controller's.
+That is not a failure of the search. It is what maximising delivered charge with no safety term
+\emph{is}, and it is the reason a learned controller cannot be asked to limit itself.
+
+\paragraph{Containment.} \pUnsafe{} of the \pPolicies{} policies breach a certified constraint
+unfiltered, the worst of them in \pWorstRate\,\% of sessions. Through the filter, all of them
+breach nothing: the learned policy goes from \pLearnViol/\pTrials{} to \pLearnFilt/\pTrials.
+
+\paragraph{Transparency.} On the policy that was already safe the filter intervenes in
+\pSafeClip\,\% of steps and costs \pSafeCost{} SOC points. That single number is weak evidence
+on its own, because transparency is not a property of one policy, so the requested C-rate is
+swept from below the admissible ceiling to far above it (Table~\ref{tab:transparency}).
+Intervention rises monotonically with the request; the filter is untouched up to \pUntouchedC C
+and the unfiltered policy is unsafe from \pUnsafeC C. The order of those two matters: clipping
+begins \emph{before} breaching does, which is what a filter that is neither indifferent to the
+request nor asleep looks like.
+
+\begin{table}[t]
+\centering
+\caption{Transparency as a curve. \pCurveTrials{} sessions per row.}
+\label{tab:transparency}
+\begin{tabular}{lrr}
+\toprule
+requested & filter intervenes & unfiltered breaches \\
+\midrule
+0.3C & \pClipAthree\,\% & \pViolAthree/\pCurveTrials \\
+0.5C & \pClipAfive\,\% & \pViolAfive/\pCurveTrials \\
+0.8C & \pClipAeight\,\% & \pViolAeight/\pCurveTrials \\
+1.0C & \pClipBone\,\% & \pViolBone/\pCurveTrials \\
+1.5C & \pClipBfive\,\% & \pViolBfive/\pCurveTrials \\
+2.0C & \pClipCtwo\,\% & \pViolCtwo/\pCurveTrials \\
+3.0C & \pClipCthree\,\% & \pViolCthree/\pCurveTrials \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{And it is worth doing.} The obvious objection is that containment is trivial if the
+filter simply refuses everything. It does not: the filtered aggressive policy delivers
+$+$\pGainSafe{} SOC points more than the safe CC--CV protocol it replaces, with the same zero
+breaches. The comparison is deliberately against that protocol and not against the unfiltered
+run, because the charge the unfiltered run delivered was bought with violations and is not a
+baseline anyone may claim against.
+
+\section{The weakest cell, in motion}\label{sec:packdyn}
+
+\S\ref{sec:ground} established the pack lemma statically: for a \gTruckCells-cell truck pack the
+certified pack current equals the weakest cell's to $10^{-13}$, at one state. That is a
+snapshot. It says the limit is set by whichever cell is worst \emph{at the instant of
+evaluation}, and says nothing about what happens once the cells stop sharing a state --- which
+they do immediately, because a pack is not thermally uniform and its cells are not identical.
+
+The experiment runs in two phases, and the division of labour is the point. First the pack of
+\qCells{} individually simulated cells --- each with its own resistance, capacity, plating scale
+and cooling coefficient --- drives \qLaps{} laps of the EPA schedules of \S\ref{sec:cycles}.
+Nothing is filtered and nothing is claimed there; the cycle's job is to \emph{produce} a
+diverged pack from an external input rather than from a spread we invented, and it is also how
+a real pack arrives at a charger. Then the diverged pack is fast-charged, which is where the
+certificate binds --- in \qBind\,\% of steps --- and where the pack claim carries weight.
+
+An earlier version of this experiment tried to test the pack rule on the regenerative braking
+\emph{within} the cycle and had to be abandoned. Instrumented, the certificate bound in about
+1\,\% of braking steps on US06 and in none at all on UDDS or HWFET: for this pack and these
+schedules, regeneration is simply not constraint-limited at moderate SOC, so every rule ---
+including a deliberately wrong one --- returned a clean sheet. That is a fact about the duty
+cycle, not a result about heterogeneity, and reporting the resulting agreement would have meant
+nothing.
+
+\paragraph{The binding cell moves, and it is the wrong cell.} Driving leaves \qSpreadT\,K and
+\qSpreadSoc{} SOC points of spread. Over the charge that follows, as many as \qDistinct{}
+distinct cells take turns being the binding one, handing over in \qSwitchRate\,\% of steps, so
+an implementation that identifies the worst cell once and caches it is unsound; the minimum has
+to be taken every step. It is the worst-resistance cell in only \qWorstParam{} of \qPacks{}
+packs.
+
+More interesting is \emph{which} cell binds. Its mean temperature rank is \qRank{} against 0.50
+for an indifferent draw, and it is the coldest cell in the pack outright \qColdest\,\% of the
+time. This is the reverse of the intuition a lumped thermal model encodes, and it follows
+directly from \S\ref{sec:cell}: in the charge direction the plating cap tightens as a cell
+cools, so a cold cell is a weak cell. The hot-cell heuristic is looking at the wrong end of the
+distribution.
+
+\paragraph{What the lumped model breaks is not the theorem.} The obvious shortcut is to evaluate
+the certificate once, on mean parameters at the mean state. That is what a pack-level model
+\emph{is}, and it is what every simulation reporting a single pack temperature implicitly
+certifies against. It is given the same pessimistic resistance the real estimator carries, so
+the only thing it gives up is the spread.
+
+It breaks no certified constraint: \qMeanBreach{} of \qPacks{} packs, exactly like the minimum
+rule. That is the theorem doing its job and it is not the interesting line. What it breaks is
+plating --- \qMeanPlated{} of \qTotalCells{} cells (\qMeanPlatePct\,\%), in \qMeanPlatePacks{}
+of \qPacks{} packs, against \qMinPlated{} for the minimum over cells --- bought for
+$+$\qSocCost{} SOC points. Plating is enforced and never certified (\S\ref{sec:theory}), so no
+theorem is violated; the cells are damaged all the same, which is the entire reason the channel
+is enforced. A study that counted only certified channels would have reported the shortcut as
+safe.
+
+Nor does this depend on an unusually loose pack. Sweeping the thermal spread from \qSweepLo\,K
+--- tighter than any production specification --- to \qSweepHi\,K, the lumped model plates cells
+at \emph{every} point, worsening from \qSweepPlateLo{} cells to \qSweepPlateHi, while the
+minimum over cells plates \qSweepMinPlate{} anywhere in the sweep (\qSweepLumped{} against
+\qSweepMinPlate{} in total, over \qSweepPacks{} packs). The minimum is a requirement, not a
+preference.
+
+
 \section{What makes this one method}\label{sec:cross}
 
 Forty-four experiments establish that the certificate holds in each medium. That is not the same
@@ -1748,6 +1896,10 @@ V4-9$^\dagger$ & \ref{sec:space} & array decay shrinks the window, not the certi
 V4-10$^\dagger$ & \ref{sec:space} & radiator loss degrades gracefully & it \emph{improves} charge: cold-limited \\
 V4-11 & \ref{sec:space} & the eclipse bus load is a nonzero anchor & null-input browns out every case \\
 \addlinespace
+\multicolumn{4}{@{}l}{\textit{P --- The filter in use}}\\
+P1 & \ref{sec:policy} & an unsafe policy, filtered, becomes safe without becoming useless & contained \pUnsafe/\pUnsafe; \pSafeClip\,\% intervention on a safe one \\
+P2$^\dagger$ & \ref{sec:packdyn} & the lumped pack model is unsound once cells diverge & \emph{no certified breach}; it plates \qMeanPlatePct\,\% of cells \\
+\addlinespace
 \multicolumn{4}{@{}l}{\textit{X --- Cross-domain}}\\
 X1 & \ref{sec:cross} & the admissible set is one interval in every domain & \scanDisconnected{} disconnected in \scanTotal{} \\
 X2 & \ref{sec:cross} & the generalisation reduces to the original theorem & bit-exact, \reduceMismatch{}/\reduceStates{} \\
@@ -1757,7 +1909,7 @@ X5 & \ref{sec:cross} & every zero-failure claim has enough samples & \adequacyVi
 \end{longtable}}
 
 \vspace{4pt}
-\noindent Fourteen of \vExperiments{} are marked $\dagger$. A register in which nothing is marked
+\noindent Fifteen of \vExperiments{} are marked $\dagger$. A register in which nothing is marked
 is a register written after the results.
 
 \end{document}

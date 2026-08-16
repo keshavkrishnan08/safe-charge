@@ -1,0 +1,167 @@
+{
+  "trials": 400,
+  "learned_weights": [
+    7.594164217885778,
+    5.798212506123588,
+    1.9269026862410776,
+    -3.559015619414689
+  ],
+  "policies": {
+    "greedy (u_max)": {
+      "unfiltered": {
+        "violations": 400,
+        "violation_rate": 1.0,
+        "mean_soc": 0.8108626896505728,
+        "cp95_upper_pct": 100.0,
+        "clip_rate": 0.0
+      },
+      "filtered": {
+        "violations": 0,
+        "violation_rate": 0.0,
+        "mean_soc": 0.6351553996151901,
+        "cp95_upper_pct": 0.7461355528799563,
+        "clip_rate": 1.0
+      },
+      "delta_vs_unfiltered_points": -17.570729003538275,
+      "contained": true,
+      "charge_cost_points": -17.570729003538275,
+      "transparent": false
+    },
+    "thermal heuristic": {
+      "unfiltered": {
+        "violations": 400,
+        "violation_rate": 1.0,
+        "mean_soc": 0.8047597580323665,
+        "cp95_upper_pct": 100.0,
+        "clip_rate": 0.0
+      },
+      "filtered": {
+        "violations": 0,
+        "violation_rate": 0.0,
+        "mean_soc": 0.6351553996151901,
+        "cp95_upper_pct": 0.7461355528799563,
+        "clip_rate": 1.0
+      },
+      "delta_vs_unfiltered_points": -16.960435841717647,
+      "contained": true,
+      "charge_cost_points": -16.960435841717647,
+      "transparent": false
+    },
+    "learned (charge only)": {
+      "unfiltered": {
+        "violations": 400,
+        "violation_rate": 1.0,
+        "mean_soc": 0.8109600754299615,
+        "cp95_upper_pct": 100.0,
+        "clip_rate": 0.0
+      },
+      "filtered": {
+        "violations": 0,
+        "violation_rate": 0.0,
+        "mean_soc": 0.6351553996151901,
+        "cp95_upper_pct": 0.7461355528799563,
+        "clip_rate": 1.0
+      },
+      "delta_vs_unfiltered_points": -17.580467581477144,
+      "contained": true,
+      "charge_cost_points": -17.580467581477144,
+      "transparent": false
+    },
+    "CC-CV 0.5C (production)": {
+      "unfiltered": {
+        "violations": 0,
+        "violation_rate": 0.0,
+        "mean_soc": 0.46851572054279195,
+        "cp95_upper_pct": 0.7461355528799563,
+        "clip_rate": 0.0
+      },
+      "filtered": {
+        "violations": 0,
+        "violation_rate": 0.0,
+        "mean_soc": 0.4684840448113786,
+        "cp95_upper_pct": 0.7461355528799563,
+        "clip_rate": 0.0038749999999999995
+      },
+      "delta_vs_unfiltered_points": -0.003167573141332758,
+      "contained": true,
+      "charge_cost_points": -0.003167573141332758,
+      "transparent": true
+    }
+  },
+  "unsafe_policies": [
+    "greedy (u_max)",
+    "thermal heuristic",
+    "learned (charge only)"
+  ],
+  "all_contained": true,
+  "worst_unfiltered_rate": 1.0,
+  "transparent_on_safe_policy": true,
+  "safe_policy_charge_cost_points": -0.003167573141332758,
+  "learned_saturated": true,
+  "learned_matches_greedy": true,
+  "transparency_curve": [
+    {
+      "c_rate": 0.3,
+      "clip_rate": 0.0,
+      "unfiltered_violations": 0,
+      "trials": 80,
+      "filtered_soc": 0.3538855664891044,
+      "unfiltered_soc": 0.3538855664891044
+    },
+    {
+      "c_rate": 0.5,
+      "clip_rate": 0.0073437500000000005,
+      "unfiltered_violations": 0,
+      "trials": 80,
+      "filtered_soc": 0.4626558630165671,
+      "unfiltered_soc": 0.4627116805154069
+    },
+    {
+      "c_rate": 0.8,
+      "clip_rate": 0.37906249999999997,
+      "unfiltered_violations": 0,
+      "trials": 80,
+      "filtered_soc": 0.6195101708051197,
+      "unfiltered_soc": 0.649967975144883
+    },
+    {
+      "c_rate": 1.0,
+      "clip_rate": 0.76328125,
+      "unfiltered_violations": 3,
+      "trials": 80,
+      "filtered_soc": 0.6378698988272614,
+      "unfiltered_soc": 0.7435191970420526
+    },
+    {
+      "c_rate": 1.5,
+      "clip_rate": 0.938125,
+      "unfiltered_violations": 15,
+      "trials": 80,
+      "filtered_soc": 0.6521490142984966,
+      "unfiltered_soc": 0.8018638026873287
+    },
+    {
+      "c_rate": 2.0,
+      "clip_rate": 0.9821874999999999,
+      "unfiltered_violations": 60,
+      "trials": 80,
+      "filtered_soc": 0.6548797637793101,
+      "unfiltered_soc": 0.802702142463929
+    },
+    {
+      "c_rate": 3.0,
+      "clip_rate": 1.0,
+      "unfiltered_violations": 77,
+      "trials": 80,
+      "filtered_soc": 0.6381063329759055,
+      "unfiltered_soc": 0.802655950110706
+    }
+  ],
+  "curve_trials": 80,
+  "curve_monotone": true,
+  "max_untouched_C": 0.5,
+  "min_unsafe_C": 1.0,
+  "safe_protocol_mean_soc": 0.4684840448113786,
+  "filtered_aggressive_mean_soc": 0.6351553996151901,
+  "gain_over_safe_protocol_points": 16.667135480381145
+}

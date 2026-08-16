@@ -1,0 +1,233 @@
+{
+  "n_cells": 128,
+  "series": 96,
+  "parallel": 45,
+  "packs_per_cycle": 8,
+  "T_amb": 25.0,
+  "soc0": 0.6,
+  "laps": 2,
+  "cool_spread": [
+    0.75,
+    1.15
+  ],
+  "cycles": {
+    "US06": {
+      "cycle": "US06",
+      "spread_T_K": 1.1344373937810541,
+      "spread_soc": 0.013106386470158424,
+      "distinct_binders": 5.25,
+      "max_distinct_binders": 6,
+      "binder_switches": 4.25,
+      "switch_rate": 0.053125000000000006,
+      "binder_temp_rank": 0.308058562992126,
+      "binder_is_coldest_frac": 0.1234375,
+      "binder_is_worst_param": 0,
+      "rules": {
+        "min": {
+          "packs": 8,
+          "packs_violating": 0,
+          "cells_violating": 0,
+          "violation_rate": 0.0,
+          "cp95_upper_pct": 31.234397806636792,
+          "mean_soc": 0.7414786674866771,
+          "packs_plating": 0,
+          "cells_plating": 0,
+          "plating_rate": 0.0,
+          "bind_fraction": 1.0
+        },
+        "mean": {
+          "packs": 8,
+          "packs_violating": 0,
+          "cells_violating": 0,
+          "violation_rate": 0.0,
+          "cp95_upper_pct": 31.234397806636792,
+          "mean_soc": 0.7702344299051351,
+          "packs_plating": 8,
+          "cells_plating": 190,
+          "plating_rate": 1.0,
+          "bind_fraction": 1.0
+        }
+      }
+    },
+    "UDDS": {
+      "cycle": "UDDS",
+      "spread_T_K": 0.44148315873088206,
+      "spread_soc": 0.007542938048937964,
+      "distinct_binders": 5.625,
+      "max_distinct_binders": 7,
+      "binder_switches": 4.75,
+      "switch_rate": 0.059375000000000004,
+      "binder_temp_rank": 0.28302165354330705,
+      "binder_is_coldest_frac": 0.0390625,
+      "binder_is_worst_param": 0,
+      "rules": {
+        "min": {
+          "packs": 8,
+          "packs_violating": 0,
+          "cells_violating": 0,
+          "violation_rate": 0.0,
+          "cp95_upper_pct": 31.234397806636792,
+          "mean_soc": 0.7417516598606081,
+          "packs_plating": 0,
+          "cells_plating": 0,
+          "plating_rate": 0.0,
+          "bind_fraction": 1.0
+        },
+        "mean": {
+          "packs": 8,
+          "packs_violating": 0,
+          "cells_violating": 0,
+          "violation_rate": 0.0,
+          "cp95_upper_pct": 31.234397806636792,
+          "mean_soc": 0.7703369734153411,
+          "packs_plating": 8,
+          "cells_plating": 218,
+          "plating_rate": 1.0,
+          "bind_fraction": 1.0
+        }
+      }
+    },
+    "HWFET": {
+      "cycle": "HWFET",
+      "spread_T_K": 0.8372917335488421,
+      "spread_soc": 0.011858358605586483,
+      "distinct_binders": 6.25,
+      "max_distinct_binders": 9,
+      "binder_switches": 5.25,
+      "switch_rate": 0.065625,
+      "binder_temp_rank": 0.29345472440944886,
+      "binder_is_coldest_frac": 0.060937500000000006,
+      "binder_is_worst_param": 0,
+      "rules": {
+        "min": {
+          "packs": 8,
+          "packs_violating": 0,
+          "cells_violating": 0,
+          "violation_rate": 0.0,
+          "cp95_upper_pct": 31.234397806636792,
+          "mean_soc": 0.7418525106421024,
+          "packs_plating": 0,
+          "cells_plating": 0,
+          "plating_rate": 0.0,
+          "bind_fraction": 1.0
+        },
+        "mean": {
+          "packs": 8,
+          "packs_violating": 0,
+          "cells_violating": 0,
+          "violation_rate": 0.0,
+          "cp95_upper_pct": 31.234397806636792,
+          "mean_soc": 0.770615558596356,
+          "packs_plating": 8,
+          "cells_plating": 188,
+          "plating_rate": 1.0,
+          "bind_fraction": 1.0
+        }
+      }
+    }
+  },
+  "total_packs": 24,
+  "total_cells": 3072,
+  "min_rule_breaches": 0,
+  "mean_rule_breaches": 0,
+  "mean_rule_cells_breached": 0,
+  "mean_rule_packs_plating": 24,
+  "min_rule_packs_plating": 0,
+  "mean_rule_cells_plated": 596,
+  "min_rule_cells_plated": 0,
+  "mean_rule_plating_pct": 19.401041666666668,
+  "min_rule_cp95_pct": 11.734615615494882,
+  "mean_rule_violation_rate": 0.0,
+  "bind_fraction": 1.0,
+  "identity_migrates": true,
+  "max_distinct_binders": 9,
+  "binder_is_worst_param": 0,
+  "binder_coldest_frac": 0.07447916666666667,
+  "binder_temp_rank": 0.2948449803149606,
+  "soc_cost_points": 2.870137464248153,
+  "spread_sweep": [
+    {
+      "dT0_K": 2.0,
+      "spread_T_K": 1.1486392094392177,
+      "packs": 8,
+      "min_breaches": 0,
+      "mean_breaches": 0,
+      "mean_cells": 0,
+      "min_cells": 0,
+      "min_plating": 0,
+      "mean_plating": 8,
+      "min_plated_cells": 0,
+      "mean_plated_cells": 205
+    },
+    {
+      "dT0_K": 5.0,
+      "spread_T_K": 2.42719788429393,
+      "packs": 8,
+      "min_breaches": 0,
+      "mean_breaches": 0,
+      "mean_cells": 0,
+      "min_cells": 0,
+      "min_plating": 0,
+      "mean_plating": 8,
+      "min_plated_cells": 0,
+      "mean_plated_cells": 209
+    },
+    {
+      "dT0_K": 10.0,
+      "spread_T_K": 4.622346486932818,
+      "packs": 8,
+      "min_breaches": 0,
+      "mean_breaches": 0,
+      "mean_cells": 0,
+      "min_cells": 0,
+      "min_plating": 0,
+      "mean_plating": 8,
+      "min_plated_cells": 0,
+      "mean_plated_cells": 225
+    },
+    {
+      "dT0_K": 15.0,
+      "spread_T_K": 6.830429311530873,
+      "packs": 8,
+      "min_breaches": 0,
+      "mean_breaches": 0,
+      "mean_cells": 0,
+      "min_cells": 0,
+      "min_plating": 0,
+      "mean_plating": 8,
+      "min_plated_cells": 0,
+      "mean_plated_cells": 260
+    },
+    {
+      "dT0_K": 20.0,
+      "spread_T_K": 9.051388335175593,
+      "packs": 8,
+      "min_breaches": 0,
+      "mean_breaches": 0,
+      "mean_cells": 0,
+      "min_cells": 0,
+      "min_plating": 0,
+      "mean_plating": 8,
+      "min_plated_cells": 0,
+      "mean_plated_cells": 306
+    },
+    {
+      "dT0_K": 25.0,
+      "spread_T_K": 11.278895798904323,
+      "packs": 8,
+      "min_breaches": 0,
+      "mean_breaches": 0,
+      "mean_cells": 0,
+      "min_cells": 0,
+      "min_plating": 0,
+      "mean_plating": 8,
+      "min_plated_cells": 0,
+      "mean_plated_cells": 357
+    }
+  ],
+  "lumped_fails_above_K": 1.1486392094392177,
+  "min_rule_breaches_in_sweep": 0,
+  "min_rule_plating_in_sweep": 0,
+  "lumped_plating_in_sweep": 1562,
+  "sweep_packs": 48
+}

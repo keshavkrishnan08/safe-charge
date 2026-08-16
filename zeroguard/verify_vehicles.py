@@ -64,6 +64,61 @@ B3 = "b3_tuned_derate.json"
 D1 = "d1_drive_cycles.json"
 EMB = "e13_embedded.json"
 M1 = "m1_duration_margin.json"
+P1 = "p1_policy_filter.json"
+P2 = "p2_pack_dynamic.json"
+
+# ---- a policy through the filter: containment and transparency --------------------------
+pred("P1    every unsafe policy, filtered, violates nothing",
+     lambda: dig(P1, "all_contained"),
+     "a filtered policy still breached a certified constraint")
+pred("P1    and the policies really were unsafe unfiltered",
+     lambda: len(dig(P1, "unsafe_policies")) >= 3
+     and dig(P1, "worst_unfiltered_rate") > 0.9,
+     "the unfiltered policies were not actually unsafe, so containment shows nothing")
+eq("P1    the learned policy, trained on charge alone, is contained exactly",
+   lambda: dig(P1, "policies", "learned (charge only)", "filtered", "violations"), 0)
+pred("P1    an objective with no safety term converges on the boundary",
+     lambda: dig(P1, "learned_saturated") and dig(P1, "learned_matches_greedy"),
+     "the learned policy did not saturate, so the paper must not say it did")
+pred("P1    the filter is transparent to a policy that was already safe",
+     lambda: dig(P1, "transparent_on_safe_policy")
+     and abs(dig(P1, "safe_policy_charge_cost_points")) < 0.05,
+     "the filter clipped a safe policy, so transparency is not demonstrated")
+pred("P1    intervention rises with the request rather than sitting at a constant",
+     lambda: dig(P1, "curve_monotone")
+     and dig(P1, "max_untouched_C") < dig(P1, "min_unsafe_C"),
+     "the intervention curve is not monotone, or clipping begins only after breaches do")
+pred("P1    and the filtered aggressive policy still beats the safe protocol it replaces",
+     lambda: dig(P1, "gain_over_safe_protocol_points") > 10.0,
+     "filtering an aggressive policy left it no better than the production protocol")
+
+# ---- the pack lemma, in motion ----------------------------------------------------------
+eq("P2    the minimum over cells breaches no certified constraint",
+   lambda: dig(P2, "min_rule_breaches"), 0)
+eq("P2    and drives no cell past the plating margin either",
+   lambda: dig(P2, "min_rule_cells_plated"), 0)
+pred("P2    the certificate actually binds, so the comparison is not vacuous",
+     lambda: dig(P2, "bind_fraction") > 0.95,
+     "the certificate rarely bound, so neither rule was tested")
+pred("P2    the binding cell's identity migrates within a single charge",
+     lambda: dig(P2, "identity_migrates") and dig(P2, "max_distinct_binders") > 2,
+     "one cell bound throughout, so caching the worst cell would have been sound")
+pred("P2    and it is not the worst-resistance cell",
+     lambda: dig(P2, "binder_is_worst_param") < dig(P2, "total_packs") / 2,
+     "the worst-parameter cell bound in most packs, so the static rule would have sufficed")
+pred("P2    the binder sits among the pack's colder cells, against intuition",
+     lambda: dig(P2, "binder_temp_rank") < 0.45,
+     "the binding cell was not cold-biased, so the paper must not say it was")
+eq("P2    the lumped model breaks no certified constraint -- that is not what it breaks",
+   lambda: dig(P2, "mean_rule_breaches"), 0)
+pred("P2    what it breaks is plating, in every pack",
+     lambda: dig(P2, "mean_rule_packs_plating") == dig(P2, "total_packs")
+     and dig(P2, "mean_rule_plating_pct") > 5.0,
+     "the lumped model did not plate cells, so the min rule is a preference not a requirement")
+pred("P2    and it plates at every spread tested, including the tightest pack",
+     lambda: dig(P2, "spread_sweep")[0]["mean_plated_cells"] > 0
+     and dig(P2, "min_rule_plating_in_sweep") == 0,
+     "the lumped model was safe at small spread, so the claim needs a threshold")
 
 # ---- the duration-aware margin: a limitation turned into a refinement --------------------
 pred("M1    the duration-aware margin reproduces the calibrated one at its reference duration",
