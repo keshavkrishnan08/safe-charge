@@ -41,6 +41,7 @@ VEHICLE_STAGES = [
     ("B3  a de-rate tuned honestly, then deployed", "exp/b3_tuned_derate.py"),
     ("D1  the EPA's own driving schedules", "exp/d1_drive_cycles.py"),
     ("E13 deployability on a BMS microcontroller", "exp/e13_embedded.py"),
+    ("M1  a margin that knows how long the operation lasts", "exp/m1_duration_margin.py"),
 ]
 
 

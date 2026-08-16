@@ -1,0 +1,202 @@
+{
+  "reduction": {
+    "tau_ref_s": 1800.0,
+    "k_rate_K_per_s": 0.008333333333333333,
+    "old_thermal_K": 12.5,
+    "new_thermal_K": 12.5,
+    "agrees": true,
+    "margin_at_1s": 0.5066666666666667,
+    "margin_at_5s": 0.5333333333333333,
+    "margin_at_60s": 0.9
+  },
+  "charging": {
+    "name": "charge_duration_margin",
+    "trials": 1500,
+    "violations": 0,
+    "rate_pct": 0.0,
+    "cp95_upper_pct": 0.19951618622789935,
+    "mean_soc": 0.4005772538987744
+  },
+  "regen": {
+    "us06col.txt": {
+      "label": "US06",
+      "sustained": {
+        "recovery_mean": 0.7419366368434333,
+        "breach_while_certified": 0
+      },
+      "duration_aware": {
+        "recovery_mean": 0.8919366368434332,
+        "breach_while_certified": 0
+      },
+      "recovery_gain_points": 14.999999999999991
+    },
+    "uddscol.txt": {
+      "label": "UDDS",
+      "sustained": {
+        "recovery_mean": 0.701382397641256,
+        "breach_while_certified": 0
+      },
+      "duration_aware": {
+        "recovery_mean": 0.8501322524141361,
+        "breach_while_certified": 0
+      },
+      "recovery_gain_points": 14.874985477288016
+    },
+    "hwycol.txt": {
+      "label": "HWFET",
+      "sustained": {
+        "recovery_mean": 0.8341336958824617,
+        "breach_while_certified": 0
+      },
+      "duration_aware": {
+        "recovery_mean": 0.8841336958824616,
+        "breach_while_certified": 0
+      },
+      "recovery_gain_points": 4.999999999999993
+    }
+  },
+  "regen_breaches": 0,
+  "regen_mean_gain_points": 11.624995159096,
+  "floor": {
+    "rows": [
+      {
+        "assumed_tau_s": 1800.0,
+        "thermal_margin_K": 12.5,
+        "trials": 200,
+        "violations": 0,
+        "violation_rate": 0.0,
+        "peak_T": 39.56850667942369,
+        "mean_soc": 0.2890417293922384
+      },
+      {
+        "assumed_tau_s": 600.0,
+        "thermal_margin_K": 4.5,
+        "trials": 200,
+        "violations": 0,
+        "violation_rate": 0.0,
+        "peak_T": 40.54689354163343,
+        "mean_soc": 0.6657325919660283
+      },
+      {
+        "assumed_tau_s": 200.0,
+        "thermal_margin_K": 1.8333333333333335,
+        "trials": 200,
+        "violations": 0,
+        "violation_rate": 0.0,
+        "peak_T": 43.21229708222326,
+        "mean_soc": 0.732235195541851
+      },
+      {
+        "assumed_tau_s": 60.0,
+        "thermal_margin_K": 0.9,
+        "trials": 200,
+        "violations": 0,
+        "violation_rate": 0.0,
+        "peak_T": 44.15017798535125,
+        "mean_soc": 0.7408503246535098
+      },
+      {
+        "assumed_tau_s": 20.0,
+        "thermal_margin_K": 0.6333333333333333,
+        "trials": 200,
+        "violations": 0,
+        "violation_rate": 0.0,
+        "peak_T": 44.41285105518631,
+        "mean_soc": 0.7436872140485806
+      },
+      {
+        "assumed_tau_s": 5.0,
+        "thermal_margin_K": 0.5333333333333333,
+        "trials": 200,
+        "violations": 0,
+        "violation_rate": 0.0,
+        "peak_T": 44.510671735643086,
+        "mean_soc": 0.7449204521835193
+      },
+      {
+        "assumed_tau_s": 1.0,
+        "thermal_margin_K": 0.5066666666666667,
+        "trials": 200,
+        "violations": 0,
+        "violation_rate": 0.0,
+        "peak_T": 44.537543468990165,
+        "mean_soc": 0.7450522161823199
+      }
+    ],
+    "true_duration_s": 1800.0,
+    "plant_resistance_beyond_bound": 2.4,
+    "assumed_bound": 1.8,
+    "first_unsafe_assumed_tau_s": null,
+    "smallest_safe_assumed_tau_s": 1.0,
+    "pulse_margin_K": 0.5333333333333333,
+    "tolerance_sweep": [
+      {
+        "plant_R_multiple": 1.8,
+        "over_assumed_bound": 1.0,
+        "trials": 200,
+        "violations": 0,
+        "peak_T": 44.46665544350457
+      },
+      {
+        "plant_R_multiple": 2.2,
+        "over_assumed_bound": 1.2222222222222223,
+        "trials": 200,
+        "violations": 0,
+        "peak_T": 44.4998142802347
+      },
+      {
+        "plant_R_multiple": 2.6,
+        "over_assumed_bound": 1.4444444444444444,
+        "trials": 200,
+        "violations": 0,
+        "peak_T": 44.53086959454245
+      },
+      {
+        "plant_R_multiple": 3.0,
+        "over_assumed_bound": 1.6666666666666665,
+        "trials": 200,
+        "violations": 200,
+        "peak_T": 44.56796767132848
+      },
+      {
+        "plant_R_multiple": 3.5,
+        "over_assumed_bound": 1.9444444444444444,
+        "trials": 200,
+        "violations": 198,
+        "peak_T": 44.61698308180851
+      },
+      {
+        "plant_R_multiple": 4.0,
+        "over_assumed_bound": 2.2222222222222223,
+        "trials": 200,
+        "violations": 198,
+        "peak_T": 44.64707987072854
+      },
+      {
+        "plant_R_multiple": 5.0,
+        "over_assumed_bound": 2.7777777777777777,
+        "trials": 200,
+        "violations": 198,
+        "peak_T": 44.72424079511275
+      },
+      {
+        "plant_R_multiple": 6.0,
+        "over_assumed_bound": 3.333333333333333,
+        "trials": 200,
+        "violations": 193,
+        "peak_T": 44.77942938068109
+      }
+    ],
+    "breaks_at_R_multiple": 3.0,
+    "breaks_at_factor_over_bound": 1.6666666666666665,
+    "has_a_floor": true
+  },
+  "verdict": {
+    "has_a_demonstrated_floor": true,
+    "reduces_correctly": true,
+    "charging_still_safe": true,
+    "regen_still_safe": true,
+    "regen_gain_points": 11.624995159096,
+    "accepted": true
+  }
+}

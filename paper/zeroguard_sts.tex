@@ -1376,15 +1376,61 @@ Against the \dUniversalCap{}C cap that \emph{is} universally safe, the certifica
 \dGainVsUniversal{} points \emph{less} braking energy. The diagnosis is specific and it points
 at a fixable design choice rather than at the theorem: the thermal margin
 $\delta_T = \delta_{T0} + K(s_R-1) = 12.5$\,K was sized for a thirty-minute charge, and it is
-being applied unchanged to a regeneration pulse lasting seconds. A margin that accounted for the
-duration over which heat actually accumulates would recover most of that gap. We have not built
-one, and until we do this is a genuine limitation.
+being applied unchanged to a regeneration pulse lasting seconds. A margin that accounts for the duration
+over which heat actually accumulates recovers about half of that gap; \S\ref{sec:durmargin}
+builds and tests one. The remaining half is still unexplained.
 
 \paragraph{The certificate says this car cannot follow the cycle.} On average it refuses
 \dRefusalPct\,\% of traction steps --- the demanded tractive power lies outside the certified
 envelope for a cold, aged pack. That is a concrete, checkable engineering claim about a
 published schedule, and it is the kind of statement the method exists to make. Whether it is
 \emph{correct} is a question only hardware settles.
+
+
+\subsection{A margin that knows how long the operation lasts}\label{sec:durmargin}
+
+The regeneration shortfall above is worth chasing, because the diagnosis names a design choice
+rather than the theorem, and a diagnosis that is never tested is just an excuse.
+
+\paragraph{What the margin is actually for.} It is natural to read
+$\delta_T = \delta_{T0} + K(s_R-1)$ as covering the one-step prediction error, and that reading
+is wrong by more than an order of magnitude. At 540\,A over a 30\,s step, resistance being $s_R$
+times its assumed value adds \textbf{0.85\,K} --- against a margin of 12.5\,K. The margin is not
+covering one step. It covers \emph{accumulated} divergence, because a one-step filter applied
+repeatedly lets a model error compound: sixty consecutive steps of a half-hour charge, each
+diverging a fraction of a kelvin, is where 12.5\,K comes from.
+
+That makes applying it to regeneration a category error. A braking pulse lasts seconds and is
+followed by cooling; it cannot accumulate thirty minutes of divergence.
+
+\paragraph{The refinement.} Scale the margin by the duration over which current is sustained,
+\begin{equation}
+\delta_T(\tau) \;=\; \delta_{T0} \;+\; k\,(s_R-1)\,\tau, \qquad
+k = \mKrate\ \mathrm{K/s},
+\end{equation}
+with $k$ fixed by requiring $\tau = \mTauRef$\,s to reproduce the published $\delta_T =
+\mMarginRef$\,K exactly, which it does. $\tau$ is not a prediction: it is a property of the
+operating mode, supplied by the integrator. A charging session sustains current for its
+duration; a braking pulse for the length of the event. At $\tau = 60$\,s the margin is
+\mMarginMinute\,K, and at a 5\,s pulse \mMarginPulse\,K.
+
+\paragraph{It has to be tested, and it was.} A smaller margin is a weaker guarantee unless the
+divergence really is smaller. Sustained charging is unchanged --- \mChargeViol{} violations in
+\mChargeTrials{} sessions. On the EPA schedules the pulse margin recovers
+\textbf{$+$\mRegenGain{} points} more braking energy (US06 $+$\mGainUSsix{}, UDDS
+$+$\mGainUdds{}, HWFET $+$\mGainHwfet{}) with \textbf{\mRegenBreach{} breaches while
+certified}. That closes about half the gap to the universally-safe fixed cap of
+\S\ref{sec:cycles}; the rest remains open.
+
+\paragraph{And it has a floor, which had to be looked for properly.} Sweeping the assumed
+duration downward on a sustained charge found no failure at all --- which was a flaw in the
+test, not a property of the method: every plant was drawn \emph{inside} the resistance bound the
+estimator assumes, so the margin was never asked to absorb anything. Asked the other way round,
+holding the margin at its smallest and making the plant progressively wrong, the guarantee gives
+way at \textbf{\mFloorR$\times$ resistance --- \mFloorOver$\times$ beyond the assumed bound of
+\mBound$\times$}. That is the tolerance an integrator needs, and it is the reason this is a
+refinement with a stated envelope rather than a knob.
+
 
 \section{Deployability: what it costs on a BMS microcontroller}\label{sec:embedded}
 

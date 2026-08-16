@@ -16,7 +16,7 @@ RES = os.path.join(HERE, "results")
 OUT = os.path.join(os.path.dirname(HERE), "paper", "vehicle_macros.tex")
 
 D = {}
-for k, f in (("d1", "d1_drive_cycles.json"), ("emb", "e13_embedded.json"),
+for k, f in (("m1", "m1_duration_margin.json"), ("d1", "d1_drive_cycles.json"), ("emb", "e13_embedded.json"),
              ("b3", "b3_tuned_derate.json"), ("b2", "b2_domain_baselines.json"), ("b", "b1_baselines.json"), ("n", "n1_nasa_validation.json"), ("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
              ("s", "v4_space.json"), ("x", "x_crossdomain.json"),
              ("e1", "e1_generality.json"), ("e2", "e2_boundary.json")):
@@ -389,6 +389,26 @@ if "emb" in D:
     m("embConstants", str(fp["calibration_constants"]))
     m("embLutExp", str(fp["lut_entries"]["exp"]))
     m("embLutAsinh", str(fp["lut_entries"]["asinh"]))
+
+# ---- duration-aware margin --------------------------------------------------------------
+if "m1" in D:
+    mm = D["m1"]
+    m("mTauRef", num(mm["reduction"]["tau_ref_s"], 0))
+    m("mKrate", f"{mm['reduction']['k_rate_K_per_s']:.5f}")
+    m("mMarginRef", num(mm["reduction"]["old_thermal_K"], 1))
+    m("mMarginPulse", num(mm["reduction"]["margin_at_5s"], 2))
+    m("mMarginMinute", num(mm["reduction"]["margin_at_60s"], 2))
+    m("mChargeTrials", num(mm["charging"]["trials"], 0, True))
+    m("mChargeViol", str(mm["charging"]["violations"]))
+    m("mRegenGain", num(mm["regen_mean_gain_points"], 1))
+    m("mRegenBreach", str(mm["regen_breaches"]))
+    fl = mm["floor"]
+    m("mFloorR", num(fl["breaks_at_R_multiple"], 1))
+    m("mFloorOver", num(fl["breaks_at_factor_over_bound"], 2))
+    m("mBound", num(fl["assumed_bound"], 1))
+    for fn, tag in (("us06col.txt", "USsix"), ("uddscol.txt", "Udds"), ("hwycol.txt", "Hwfet")):
+        if fn in mm["regen"]:
+            m(f"mGain{tag}", num(mm["regen"][fn]["recovery_gain_points"], 1))
 
 # ---- the Lean development, counted from the source so it cannot go stale ---------------
 LEAN = os.path.join(os.path.dirname(HERE), "formal", "AnchoredCollapse.lean")

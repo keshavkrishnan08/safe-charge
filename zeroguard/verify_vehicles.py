@@ -63,6 +63,23 @@ B2 = "b2_domain_baselines.json"
 B3 = "b3_tuned_derate.json"
 D1 = "d1_drive_cycles.json"
 EMB = "e13_embedded.json"
+M1 = "m1_duration_margin.json"
+
+# ---- the duration-aware margin: a limitation turned into a refinement --------------------
+pred("M1    the duration-aware margin reproduces the calibrated one at its reference duration",
+     lambda: dig(M1, "reduction", "agrees"),
+     "the refined margin does not reduce to the published one")
+eq("M1    sustained charging is exactly as safe as before",
+   lambda: dig(M1, "charging", "violations"), 0)
+eq("M1    and regeneration under the pulse margin breaches nothing",
+   lambda: dig(M1, "regen_breaches"), 0)
+pred("M1    while recovering materially more braking energy",
+     lambda: dig(M1, "regen_mean_gain_points") > 5.0,
+     "the refinement did not recover meaningfully more energy")
+pred("M1    the refinement has a demonstrated floor, not an unbounded knob",
+     lambda: dig(M1, "floor", "has_a_floor")
+     and dig(M1, "floor", "breaks_at_factor_over_bound") > 1.0,
+     "no floor was demonstrated for the reduced margin")
 
 # ---- external mission profiles: the EPA's own driving schedules --------------------------
 eq("D1    zero breaches while certified across all three EPA schedules",
