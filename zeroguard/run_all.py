@@ -39,6 +39,8 @@ VEHICLE_STAGES = [
     ("B1  against CC-CV, a shipped de-rate, and MPC", "exp/b1_baselines.py"),
     ("B2  against each domain's own stopping rule", "exp/b2_domain_baselines.py"),
     ("B3  a de-rate tuned honestly, then deployed", "exp/b3_tuned_derate.py"),
+    ("D1  the EPA's own driving schedules", "exp/d1_drive_cycles.py"),
+    ("E13 deployability on a BMS microcontroller", "exp/e13_embedded.py"),
 ]
 
 

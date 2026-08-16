@@ -16,7 +16,8 @@ RES = os.path.join(HERE, "results")
 OUT = os.path.join(os.path.dirname(HERE), "paper", "vehicle_macros.tex")
 
 D = {}
-for k, f in (("b3", "b3_tuned_derate.json"), ("b2", "b2_domain_baselines.json"), ("b", "b1_baselines.json"), ("n", "n1_nasa_validation.json"), ("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
+for k, f in (("d1", "d1_drive_cycles.json"), ("emb", "e13_embedded.json"),
+             ("b3", "b3_tuned_derate.json"), ("b2", "b2_domain_baselines.json"), ("b", "b1_baselines.json"), ("n", "n1_nasa_validation.json"), ("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
              ("s", "v4_space.json"), ("x", "x_crossdomain.json"),
              ("e1", "e1_generality.json"), ("e2", "e2_boundary.json")):
     p = os.path.join(RES, f)
@@ -346,6 +347,48 @@ if "b3" in D:
     m("bThreeRequired", num(z["deploy"]["required_C"], 1))
     m("bThreeGainPts", num(z["gain_over_safe_fixed_points"], 1))
     m("bThreeGainPct", num(z["gain_over_safe_fixed_pct"], 1))
+
+# ---- EPA drive cycles -------------------------------------------------------------------
+if "d1" in D:
+    d1 = D["d1"]
+    m("dRepeats", str(d1["repeats"]))
+    m("dCertBreach", str(d1["certificate_breaches_while_certified"]))
+    m("dRefusalPct", num(100 * d1["mean_refusal_fraction"], 1))
+    m("dUniversalCap", num(d1["best_universal_cap_C"], 1))
+    m("dGainVsUniversal", num(d1["gain_vs_universal_cap_points"], 1))
+    m("dTunedCap", num(d1["cap_tuned_on_easiest_schedule_C"], 1))
+    br = d1["cap_tuned_elsewhere_breaches"]
+    m("dTunedBreachUSsix", str(br.get("us06col.txt", 0)))
+    m("dTunedBreachHwy", str(br.get("hwycol.txt", 0)))
+    for fn, tag in (("us06col.txt", "USsix"), ("uddscol.txt", "Udds"), ("hwycol.txt", "Hwfet")):
+        if fn in d1["cycles"]:
+            c = d1["cycles"][fn]
+            m(f"d{tag}Km", num(c["distance_km"], 1))
+            m(f"d{tag}Sec", num(c["seconds"], 0))
+            m(f"d{tag}PeakkW", num(c["peak_power_kW"], 0))
+            m(f"d{tag}Recovery", num(100 * c["rules"]["certificate"]["recovery_mean"], 1))
+            m(f"d{tag}Refusal", num(100 * c["rules"]["certificate"]["refusal_fraction"], 1))
+            m(f"d{tag}SafeCap", num(c["best_safe_fixed_C"], 1))
+
+# ---- embedded footprint -----------------------------------------------------------------
+if "emb" in D:
+    e = D["emb"]; vd = e["verdict"]; fp = e["footprint"]; sp = e["single_precision"]
+    m("embBytesPerCall", num(e["allocation"]["bytes_per_call"], 1))
+    m("embCalls", num(e["allocation"]["calls"], 0, True))
+    m("embSpStates", num(sp["states"], 0, True))
+    m("embSpWorstmA", num(1000 * sp["max_abs_dev_A"], 2))
+    m("embSpLooseCount", num(sp["times_less_conservative"], 0, True))
+    m("embSpFrac", f"{100*sp['relative_to_umax']:.1e}")
+    ib = e["integer_bisection"]
+    m("embIntBits", str(ib["bits"]))
+    m("embIntQuantum", num(ib["quantum_A"], 4))
+    m("embIntAbove", str(ib["times_above_reference"]))
+    m("embIntStates", num(ib["states"], 0, True))
+    m("embRam", str(vd["ram_bytes"]))
+    m("embFlash", num(vd["flash_bytes"], 0, True))
+    m("embConstants", str(fp["calibration_constants"]))
+    m("embLutExp", str(fp["lut_entries"]["exp"]))
+    m("embLutAsinh", str(fp["lut_entries"]["asinh"]))
 
 # ---- the Lean development, counted from the source so it cannot go stale ---------------
 LEAN = os.path.join(os.path.dirname(HERE), "formal", "AnchoredCollapse.lean")

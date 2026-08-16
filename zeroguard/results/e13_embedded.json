@@ -1,0 +1,51 @@
+{
+  "allocation": {
+    "calls": 2000,
+    "net_heap_growth_bytes": 896,
+    "bytes_per_call": 0.448,
+    "note": "Python allocates for its own object model; what this shows is that the projection holds no growing structure -- no list, no queue, no history. A C implementation of the same control flow allocates nothing at all, because there is nothing to allocate."
+  },
+  "single_precision": {
+    "states": 20000,
+    "max_abs_dev_A": 0.006866455078125,
+    "mean_dev_A": 1.91141752338769e-06,
+    "times_less_conservative": 2672,
+    "fraction_less_conservative": 0.1336,
+    "relative_to_umax": 1.2715657552083334e-05
+  },
+  "integer_bisection": {
+    "states": 20000,
+    "bits": 16,
+    "max_abs_dev_A": 0.004119873046875,
+    "times_above_reference": 0,
+    "conservative_by_construction": true,
+    "quantum_A": 0.00823974609375,
+    "note": "the integer midpoint rounds down, so the returned current is at or below the real-valued answer -- reduced precision costs charge and cannot cost the guarantee"
+  },
+  "footprint": {
+    "calibration_constants": 38,
+    "calibration_bytes_f32": 152,
+    "live_state_bytes_f32": 28,
+    "live_state_bytes_f64": 56,
+    "lut_entries": {
+      "exp": 65,
+      "asinh": 257,
+      "ocv": 128
+    },
+    "lut_bytes_q16": 1800,
+    "total_ram_f32_bytes": 180,
+    "total_flash_integer_build_bytes": 1952,
+    "evaluations_charge": 20,
+    "evaluations_discharge": 40,
+    "stack_depth": "constant: no recursion, no variable-length structure"
+  },
+  "verdict": {
+    "no_growing_state": true,
+    "single_precision_one_sided": false,
+    "single_precision_worst_excess_A": 0.006866455078125,
+    "single_precision_excess_frac_of_scale": 1.2715657552083334e-05,
+    "integer_one_sided": true,
+    "ram_bytes": 180,
+    "flash_bytes": 1952
+  }
+}

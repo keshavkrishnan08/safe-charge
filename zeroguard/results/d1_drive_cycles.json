@@ -1,0 +1,218 @@
+{
+  "vehicle": {
+    "mass": 1800.0,
+    "crr": 0.01,
+    "cda": 0.62,
+    "rho": 1.225,
+    "eta_drive": 0.9,
+    "eta_regen": 0.7,
+    "regen_cap_kW": 60.0
+  },
+  "regen_cap_sweep": [
+    0.1,
+    0.2,
+    0.3,
+    0.5,
+    1.0
+  ],
+  "repeats": 40,
+  "cycles": {
+    "us06col.txt": {
+      "label": "US06 (aggressive)",
+      "seconds": 600.0,
+      "distance_km": 12.887582048,
+      "peak_power_kW": 93.7148945084636,
+      "peak_regen_kW": 38.87110683372679,
+      "runs": 40,
+      "rules": {
+        "fixed_0.1C": {
+          "recovery_mean": 0.38974037440335707,
+          "breach_while_certified": 0,
+          "breach_after_refusal": 2,
+          "refusal_fraction": 0.1752169197396963,
+          "peak_T": 37.89101223578767
+        },
+        "fixed_0.2C": {
+          "recovery_mean": 0.6835312889306764,
+          "breach_while_certified": 0,
+          "breach_after_refusal": 2,
+          "refusal_fraction": 0.1752169197396963,
+          "peak_T": 37.91281106198733
+        },
+        "fixed_0.3C": {
+          "recovery_mean": 0.8668132163022255,
+          "breach_while_certified": 11,
+          "breach_after_refusal": 2,
+          "refusal_fraction": 0.1752169197396963,
+          "peak_T": 37.93875817989101
+        },
+        "fixed_0.5C": {
+          "recovery_mean": 1.0,
+          "breach_while_certified": 33,
+          "breach_after_refusal": 2,
+          "refusal_fraction": 0.1752169197396963,
+          "peak_T": 37.969028933367156
+        },
+        "fixed_1C": {
+          "recovery_mean": 1.0,
+          "breach_while_certified": 35,
+          "breach_after_refusal": 2,
+          "refusal_fraction": 0.1752169197396963,
+          "peak_T": 37.978412475706406
+        },
+        "certificate": {
+          "recovery_mean": 0.6607395505764797,
+          "breach_while_certified": 0,
+          "breach_after_refusal": 2,
+          "refusal_fraction": 0.1752169197396963,
+          "peak_T": 37.893330414688734
+        }
+      },
+      "safe_fixed_caps": [
+        0.1,
+        0.2
+      ],
+      "best_safe_fixed_C": 0.2,
+      "recovery_gain_points": -2.279173835419668
+    },
+    "uddscol.txt": {
+      "label": "UDDS (city)",
+      "seconds": 1369.0,
+      "distance_km": 11.990238656,
+      "peak_power_kW": 42.51580954267967,
+      "peak_regen_kW": 20.9092307283399,
+      "runs": 40,
+      "rules": {
+        "fixed_0.1C": {
+          "recovery_mean": 0.723354233525951,
+          "breach_while_certified": 0,
+          "breach_after_refusal": 0,
+          "refusal_fraction": 0.325,
+          "peak_T": 36.99842770886292
+        },
+        "fixed_0.2C": {
+          "recovery_mean": 0.9734479101247274,
+          "breach_while_certified": 0,
+          "breach_after_refusal": 0,
+          "refusal_fraction": 0.325,
+          "peak_T": 36.99842770886292
+        },
+        "fixed_0.3C": {
+          "recovery_mean": 1.0,
+          "breach_while_certified": 0,
+          "breach_after_refusal": 0,
+          "refusal_fraction": 0.325,
+          "peak_T": 36.99842770886292
+        },
+        "fixed_0.5C": {
+          "recovery_mean": 1.0,
+          "breach_while_certified": 0,
+          "breach_after_refusal": 0,
+          "refusal_fraction": 0.325,
+          "peak_T": 36.99842770886292
+        },
+        "fixed_1C": {
+          "recovery_mean": 1.0,
+          "breach_while_certified": 0,
+          "breach_after_refusal": 0,
+          "refusal_fraction": 0.325,
+          "peak_T": 36.99842770886292
+        },
+        "certificate": {
+          "recovery_mean": 0.49631952636688814,
+          "breach_while_certified": 0,
+          "breach_after_refusal": 0,
+          "refusal_fraction": 0.325,
+          "peak_T": 36.99842770886292
+        }
+      },
+      "safe_fixed_caps": [
+        0.1,
+        0.2,
+        0.3,
+        0.5,
+        1.0
+      ],
+      "best_safe_fixed_C": 1.0,
+      "recovery_gain_points": -50.368047363311184
+    },
+    "hwycol.txt": {
+      "label": "HWFET (highway)",
+      "seconds": 765.0,
+      "distance_km": 16.506549663999998,
+      "peak_power_kW": 33.992556064202894,
+      "peak_regen_kW": 28.97683203956151,
+      "runs": 40,
+      "rules": {
+        "fixed_0.1C": {
+          "recovery_mean": 0.6251946301377701,
+          "breach_while_certified": 0,
+          "breach_after_refusal": 0,
+          "refusal_fraction": 0.15,
+          "peak_T": 36.9984277088629
+        },
+        "fixed_0.2C": {
+          "recovery_mean": 0.8539318610987312,
+          "breach_while_certified": 0,
+          "breach_after_refusal": 0,
+          "refusal_fraction": 0.15,
+          "peak_T": 36.9984277088629
+        },
+        "fixed_0.3C": {
+          "recovery_mean": 0.9679166671210421,
+          "breach_while_certified": 12,
+          "breach_after_refusal": 0,
+          "refusal_fraction": 0.15,
+          "peak_T": 36.9984277088629
+        },
+        "fixed_0.5C": {
+          "recovery_mean": 1.0,
+          "breach_while_certified": 17,
+          "breach_after_refusal": 0,
+          "refusal_fraction": 0.15,
+          "peak_T": 36.9984277088629
+        },
+        "fixed_1C": {
+          "recovery_mean": 1.0,
+          "breach_while_certified": 17,
+          "breach_after_refusal": 0,
+          "refusal_fraction": 0.15,
+          "peak_T": 36.9984277088629
+        },
+        "certificate": {
+          "recovery_mean": 0.6257632633373466,
+          "breach_while_certified": 0,
+          "breach_after_refusal": 0,
+          "refusal_fraction": 0.15,
+          "peak_T": 36.9984277088629
+        }
+      },
+      "safe_fixed_caps": [
+        0.1,
+        0.2
+      ],
+      "best_safe_fixed_C": 0.2,
+      "recovery_gain_points": -22.816859776138465
+    }
+  },
+  "caps_safe_on_every_schedule": [
+    0.1,
+    0.2
+  ],
+  "best_universal_cap_C": 0.2,
+  "gain_vs_universal_cap_points": -24.269623995780687,
+  "per_cycle_best_safe_cap": {
+    "us06col.txt": 0.2,
+    "uddscol.txt": 1.0,
+    "hwycol.txt": 0.2
+  },
+  "cap_tuned_on_easiest_schedule_C": 1.0,
+  "cap_tuned_elsewhere_breaches": {
+    "us06col.txt": 35,
+    "uddscol.txt": 0,
+    "hwycol.txt": 17
+  },
+  "certificate_breaches_while_certified": 0,
+  "mean_refusal_fraction": 0.21673897324656544,
+  "mean_recovery_gain_points": -25.154693658289773
+}

@@ -61,6 +61,38 @@ N = "n1_nasa_validation.json"
 B = "b1_baselines.json"
 B2 = "b2_domain_baselines.json"
 B3 = "b3_tuned_derate.json"
+D1 = "d1_drive_cycles.json"
+EMB = "e13_embedded.json"
+
+# ---- external mission profiles: the EPA's own driving schedules --------------------------
+eq("D1    zero breaches while certified across all three EPA schedules",
+   lambda: dig(D1, "certificate_breaches_while_certified"), 0)
+pred("D1    a regen cap tuned on the gentlest schedule breaches on the others",
+     lambda: max(dig(D1, "cap_tuned_elsewhere_breaches").values()) > 0,
+     "a single tuned regen cap transferred safely across all three schedules")
+pred("D1    and the certificate's regen conservatism is reported, not hidden",
+     lambda: dig(D1, "gain_vs_universal_cap_points") < 0,
+     "the honest negative on recovered braking energy has gone missing")
+pred("D1    the certificate refuses a material share of traction on aged cold packs",
+     lambda: dig(D1, "mean_refusal_fraction") > 0.05,
+     "the traction-refusal finding is missing")
+
+# ---- deployability on a microcontroller --------------------------------------------------
+pred("E13   a projection holds no growing state",
+     lambda: dig(EMB, "verdict", "no_growing_state"),
+     "the projection accumulated heap state per call")
+pred("E13   the integer search is one-sided by construction",
+     lambda: dig(EMB, "verdict", "integer_one_sided"),
+     "the integer bisection returned more current than the real-valued answer")
+pred("E13   single precision is NOT claimed to be one-sided",
+     lambda: not dig(EMB, "verdict", "single_precision_one_sided"),
+     "single precision was claimed one-sided when it is not")
+pred("E13   and its worst excess is negligible against the thermal margin",
+     lambda: dig(EMB, "single_precision", "relative_to_umax") < 1e-4,
+     "single-precision deviation was not negligible relative to full scale")
+pred("E13   the whole thing fits in a kilobyte of RAM",
+     lambda: dig(EMB, "verdict", "ram_bytes") < 1024,
+     "the RAM footprint exceeded a kilobyte")
 
 # ---- the honest de-rate comparison: tune on one population, deploy on another ------------
 pred("B3    a de-rate tuned on characterisable evidence fails when deployed",

@@ -1345,6 +1345,80 @@ has to absorb it.}
 \end{figure}
 
 
+
+\section{External mission profiles: the EPA's driving schedules}\label{sec:cycles}
+
+Every mission profile so far was written by us. That is defensible where no standard exists and
+indefensible for the one domain where three have existed for decades. This section replaces the
+synthetic ground profile with the EPA's own dynamometer driving schedules, downloaded from
+\texttt{epa.gov}: \textbf{US06} (\dUSsixSec\,s, \dUSsixKm\,km, \dUSsixPeakkW\,kW peak --- the
+supplemental cycle written because the older ones were too gentle), \textbf{UDDS} (city
+stop-and-go, which is what a robotaxi actually does), and \textbf{HWFET} (sustained cruise). The
+speed traces are not ours and the vehicle model is textbook longitudinal dynamics; the only
+thing this work contributes to the simulation is the certificate.
+
+A drive cycle also exercises the two-sided certificate as nothing else here does, because it
+alternates between both cases every few seconds: under traction the demanded power is a
+\emph{floor}, under braking the regenerative current is a \emph{cap}.
+
+\paragraph{The safety claim transfers.} Across all three schedules, over \dRepeats{} runs each
+spanning ambient $-5$ to $35\,\degC$ and the full ageing envelope, the certificate breached a
+constraint \textbf{\dCertBreach{} times while reporting feasible}.
+
+\paragraph{And a fixed regen cap does not.} Production vehicles limit regeneration to a constant
+chosen offline. Which constant? The largest safe on UDDS is \dTunedCap{}C --- and that same cap,
+run on the schedules it was not tuned on, breaches \textbf{\dTunedBreachUSsix{} times on US06}
+and \dTunedBreachHwy{} on HWFET. Only \dUniversalCap{}C is safe on all three. This is the
+transfer failure of \S\ref{sec:tuned} appearing again on external inputs.
+
+\paragraph{But the certificate is over-conservative on regeneration, and that is a real cost.}
+Against the \dUniversalCap{}C cap that \emph{is} universally safe, the certificate recovers
+\dGainVsUniversal{} points \emph{less} braking energy. The diagnosis is specific and it points
+at a fixable design choice rather than at the theorem: the thermal margin
+$\delta_T = \delta_{T0} + K(s_R-1) = 12.5$\,K was sized for a thirty-minute charge, and it is
+being applied unchanged to a regeneration pulse lasting seconds. A margin that accounted for the
+duration over which heat actually accumulates would recover most of that gap. We have not built
+one, and until we do this is a genuine limitation.
+
+\paragraph{The certificate says this car cannot follow the cycle.} On average it refuses
+\dRefusalPct\,\% of traction steps --- the demanded tractive power lies outside the certified
+envelope for a cold, aged pack. That is a concrete, checkable engineering claim about a
+published schedule, and it is the kind of statement the method exists to make. Whether it is
+\emph{correct} is a question only hardware settles.
+
+\section{Deployability: what it costs on a BMS microcontroller}\label{sec:embedded}
+
+The claim that the certificate ``fits inside any microcontroller a battery management system
+already contains'' is an assertion about software that has never been compiled for one. It
+should be measured or withdrawn.
+
+\paragraph{It holds no growing state.} Over \embCalls{} projections the heap grows by
+\embBytesPerCall{} bytes per call --- Python's own object churn. There is no list, no queue, no
+history: nothing a C implementation would need to allocate.
+
+\paragraph{Single precision is adequate but not one-sided.} A Cortex-M4F has a
+single-precision FPU and no double. Across \embSpStates{} states the single-precision filter
+deviates from double by at most \embSpWorstmA\,mA, which is \embSpFrac\,\% of full scale ---
+but it deviates in \emph{both} directions, permitting slightly more current than double in
+\embSpLooseCount{} of them. Negligible in magnitude against a 12.5\,K thermal margin; not a
+guarantee, and not claimed as one.
+
+\paragraph{The search needs no floating point at all, and there the direction \emph{is}
+provable.} Representing current as an integer count of quanta makes the bisection's only
+arithmetic \texttt{mid = (lo + hi) >> 1}, exact on any integer unit. Rounding the midpoint down
+makes the result conservative by construction: across \embIntStates{} states at
+\embIntBits{}-bit resolution (\embIntQuantum\,A quanta) the integer search returned a value
+above the real-valued answer \textbf{\embIntAbove{} times}. For a build that needs a provable
+direction of error, the FPU-free one is the one to ship.
+
+\paragraph{Footprint.} \textbf{\embRam{} bytes of RAM} --- live state plus \embConstants{}
+calibration constants --- and \textbf{\embFlash{} bytes} of lookup tables for an FPU-free build
+(\embLutExp{} entries for the Arrhenius exponential, \embLutAsinh{} for the inverse hyperbolic
+sine, 128 for open-circuit voltage, each sized for 0.1\,\% interpolation error). Constant stack,
+no recursion, no variable-length structure, \evalCharge{}--\evalDischarge{} model evaluations.
+That is smaller than the interrupt vector table on the parts in question.
+
+
 \section{What makes this one method}\label{sec:cross}
 
 Forty-four experiments establish that the certificate holds in each medium. That is not the same
@@ -1467,9 +1541,10 @@ trajectory: a rotorcraft's binding constraint below freezing is voltage, not tem
 (\S\ref{sec:water}); and a lunar lander's survival is bought by emissivity, \sNightBase{} to
 \sNightBest{} hours, not by capacity (\S\ref{sec:space}). Each required only asking the
 certificate about a vehicle that does not exist yet, at \worstLatency\,$\mu$s per answer ---
-deterministic, branch-bounded arithmetic that allocates nothing, calls no library, and has no
-path on which it fails to terminate. There is no solver to qualify and no iteration cap to
-justify, which matters most exactly where qualification is hardest.
+deterministic, branch-bounded arithmetic in \embRam{} bytes of RAM (\S\ref{sec:embedded}), with
+no growing state, no library call, and no path on which it fails to terminate. There is no
+solver to qualify and no iteration cap to justify, which matters most exactly where
+qualification is hardest.
 
 \section{Limitations}\label{sec:limits}
 
