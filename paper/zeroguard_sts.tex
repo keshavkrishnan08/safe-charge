@@ -65,12 +65,18 @@ discharging pack; what zero cannot do is serve the load, which is a \emph{floor}
 cap. \textbf{Anchored Collapse} adds the floor family and a second bisection --- \evalDischarge{}
 fixed evaluations against \evalCharge{}.
 
-The result is a certificate that is measurably better than what ships. Against the conservative
-de-rate a production pack carries, it delivers \textbf{$+$\bGainPts{} points of charge
-($+$\bGainPct\,\%) at zero violations}, on cells where removing the de-rate outright violates in
-\bAggrViolPct\,\% of sessions. Against model-predictive control it returns the \emph{same}
-answer --- to \bMpcGap{} SOC points --- at \bZgEval{} model evaluations against \bMpcMaxEval{},
-and the \bZgEval{} is a proved bound while MPC's number is whatever its iteration cap allowed.
+What that buys is not speed but \emph{transfer}. Tuned on a fleet a manufacturer could
+characterise in advance --- mild ambient, cells not yet aged --- the fastest safe fixed de-rate
+is \bThreeTuned{}C. Deployed on the fleet a vehicle actually meets, from $-10$ to $40\,\degC$ and
+out to end of life, that same rate \textbf{violates in \bThreeTunedViolPct\,\% of sessions}. The
+certificate, re-tuned not at all because it has nothing to tune, violates in
+\textbf{\bThreeZgViol{} of \bThreeTrials{}}. Matching its safety with a constant requires
+dropping to \bThreeRequired{}C, and against that constant it still delivers
+$+$\bThreeGainPct\,\% more charge. The honest claim is therefore parity-or-better on charge and
+a categorical difference on safety, not the large speed-up a single chosen baseline suggests.
+Against model-predictive control it returns the \emph{same} answer --- to \bMpcGap{} SOC
+points --- at \bZgEval{} model evaluations against \bMpcMaxEval{}, and the \bZgEval{} is a proved
+bound while MPC's number is whatever its iteration cap allowed.
 Across \vPlatforms{} platforms in four media and \vExperiments{} experiments totalling
 \vTotalEpisodes{} episodes, nothing was breached while the certificate reported feasible, the
 admissible set was a single interval in all \scanTotal{} dense scans, and worst-case latency was
@@ -1094,8 +1100,9 @@ sized around.}
 \textbf{Controller} & \textbf{Violations} & \textbf{Mean SOC} & \textbf{Evals (med)} &
 \textbf{Evals (max)} & \textbf{Worst case known?} \\
 \midrule
-CC-CV at the shipped \bDerateC{}C de-rate & \bViolDerate{} & \bSocDerate{} & 1 & 1 & --- \\
-CC-CV at \bAggrC{}C & \bViolAggr{} & \bSocAggr{} & 1 & 1 & --- \\
+CC-CV at \bDerateC{}C (safe on this population) & \bViolDerate{} & \bSocDerate{} & 1 & 1 & --- \\
+CC-CV at \bFastestSafeC{}C (also safe here) & \bViolOneC{} & \bSocOneC{} & 1 & 1 & --- \\
+CC-CV at \bAggrC{}C (first unsafe rate) & --- & --- & 1 & 1 & --- \\
 MPC, horizon 1 (SLSQP) & \bViolMpcOne{} & \bSocMpcOne{} & 11 & \bMpcMaxEval{} & no \\
 MPC, horizon 3 (SLSQP) & \bViolMpcThree{} & \bSocMpcThree{} & 94 & 502 & no \\
 \textbf{ZEROGUARD} & \textbf{\bViolZg{}} & \textbf{\bSocZg{}} & 20 & \textbf{\bZgEval{}} &
@@ -1104,17 +1111,45 @@ MPC, horizon 3 (SLSQP) & \bViolMpcThree{} & \bSocMpcThree{} & 94 & 502 & no \\
 \end{tabular}
 \end{table}
 
-\paragraph{Against what ships today.} A production pack is limited to a single conservative
-C-rate chosen for the weakest cell at a temperature extreme at end of life, and applied whatever
-the present state happens to be. The certificate delivers \textbf{$+$\bGainPts{} SOC points
-($+$\bGainPct\,\%)} over that de-rate with \bViolZg{} violations. That is the entire economic
-argument of \S\ref{sec:enables}, measured rather than asserted.
+\paragraph{Against what ships today, carefully.} A production pack is limited to a single
+conservative C-rate chosen offline and applied whatever the present state happens to be. It is
+tempting to pick such a rate, measure the gain against it, and quote the number --- and that is
+exactly what an earlier version of this section did, reporting $+$\bGainPts{} points against
+\bDerateC{}C. \textbf{That number measured our own choice of baseline.} Sweeping the whole
+plausible range shows why: a fixed \bFastestSafeC{}C is also safe on that population, and
+delivers \emph{more} charge than the certificate, which carries a pessimistic estimator and a
+12.5\,K throttle that a well-chosen constant does not.
 
-\paragraph{And the de-rate is not paranoia.} A comparison against a conservative baseline is
-only meaningful if the conservatism is doing something. Removing it --- charging at \bAggrC{}C
-on the same cells --- violates in \textbf{\bAggrViolPct\,\% of sessions}. The de-rate is
-protecting against something real; the certificate's contribution is to stop paying for it when
-the present state does not require it.
+The comparison only becomes meaningful when the fixed rate is tuned and evaluated on
+\emph{different} populations, which is what \S\ref{sec:tuned} does. A manufacturer does not get
+to choose a de-rate knowing the fleet it will meet.
+
+
+\subsection{A de-rate, tuned honestly, then deployed}\label{sec:tuned}
+
+The fair experiment tunes the constant on evidence a manufacturer could actually have, then
+ships it into the world.
+
+\textbf{Stage 1, characterisation.} On a benign fleet --- 25\,\degC{} ambient, cells not yet
+aged --- the fastest fixed rate with zero violations is \textbf{\bThreeTuned{}C}. That is the
+best de-rate this evidence supports, and a manufacturer choosing it would be doing nothing
+wrong.
+
+\textbf{Stage 2, deployment.} On the fleet a vehicle actually meets --- ambient $-10$ to
+$40\,\degC$, cells out to end of life --- that same \bThreeTuned{}C rate violates in
+\textbf{\bThreeTunedViolPct\,\% of \bThreeTrials{} sessions}. The certificate, given the same
+widened population and re-tuned not at all because it has nothing to tune, violates in
+\textbf{\bThreeZgViol{}} (CP-95 upper bound \bThreeZgCP\,\%).
+
+\textbf{What safety costs a constant.} To be safe across the deployment fleet, a fixed rate must
+fall to \bThreeRequired{}C. Against that correctly conservative constant the certificate
+delivers $+$\bThreeGainPts{} points ($+$\bThreeGainPct\,\%) --- a real gain, and a modest one.
+
+So the argument for the method is not that it charges dramatically faster. It is that
+\textbf{no constant is simultaneously safe across the deployment fleet and fast on the benign
+part of it}, because a constant cannot see which fleet it is in. The certificate can, at
+\worstLatency\,$\mu$s and without identifying anything. Charge parity-or-better is the
+by-product; the transfer of the guarantee is the result.
 
 \paragraph{Against MPC: the same problem, solved two ways.} This is the comparison that matters
 for the run-time claim, because that claim is only interesting if the solver is solving the same

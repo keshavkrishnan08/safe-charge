@@ -16,7 +16,7 @@ RES = os.path.join(HERE, "results")
 OUT = os.path.join(os.path.dirname(HERE), "paper", "vehicle_macros.tex")
 
 D = {}
-for k, f in (("b2", "b2_domain_baselines.json"), ("b", "b1_baselines.json"), ("n", "n1_nasa_validation.json"), ("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
+for k, f in (("b3", "b3_tuned_derate.json"), ("b2", "b2_domain_baselines.json"), ("b", "b1_baselines.json"), ("n", "n1_nasa_validation.json"), ("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
              ("s", "v4_space.json"), ("x", "x_crossdomain.json"),
              ("e1", "e1_generality.json"), ("e2", "e2_boundary.json")):
     p = os.path.join(RES, f)
@@ -296,17 +296,17 @@ if "b" in D:
     b = D["b"]; cc = b["controllers"]
     m("bTrials", num(b["trials"], 0, True))
     m("bDerateC", num(b["derate_C"], 1))
-    m("bAggrC", num(b["aggressive_C"], 1))
     m("bGainPts", num(b["charge_gain_over_derate_points"], 1))
     m("bGainPct", num(b["charge_gain_over_derate_pct"], 1))
     m("bAggrViolPct", num(100 * b["aggressive_violation_rate"], 0))
-    m("bAggrViol", str(cc["ccv_aggressive"]["violations"]))
+    m("bAggrC", num(b["slowest_unsafe_derate_C"], 1))
+    m("bFastestSafeC", num(b["fastest_safe_derate_C"], 1))
     m("bMpcGap", num(abs(b["mpc_h1_soc_gap_points"]), 2))
     m("bMpcRatio", num(b["mpc_h1_eval_ratio"], 1))
     m("bMpcMaxEval", num(cc["mpc_h1"]["evals_max"], 0))
     m("bMpcIterSpread", str(cc["mpc_h1"].get("iters_spread", "")))
     m("bZgEval", num(cc["zeroguard"]["evals_max"], 0))
-    for k, tag in (("ccv_derate", "Derate"), ("ccv_aggressive", "Aggr"),
+    for k, tag in (("ccv_0.5C", "Derate"), ("ccv_1C", "OneC"),
                    ("mpc_h1", "MpcOne"), ("mpc_h3", "MpcThree"), ("zeroguard", "Zg")):
         if k in cc:
             m(f"bSoc{tag}", num(cc[k]["mean_soc"], 3))
@@ -333,6 +333,19 @@ if "b2" in D:
         if c8["fixed SOC reserve"] and c8["certificate reserve"]:
             g = 100 * (c8["certificate reserve"] / c8["fixed SOC reserve"] - 1)
             m(f"bTwo{tag}GainEighty", f"{g:+.0f}")
+
+# ---- tuned de-rate, deployed ------------------------------------------------------------
+if "b3" in D:
+    z = D["b3"]
+    m("bThreeTrials", num(z["trials"], 0, True))
+    m("bThreeTuned", num(z["tune"]["chosen_C"], 1))
+    m("bThreeTunedViolPct", num(100 * z["tuned_rate_violation_rate"], 1))
+    m("bThreeTunedViol", str(z["deploy"]["rows"][f"ccv_{z['tune']['chosen_C']:g}C"]["violations"]))
+    m("bThreeZgViol", str(z["zeroguard_violations"]))
+    m("bThreeZgCP", num(z["zeroguard_cp95"], 3))
+    m("bThreeRequired", num(z["deploy"]["required_C"], 1))
+    m("bThreeGainPts", num(z["gain_over_safe_fixed_points"], 1))
+    m("bThreeGainPct", num(z["gain_over_safe_fixed_pct"], 1))
 
 # ---- the Lean development, counted from the source so it cannot go stale ---------------
 LEAN = os.path.join(os.path.dirname(HERE), "formal", "AnchoredCollapse.lean")

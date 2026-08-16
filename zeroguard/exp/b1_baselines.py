@@ -46,9 +46,14 @@ SEED = 20260815
 ENV = dict(R=(1.0, 1.8), Q=(0.80, 1.0), plate=(1.0, 1.6))
 DT, HORIZON, TARGET = 30.0, 80, 0.80
 
-# What a production pack ships with: a single conservative C-rate chosen for the worst cell at
-# the worst temperature at end of life, applied whatever the present state happens to be.
-DERATE_C = 0.5
+# A production de-rate is a single conservative C-rate chosen for the worst cell at the worst
+# temperature at end of life, applied whatever the present state happens to be. Rather than pick
+# one number and rest the headline on it -- an earlier version used 0.5C, chosen by us, which is
+# exactly the kind of assumption a reader should refuse to accept -- the whole plausible range is
+# swept. The reported gain is then a curve, and the claim does not depend on which point of it a
+# particular manufacturer happens to occupy.
+DERATE_SWEEP = (0.3, 0.5, 0.7, 1.0, 1.5)
+DERATE_C = 0.5          # the point quoted in prose, for continuity with earlier runs
 AGGRESSIVE_C = 2.0
 
 
@@ -163,18 +168,16 @@ def main(n=250, seed=SEED):
     print("B1 -- the certificate against what people actually deploy\n" + "=" * 78)
     est = V.pessimistic("robotaxi-urban", T_amb=25.0)
     marg = V.margins(est)
-    res = {k: dict(soc=[], viol=0, evals=[], iters=[], enf=0)
-           for k in ("ccv_derate", "ccv_aggressive", "mpc_h1", "mpc_h3", "zeroguard")}
+    keys = ["mpc_h1", "mpc_h3", "zeroguard"] + [f"ccv_{c:g}C" for c in DERATE_SWEEP]
+    res = {k: dict(soc=[], viol=0, evals=[], iters=[], enf=0) for k in keys}
 
     for i in range(n):
         plant, _ = V.draw_plant("robotaxi-urban", rng, ENV, T_amb=25.0)
         s0 = est.init(float(rng.uniform(0.05, 0.30)), float(rng.uniform(18.0, 35.0)))
-        runs = {
-            "ccv_derate": run_ccv(plant, est, s0, 25.0, DERATE_C, marg),
-            "ccv_aggressive": run_ccv(plant, est, s0, 25.0, AGGRESSIVE_C, marg),
-            "zeroguard": run_filter(plant, est, s0, 25.0, marg),
-            "mpc_h1": run_mpc(plant, est, s0, 25.0, marg, 1),
-        }
+        runs = {"zeroguard": run_filter(plant, est, s0, 25.0, marg),
+                "mpc_h1": run_mpc(plant, est, s0, 25.0, marg, 1)}
+        for c in DERATE_SWEEP:
+            runs[f"ccv_{c:g}C"] = run_ccv(plant, est, s0, 25.0, c, marg)
         if i < max(30, n // 8):                      # horizon-3 MPC is expensive; subsample
             runs["mpc_h3"] = run_mpc(plant, est, s0, 25.0, marg, 3)
         for k, r in runs.items():
@@ -212,11 +215,32 @@ def main(n=250, seed=SEED):
                        iters_spread=int(it.max() - it.min()))
         out["controllers"][k] = rec
 
-    zg, dr = out["controllers"]["zeroguard"], out["controllers"]["ccv_derate"]
-    ag = out["controllers"]["ccv_aggressive"]
+    zg = out["controllers"]["zeroguard"]
+    sweep = []
+    for c in DERATE_SWEEP:
+        r = out["controllers"][f"ccv_{c:g}C"]
+        sweep.append(dict(c_rate=c, mean_soc=r["mean_soc"], violations=r["violations"],
+                          trials=r["trials"],
+                          violation_rate=r["violations"] / r["trials"],
+                          gain_points=100 * (zg["mean_soc"] - r["mean_soc"]),
+                          gain_pct=100 * (zg["mean_soc"] / r["mean_soc"] - 1)))
+    out["derate_sweep"] = sweep
+    # the only de-rates a manufacturer could actually ship are the ones that are safe
+    safe = [s for s in sweep if s["violations"] == 0]
+    out["safe_derates"] = [s["c_rate"] for s in safe]
+    out["fastest_safe_derate_C"] = max(s["c_rate"] for s in safe) if safe else None
+    if safe:
+        best = min(safe, key=lambda s: s["gain_points"])   # the toughest safe baseline
+        out["gain_vs_fastest_safe_derate_points"] = best["gain_points"]
+        out["gain_vs_fastest_safe_derate_pct"] = best["gain_pct"]
+    dr = out["controllers"][f"ccv_{DERATE_C:g}C"]
+    ag = out["controllers"]["ccv_2C"] if "ccv_2C" in out["controllers"] else None
     out["charge_gain_over_derate_points"] = 100 * (zg["mean_soc"] - dr["mean_soc"])
     out["charge_gain_over_derate_pct"] = 100 * (zg["mean_soc"] / dr["mean_soc"] - 1)
-    out["aggressive_violation_rate"] = ag["violations"] / ag["trials"]
+    unsafe = [s for s in sweep if s["violations"] > 0]
+    out["aggressive_violation_rate"] = (min(s["violation_rate"] for s in unsafe)
+                                        if unsafe else 0.0)
+    out["slowest_unsafe_derate_C"] = (min(s["c_rate"] for s in unsafe) if unsafe else None)
     if "mpc_h1" in out["controllers"]:
         m1 = out["controllers"]["mpc_h1"]
         out["mpc_h1_eval_ratio"] = m1["evals_max"] / zg["evals_max"]
@@ -228,7 +252,7 @@ def main(n=250, seed=SEED):
     print(f"\n{n} sessions per controller, identical plants and seeds, same margins\n")
     print(f"{'controller':18}{'viol':>6}{'CP95 %':>9}{'mean SOC':>10}"
           f"{'evals med':>11}{'evals max':>11}{'worst known?':>14}")
-    for k in ("ccv_derate", "ccv_aggressive", "mpc_h1", "mpc_h3", "zeroguard"):
+    for k in [f"ccv_{c:g}C" for c in DERATE_SWEEP] + ["mpc_h1", "mpc_h3", "zeroguard"]:
         if k not in out["controllers"]:
             continue
         r = out["controllers"][k]
@@ -236,13 +260,18 @@ def main(n=250, seed=SEED):
         print(f"{k:18}{r['violations']:>6}{r['cp95_upper_pct']:>9.3f}{r['mean_soc']:>10.3f}"
               f"{r['evals_median']:>11.0f}{r['evals_max']:>11.0f}{wk:>14}")
 
-    print(f"\n  against the shipped de-rate ({DERATE_C}C): "
-          f"{out['charge_gain_over_derate_points']:+.1f} SOC points "
-          f"({out['charge_gain_over_derate_pct']:+.1f}%) at "
-          f"{zg['violations']} violations")
-    print(f"  the de-rate is not paranoia: {DERATE_C}C -> {dr['violations']} violations, but "
-          f"{AGGRESSIVE_C}C -> {ag['violations']}/{ag['trials']} "
-          f"({100*out['aggressive_violation_rate']:.0f}%)")
+    print(f"\n  de-rate sweep -- the gain does not rest on choosing one number:")
+    print(f"    {'C-rate':>8}{'viol':>7}{'mean SOC':>10}{'gain vs ZG':>13}")
+    for s in out["derate_sweep"]:
+        flag = "" if s["violations"] == 0 else "  <- unsafe, cannot ship"
+        print(f"    {s['c_rate']:>7.1f}C{s['violations']:>7}{s['mean_soc']:>10.3f}"
+              f"{s['gain_points']:>+12.1f}{flag}")
+    print(f"  the fastest de-rate a manufacturer could actually ship is "
+          f"{out['fastest_safe_derate_C']}C; even against that the certificate delivers "
+          f"{out['gain_vs_fastest_safe_derate_points']:+.1f} points "
+          f"({out['gain_vs_fastest_safe_derate_pct']:+.1f}%)")
+    print(f"  and the conservatism is real: {out['slowest_unsafe_derate_C']}C already violates "
+          f"in {100*out['aggressive_violation_rate']:.0f}% of sessions")
     if "mpc_h1" in out["controllers"]:
         m1 = out["controllers"]["mpc_h1"]
         print(f"  against MPC at horizon 1: delivered SOC differs by "

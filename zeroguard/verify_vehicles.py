@@ -60,6 +60,19 @@ G, A_, U, S, X = ("v1_ground.json", "v2_aerial.json", "v3_underwater.json",
 N = "n1_nasa_validation.json"
 B = "b1_baselines.json"
 B2 = "b2_domain_baselines.json"
+B3 = "b3_tuned_derate.json"
+
+# ---- the honest de-rate comparison: tune on one population, deploy on another ------------
+pred("B3    a de-rate tuned on characterisable evidence fails when deployed",
+     lambda: dig(B3, "tuned_rate_violates_on_deployment")
+     and dig(B3, "tuned_rate_violation_rate") > 0.10,
+     "the tuned fixed de-rate transferred safely, which would remove the method's argument")
+eq("B3    the certificate, re-tuned not at all, violates nothing on the same population",
+   lambda: dig(B3, "zeroguard_violations"), 0)
+pred("B3    and the charge advantage over a CORRECTLY conservative fixed rate is small, "
+     "and reported as small",
+     lambda: 0.0 < dig(B3, "gain_over_safe_fixed_pct") < 15.0,
+     "the modest charge gain against a safe fixed rate is missing or overstated")
 
 # ---- domain stopping rules: where the certificate wins, and where it does not ------------
 pred("B2    on a rotorcraft no fixed SOC reserve reaches even the 80 % recovery target that "
@@ -82,12 +95,17 @@ pred("B2    the combined min-of-two-clocks rule is never far behind the best sin
 # ---- baselines: compared to what? -------------------------------------------------------
 eq("B1    the certificate violates nothing where the shipped de-rate also violates nothing",
    lambda: dig(B, "controllers", "zeroguard", "violations"), 0)
-pred("B1    and it recovers real charge the de-rate gives away",
-     lambda: dig(B, "charge_gain_over_derate_points") > 5.0,
-     "the certificate did not materially beat the shipped de-rate")
-pred("B1    the de-rate is not paranoia: removing it actually violates",
-     lambda: dig(B, "aggressive_violation_rate") > 0.25,
-     "the aggressive protocol was safe, which would make the de-rate unjustified")
+pred("B1    and the comparison is reported as a sweep, not against one chosen baseline",
+     lambda: len(dig(B, "derate_sweep")) >= 4
+     and dig(B, "fastest_safe_derate_C") is not None,
+     "the de-rate comparison still rests on a single chosen number")
+# The strong form of this claim lives in B3, which tunes the de-rate honestly and then deploys
+# it. Here all that is asserted is that somewhere in the plausible range a fixed rate becomes
+# unsafe -- that the conservatism is buying something at all.
+pred("B1    somewhere in the plausible range a fixed de-rate becomes unsafe",
+     lambda: dig(B, "aggressive_violation_rate") > 0.01
+     and dig(B, "slowest_unsafe_derate_C") is not None,
+     "no fixed rate in the swept range was unsafe, which would make any de-rate unjustified")
 pred("B1    the filter and MPC solve the same problem, to within a fraction of a point",
      lambda: abs(dig(B, "mpc_h1_soc_gap_points")) < 2.0,
      "the filter and MPC disagreed materially on delivered charge")

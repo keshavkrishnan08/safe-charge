@@ -1,0 +1,172 @@
+{
+  "trials": 400,
+  "sweep": [
+    0.3,
+    0.5,
+    0.7,
+    1.0,
+    1.2,
+    1.5,
+    2.0
+  ],
+  "tune": {
+    "label": "characterisation fleet",
+    "rows": {
+      "ccv_0.3C": {
+        "name": "ccv_0.3C",
+        "trials": 400,
+        "violations": 0,
+        "violation_rate": 0.0,
+        "mean_soc": 0.3459029534144827,
+        "cp95_upper_pct": 0.7461355528799563
+      },
+      "ccv_0.5C": {
+        "name": "ccv_0.5C",
+        "trials": 400,
+        "violations": 0,
+        "violation_rate": 0.0,
+        "mean_soc": 0.4584729416808544,
+        "cp95_upper_pct": 0.7461355528799563
+      },
+      "ccv_0.7C": {
+        "name": "ccv_0.7C",
+        "trials": 400,
+        "violations": 0,
+        "violation_rate": 0.0,
+        "mean_soc": 0.571042929947226,
+        "cp95_upper_pct": 0.7461355528799563
+      },
+      "ccv_1C": {
+        "name": "ccv_1C",
+        "trials": 400,
+        "violations": 0,
+        "violation_rate": 0.0,
+        "mean_soc": 0.7294034514363239,
+        "cp95_upper_pct": 0.7461355528799563
+      },
+      "ccv_1.2C": {
+        "name": "ccv_1.2C",
+        "trials": 400,
+        "violations": 0,
+        "violation_rate": 0.0,
+        "mean_soc": 0.7858169732370667,
+        "cp95_upper_pct": 0.7461355528799563
+      },
+      "ccv_1.5C": {
+        "name": "ccv_1.5C",
+        "trials": 400,
+        "violations": 7,
+        "violation_rate": 0.0175,
+        "mean_soc": 0.8026111614458017,
+        "cp95_upper_pct": 3.2617976451330506
+      },
+      "ccv_2C": {
+        "name": "ccv_2C",
+        "trials": 400,
+        "violations": 252,
+        "violation_rate": 0.63,
+        "mean_soc": 0.8025038782364443,
+        "cp95_upper_pct": 67.01424262255324
+      },
+      "zeroguard": {
+        "name": "zeroguard",
+        "trials": 400,
+        "violations": 0,
+        "violation_rate": 0.0,
+        "mean_soc": 0.6412125790422176,
+        "cp95_upper_pct": 0.7461355528799563
+      }
+    },
+    "chosen_C": 1.2,
+    "safe_rates": [
+      0.3,
+      0.5,
+      0.7,
+      1.0,
+      1.2
+    ]
+  },
+  "deploy": {
+    "label": "deployment fleet",
+    "rows": {
+      "ccv_0.3C": {
+        "name": "ccv_0.3C",
+        "trials": 400,
+        "violations": 0,
+        "violation_rate": 0.0,
+        "mean_soc": 0.35604102045762387,
+        "cp95_upper_pct": 0.7461355528799563
+      },
+      "ccv_0.5C": {
+        "name": "ccv_0.5C",
+        "trials": 400,
+        "violations": 0,
+        "violation_rate": 0.0,
+        "mean_soc": 0.4747161183379604,
+        "cp95_upper_pct": 0.7461355528799563
+      },
+      "ccv_0.7C": {
+        "name": "ccv_0.7C",
+        "trials": 400,
+        "violations": 24,
+        "violation_rate": 0.06,
+        "mean_soc": 0.5930974040881248,
+        "cp95_upper_pct": 8.334607872125389
+      },
+      "ccv_1C": {
+        "name": "ccv_1C",
+        "trials": 400,
+        "violations": 79,
+        "violation_rate": 0.1975,
+        "mean_soc": 0.7399693321149531,
+        "cp95_upper_pct": 23.312248140876513
+      },
+      "ccv_1.2C": {
+        "name": "ccv_1.2C",
+        "trials": 400,
+        "violations": 105,
+        "violation_rate": 0.2625,
+        "mean_soc": 0.7835874246064475,
+        "cp95_upper_pct": 30.11795102230417
+      },
+      "ccv_1.5C": {
+        "name": "ccv_1.5C",
+        "trials": 400,
+        "violations": 138,
+        "violation_rate": 0.345,
+        "mean_soc": 0.798836720985972,
+        "cp95_upper_pct": 38.61126983608755
+      },
+      "ccv_2C": {
+        "name": "ccv_2C",
+        "trials": 400,
+        "violations": 187,
+        "violation_rate": 0.4675,
+        "mean_soc": 0.8018139194986216,
+        "cp95_upper_pct": 50.986276532890095
+      },
+      "zeroguard": {
+        "name": "zeroguard",
+        "trials": 400,
+        "violations": 0,
+        "violation_rate": 0.0,
+        "mean_soc": 0.48442598585112406,
+        "cp95_upper_pct": 0.7461355528799563
+      }
+    },
+    "safe_rates": [
+      0.3,
+      0.5
+    ],
+    "required_C": 0.5
+  },
+  "tuned_rate_violates_on_deployment": true,
+  "tuned_rate_violation_rate": 0.2625,
+  "tuned_rate_cp95": 30.11795102230417,
+  "zeroguard_violations": 0,
+  "zeroguard_cp95": 0.7461355528799563,
+  "charge_gap_points": -29.91614387553234,
+  "gain_over_safe_fixed_points": 0.9709867513163661,
+  "gain_over_safe_fixed_pct": 2.045405061694372,
+  "safe_fixed_mean_soc": 0.4747161183379604
+}
