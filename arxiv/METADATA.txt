@@ -51,8 +51,8 @@ a categorical difference on safety, not the large speed-up a single chosen basel
 Against model-predictive control it returns the same answer -- to 0.66 SOC
 points -- at 20 model evaluations against 644, and the 20 is a proved
 bound while MPC's number is whatever its iteration cap allowed.
-Across 16 platforms in four media and 56 experiments totalling
-482,475 episodes, nothing was breached while the certificate reported feasible, the
+Across 16 platforms in four media and 58 experiments totalling
+486,675 episodes, nothing was breached while the certificate reported feasible, the
 admissible set was a single interval in all 64,000 dense scans, and worst-case latency was
 123.9 \mus -- 1.24 % of a 10 ms ISO~26262 slot.
 
@@ -73,6 +73,16 @@ sessions on its own and in 0 through the filter, while still delivering
 +16.7 SOC points more than the safe protocol it replaces. On a policy that was already
 safe the filter intervenes in 0.39 % of steps, and across a swept request its
 intervention is monotone and begins strictly before breaching does.
+
+The value is not uniform across domains and the paper measures where it is not. Holding every
+domain's incumbent to the same tune-then-deploy standard -- which the first version of this work
+applied only to the ground baseline -- the incumbent rule fails in two of four media and the
+certificate in none; in the other two the incumbent survives and still delivers more mission, and
+\S\refsec:cross predicts which two in advance from whether closure is envelope- or
+energy-driven. On the ground, scored on the quantity a fleet actually buys, the certificate
+returns 17.4x as many vehicles to service inside a 40-minute window
+-- while costing -29.7 points above 32.5 C ambient, where its own margin
+exceeds the available headroom.
 
 The plants are ours, which is the objection that matters, so the certificate is also run against a
 Doyle-Fuller-Newman cell -- a different model class, with concentration gradients the
@@ -106,7 +116,7 @@ breaks no certified constraint at all and plates 19.4 % of cells.
 
 NOTES FOR THE SUBMISSION FORM
 -----------------------------
-Comments field:  38 pages, 10 figures, 56 experiments. Theorem machine-checked
+Comments field:  40 pages, 10 figures, 58 experiments. Theorem machine-checked
                  in Lean 4 (no sorry, no axioms); proof scripts and all
                  experiment code included in the repository.
 

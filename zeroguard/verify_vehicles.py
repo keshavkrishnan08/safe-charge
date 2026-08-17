@@ -64,7 +64,39 @@ B3 = "b3_tuned_derate.json"
 D1 = "d1_drive_cycles.json"
 EMB = "e13_embedded.json"
 M1 = "m1_duration_margin.json"
+B5 = "b5_domain_transfer.json"
 N2 = "n2_dfn.json"
+
+# ---- the transfer standard, applied evenly ----------------------------------------------
+pred("B5    the incumbent stopping rule fails its transfer test in the aerial domain",
+     lambda: "delivery-quadrotor" in dig(B5, "incumbent_fails_transfer"),
+     "the tuned aerial threshold survived transfer, so the aerial claim must be withdrawn")
+eq("B5    and the certificate reserve fails it nowhere",
+   lambda: len(dig(B5, "certificate_fails_transfer")), 0)
+pred("B5    the incumbent survives transfer underwater and in GEO, and this is reported",
+     lambda: "under-ice-auv" not in dig(B5, "incumbent_fails_transfer")
+     and "geo-comsat" not in dig(B5, "incumbent_fails_transfer")
+     and dig(B5, "domains", "under-ice-auv", "gain_pct") < 0
+     and dig(B5, "domains", "geo-comsat", "gain_pct") < 0,
+     "the negative water and space results moved; the paper's per-domain table is now wrong")
+pred("B5    the aerial gain is stated with the recovery target it was measured at",
+     lambda: dig(B5, "domains", "delivery-quadrotor", "target") is not None
+     and dig(B5, "domains", "delivery-quadrotor", "gain_pct") > 0,
+     "the aerial comparison has no stated safety target, so its gain is unreadable")
+pred("B5    the ground fleet mean hides a sign change, and both halves are recorded",
+     lambda: dig(B5, "ground", "best_gain_points") > 15.0
+     and dig(B5, "ground", "worst_gain_points") < -15.0,
+     "the per-ambient gain no longer changes sign; the decomposition claim is stale")
+pred("B5    the reversal is attributed to the margin's ceiling, not left unexplained",
+     lambda: 30.0 < dig(B5, "ground", "effective_ceiling_C") < 35.0
+     and min(dig(B5, "ground", "loses_at")) > dig(B5, "ground", "effective_ceiling_C"),
+     "the certificate loses at an ambient below its own effective ceiling, so the stated "
+     "mechanism does not explain the reversal")
+eq("B5    and it breaches nothing anywhere in that sweep",
+   lambda: dig(B5, "ground", "zg_violations"), 0)
+pred("B5    sessions returned to service is where the ground advantage actually shows",
+     lambda: dig(B5, "ground", "reach", "60", "ratio") > 5.0,
+     "the certificate no longer returns materially more sessions to service")
 B4 = "b4_cbf.json"
 
 # ---- the certificate against a higher-fidelity plant ------------------------------------

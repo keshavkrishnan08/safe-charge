@@ -1,0 +1,775 @@
+{
+  "trials_per_domain": 300,
+  "target": 0.95,
+  "char_envelope": {
+    "R": [
+      1.0,
+      1.4
+    ],
+    "Q": [
+      0.9,
+      1.0
+    ],
+    "plate": [
+      1.0,
+      1.2
+    ]
+  },
+  "deploy_envelope": {
+    "R": [
+      1.0,
+      1.8
+    ],
+    "Q": [
+      0.8,
+      1.0
+    ],
+    "plate": [
+      1.0,
+      1.6
+    ]
+  },
+  "bands": {
+    "aerial": {
+      "char": [
+        15.0,
+        25.0
+      ],
+      "deploy": [
+        5.0,
+        35.0
+      ]
+    },
+    "underwater": {
+      "char": [
+        6.0,
+        12.0
+      ],
+      "deploy": [
+        -1.0,
+        12.0
+      ]
+    },
+    "space": {
+      "char": [
+        0.0,
+        25.0
+      ],
+      "deploy": [
+        -20.0,
+        25.0
+      ]
+    }
+  },
+  "domains": {
+    "delivery-quadrotor": {
+      "label": "aerial: delivery quadrotor",
+      "case": "delivery-quadrotor",
+      "target": 0.8,
+      "trials": 300,
+      "reachable": true,
+      "tune": {
+        "soc<=45%": {
+          "rule": "soc<=45%",
+          "trials": 300,
+          "mission_median_s": 359.0,
+          "recovered": 258,
+          "recovery_rate": 0.86
+        },
+        "soc<=40%": {
+          "rule": "soc<=40%",
+          "trials": 300,
+          "mission_median_s": 461.0,
+          "recovered": 258,
+          "recovery_rate": 0.86
+        },
+        "soc<=35%": {
+          "rule": "soc<=35%",
+          "trials": 300,
+          "mission_median_s": 502.0,
+          "recovered": 0,
+          "recovery_rate": 0.0
+        },
+        "soc<=30%": {
+          "rule": "soc<=30%",
+          "trials": 300,
+          "mission_median_s": 502.0,
+          "recovered": 0,
+          "recovery_rate": 0.0
+        },
+        "soc<=25%": {
+          "rule": "soc<=25%",
+          "trials": 300,
+          "mission_median_s": 502.0,
+          "recovered": 0,
+          "recovery_rate": 0.0
+        },
+        "soc<=20%": {
+          "rule": "soc<=20%",
+          "trials": 300,
+          "mission_median_s": 502.0,
+          "recovered": 0,
+          "recovery_rate": 0.0
+        },
+        "reserve<=0.5A": {
+          "rule": "reserve<=0.5A",
+          "trials": 300,
+          "mission_median_s": 496.0,
+          "recovered": 0,
+          "recovery_rate": 0.0
+        },
+        "reserve<=1A": {
+          "rule": "reserve<=1A",
+          "trials": 300,
+          "mission_median_s": 491.0,
+          "recovered": 0,
+          "recovery_rate": 0.0
+        },
+        "reserve<=2A": {
+          "rule": "reserve<=2A",
+          "trials": 300,
+          "mission_median_s": 481.0,
+          "recovered": 0,
+          "recovery_rate": 0.0
+        },
+        "reserve<=4A": {
+          "rule": "reserve<=4A",
+          "trials": 300,
+          "mission_median_s": 461.0,
+          "recovered": 258,
+          "recovery_rate": 0.86
+        },
+        "reserve<=6A": {
+          "rule": "reserve<=6A",
+          "trials": 300,
+          "mission_median_s": 443.0,
+          "recovered": 258,
+          "recovery_rate": 0.86
+        },
+        "reserve<=8A": {
+          "rule": "reserve<=8A",
+          "trials": 300,
+          "mission_median_s": 425.0,
+          "recovered": 258,
+          "recovery_rate": 0.86
+        },
+        "reserve<=12A": {
+          "rule": "reserve<=12A",
+          "trials": 300,
+          "mission_median_s": 392.0,
+          "recovered": 258,
+          "recovery_rate": 0.86
+        }
+      },
+      "deploy": {
+        "soc<=45%": {
+          "rule": "soc<=45%",
+          "trials": 300,
+          "mission_median_s": 433.0,
+          "recovered": 257,
+          "recovery_rate": 0.8566666666666667
+        },
+        "soc<=40%": {
+          "rule": "soc<=40%",
+          "trials": 300,
+          "mission_median_s": 527.0,
+          "recovered": 228,
+          "recovery_rate": 0.76
+        },
+        "soc<=35%": {
+          "rule": "soc<=35%",
+          "trials": 300,
+          "mission_median_s": 567.0,
+          "recovered": 0,
+          "recovery_rate": 0.0
+        },
+        "soc<=30%": {
+          "rule": "soc<=30%",
+          "trials": 300,
+          "mission_median_s": 567.0,
+          "recovered": 0,
+          "recovery_rate": 0.0
+        },
+        "soc<=25%": {
+          "rule": "soc<=25%",
+          "trials": 300,
+          "mission_median_s": 567.0,
+          "recovered": 0,
+          "recovery_rate": 0.0
+        },
+        "soc<=20%": {
+          "rule": "soc<=20%",
+          "trials": 300,
+          "mission_median_s": 567.0,
+          "recovered": 0,
+          "recovery_rate": 0.0
+        },
+        "reserve<=0.5A": {
+          "rule": "reserve<=0.5A",
+          "trials": 300,
+          "mission_median_s": 563.0,
+          "recovered": 0,
+          "recovery_rate": 0.0
+        },
+        "reserve<=1A": {
+          "rule": "reserve<=1A",
+          "trials": 300,
+          "mission_median_s": 558.0,
+          "recovered": 0,
+          "recovery_rate": 0.0
+        },
+        "reserve<=2A": {
+          "rule": "reserve<=2A",
+          "trials": 300,
+          "mission_median_s": 549.0,
+          "recovered": 0,
+          "recovery_rate": 0.0
+        },
+        "reserve<=4A": {
+          "rule": "reserve<=4A",
+          "trials": 300,
+          "mission_median_s": 530.0,
+          "recovered": 257,
+          "recovery_rate": 0.8566666666666667
+        },
+        "reserve<=6A": {
+          "rule": "reserve<=6A",
+          "trials": 300,
+          "mission_median_s": 496.0,
+          "recovered": 257,
+          "recovery_rate": 0.8566666666666667
+        },
+        "reserve<=8A": {
+          "rule": "reserve<=8A",
+          "trials": 300,
+          "mission_median_s": 457.0,
+          "recovered": 257,
+          "recovery_rate": 0.8566666666666667
+        },
+        "reserve<=12A": {
+          "rule": "reserve<=12A",
+          "trials": 300,
+          "mission_median_s": 418.0,
+          "recovered": 257,
+          "recovery_rate": 0.8566666666666667
+        }
+      },
+      "chosen_soc_rule": "soc<=40%",
+      "chosen_reserve_rule": "reserve<=4A",
+      "soc_deployed": {
+        "rule": "soc<=40%",
+        "tuned_recovery": 0.86,
+        "deployed_recovery": 0.76,
+        "deployed_mission_s": 527.0,
+        "holds": false,
+        "shortfall": 0.09999999999999998
+      },
+      "reserve_deployed": {
+        "rule": "reserve<=4A",
+        "tuned_recovery": 0.86,
+        "deployed_recovery": 0.8566666666666667,
+        "deployed_mission_s": 530.0,
+        "holds": true,
+        "shortfall": 0.0033333333333332993
+      },
+      "soc_required": {
+        "rule": "soc<=45%",
+        "mission_s": 433.0
+      },
+      "reserve_required": {
+        "rule": "reserve<=4A",
+        "mission_s": 530.0
+      },
+      "gain_s": 97.0,
+      "gain_pct": 22.401847575057744
+    },
+    "under-ice-auv": {
+      "label": "underwater: under-ice AUV",
+      "case": "under-ice-auv",
+      "target": 0.95,
+      "trials": 300,
+      "reachable": true,
+      "tune": {
+        "soc<=50%": {
+          "rule": "soc<=50%",
+          "trials": 300,
+          "mission_median_s": 3690.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "soc<=40%": {
+          "rule": "soc<=40%",
+          "trials": 300,
+          "mission_median_s": 6630.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "soc<=30%": {
+          "rule": "soc<=30%",
+          "trials": 300,
+          "mission_median_s": 9420.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "soc<=25%": {
+          "rule": "soc<=25%",
+          "trials": 300,
+          "mission_median_s": 10710.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "soc<=20%": {
+          "rule": "soc<=20%",
+          "trials": 300,
+          "mission_median_s": 12030.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "reserve<=2A": {
+          "rule": "reserve<=2A",
+          "trials": 300,
+          "mission_median_s": 12930.0,
+          "recovered": 0,
+          "recovery_rate": 0.0
+        },
+        "reserve<=4A": {
+          "rule": "reserve<=4A",
+          "trials": 300,
+          "mission_median_s": 12390.0,
+          "recovered": 268,
+          "recovery_rate": 0.8933333333333333
+        },
+        "reserve<=8A": {
+          "rule": "reserve<=8A",
+          "trials": 300,
+          "mission_median_s": 11490.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "reserve<=12A": {
+          "rule": "reserve<=12A",
+          "trials": 300,
+          "mission_median_s": 10740.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "reserve<=16A": {
+          "rule": "reserve<=16A",
+          "trials": 300,
+          "mission_median_s": 9720.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "reserve<=20A": {
+          "rule": "reserve<=20A",
+          "trials": 300,
+          "mission_median_s": 7800.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        }
+      },
+      "deploy": {
+        "soc<=50%": {
+          "rule": "soc<=50%",
+          "trials": 300,
+          "mission_median_s": 4770.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "soc<=40%": {
+          "rule": "soc<=40%",
+          "trials": 300,
+          "mission_median_s": 7590.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "soc<=30%": {
+          "rule": "soc<=30%",
+          "trials": 300,
+          "mission_median_s": 10230.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "soc<=25%": {
+          "rule": "soc<=25%",
+          "trials": 300,
+          "mission_median_s": 11490.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "soc<=20%": {
+          "rule": "soc<=20%",
+          "trials": 300,
+          "mission_median_s": 12750.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "reserve<=2A": {
+          "rule": "reserve<=2A",
+          "trials": 300,
+          "mission_median_s": 13650.0,
+          "recovered": 0,
+          "recovery_rate": 0.0
+        },
+        "reserve<=4A": {
+          "rule": "reserve<=4A",
+          "trials": 300,
+          "mission_median_s": 13110.0,
+          "recovered": 143,
+          "recovery_rate": 0.4766666666666667
+        },
+        "reserve<=8A": {
+          "rule": "reserve<=8A",
+          "trials": 300,
+          "mission_median_s": 12180.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "reserve<=12A": {
+          "rule": "reserve<=12A",
+          "trials": 300,
+          "mission_median_s": 11100.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "reserve<=16A": {
+          "rule": "reserve<=16A",
+          "trials": 300,
+          "mission_median_s": 8400.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "reserve<=20A": {
+          "rule": "reserve<=20A",
+          "trials": 300,
+          "mission_median_s": 6900.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        }
+      },
+      "chosen_soc_rule": "soc<=20%",
+      "chosen_reserve_rule": "reserve<=8A",
+      "soc_deployed": {
+        "rule": "soc<=20%",
+        "tuned_recovery": 1.0,
+        "deployed_recovery": 1.0,
+        "deployed_mission_s": 12750.0,
+        "holds": true,
+        "shortfall": 0.0
+      },
+      "reserve_deployed": {
+        "rule": "reserve<=8A",
+        "tuned_recovery": 1.0,
+        "deployed_recovery": 1.0,
+        "deployed_mission_s": 12180.0,
+        "holds": true,
+        "shortfall": 0.0
+      },
+      "soc_required": {
+        "rule": "soc<=20%",
+        "mission_s": 12750.0
+      },
+      "reserve_required": {
+        "rule": "reserve<=8A",
+        "mission_s": 12180.0
+      },
+      "gain_s": -570.0,
+      "gain_pct": -4.470588235294115
+    },
+    "geo-comsat": {
+      "label": "space: GEO comsat in eclipse",
+      "case": "geo-comsat",
+      "target": 0.95,
+      "trials": 300,
+      "reachable": true,
+      "tune": {
+        "soc<=60%": {
+          "rule": "soc<=60%",
+          "trials": 300,
+          "mission_median_s": 1320.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "soc<=55%": {
+          "rule": "soc<=55%",
+          "trials": 300,
+          "mission_median_s": 2130.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "soc<=50%": {
+          "rule": "soc<=50%",
+          "trials": 300,
+          "mission_median_s": 2940.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "soc<=45%": {
+          "rule": "soc<=45%",
+          "trials": 300,
+          "mission_median_s": 3720.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        },
+        "soc<=40%": {
+          "rule": "soc<=40%",
+          "trials": 300,
+          "mission_median_s": 4500.0,
+          "recovered": 223,
+          "recovery_rate": 0.7433333333333333
+        },
+        "reserve<=4A": {
+          "rule": "reserve<=4A",
+          "trials": 300,
+          "mission_median_s": 4920.0,
+          "recovered": 96,
+          "recovery_rate": 0.32
+        },
+        "reserve<=8A": {
+          "rule": "reserve<=8A",
+          "trials": 300,
+          "mission_median_s": 4500.0,
+          "recovered": 149,
+          "recovery_rate": 0.49666666666666665
+        },
+        "reserve<=16A": {
+          "rule": "reserve<=16A",
+          "trials": 300,
+          "mission_median_s": 3120.0,
+          "recovered": 236,
+          "recovery_rate": 0.7866666666666666
+        },
+        "reserve<=24A": {
+          "rule": "reserve<=24A",
+          "trials": 300,
+          "mission_median_s": 1740.0,
+          "recovered": 291,
+          "recovery_rate": 0.97
+        },
+        "reserve<=32A": {
+          "rule": "reserve<=32A",
+          "trials": 300,
+          "mission_median_s": 960.0,
+          "recovered": 300,
+          "recovery_rate": 1.0
+        }
+      },
+      "deploy": {
+        "soc<=60%": {
+          "rule": "soc<=60%",
+          "trials": 300,
+          "mission_median_s": 1560.0,
+          "recovered": 295,
+          "recovery_rate": 0.9833333333333333
+        },
+        "soc<=55%": {
+          "rule": "soc<=55%",
+          "trials": 300,
+          "mission_median_s": 2340.0,
+          "recovered": 295,
+          "recovery_rate": 0.9833333333333333
+        },
+        "soc<=50%": {
+          "rule": "soc<=50%",
+          "trials": 300,
+          "mission_median_s": 3120.0,
+          "recovered": 295,
+          "recovery_rate": 0.9833333333333333
+        },
+        "soc<=45%": {
+          "rule": "soc<=45%",
+          "trials": 300,
+          "mission_median_s": 3930.0,
+          "recovered": 295,
+          "recovery_rate": 0.9833333333333333
+        },
+        "soc<=40%": {
+          "rule": "soc<=40%",
+          "trials": 300,
+          "mission_median_s": 4650.0,
+          "recovered": 106,
+          "recovery_rate": 0.35333333333333333
+        },
+        "reserve<=4A": {
+          "rule": "reserve<=4A",
+          "trials": 300,
+          "mission_median_s": 4590.0,
+          "recovered": 102,
+          "recovery_rate": 0.34
+        },
+        "reserve<=8A": {
+          "rule": "reserve<=8A",
+          "trials": 300,
+          "mission_median_s": 3600.0,
+          "recovered": 175,
+          "recovery_rate": 0.5833333333333334
+        },
+        "reserve<=16A": {
+          "rule": "reserve<=16A",
+          "trials": 300,
+          "mission_median_s": 1620.0,
+          "recovered": 252,
+          "recovery_rate": 0.84
+        },
+        "reserve<=24A": {
+          "rule": "reserve<=24A",
+          "trials": 300,
+          "mission_median_s": 600.0,
+          "recovered": 290,
+          "recovery_rate": 0.9666666666666667
+        },
+        "reserve<=32A": {
+          "rule": "reserve<=32A",
+          "trials": 300,
+          "mission_median_s": 0.0,
+          "recovered": 295,
+          "recovery_rate": 0.9833333333333333
+        }
+      },
+      "chosen_soc_rule": "soc<=45%",
+      "chosen_reserve_rule": "reserve<=24A",
+      "soc_deployed": {
+        "rule": "soc<=45%",
+        "tuned_recovery": 1.0,
+        "deployed_recovery": 0.9833333333333333,
+        "deployed_mission_s": 3930.0,
+        "holds": true,
+        "shortfall": 0.01666666666666672
+      },
+      "reserve_deployed": {
+        "rule": "reserve<=24A",
+        "tuned_recovery": 0.97,
+        "deployed_recovery": 0.9666666666666667,
+        "deployed_mission_s": 600.0,
+        "holds": true,
+        "shortfall": 0.0033333333333332993
+      },
+      "soc_required": {
+        "rule": "soc<=45%",
+        "mission_s": 3930.0
+      },
+      "reserve_required": {
+        "rule": "reserve<=24A",
+        "mission_s": 600.0
+      },
+      "gain_s": -3330.0,
+      "gain_pct": -84.7328244274809
+    }
+  },
+  "incumbent_fails_transfer": [
+    "delivery-quadrotor"
+  ],
+  "certificate_fails_transfer": [],
+  "ground": {
+    "trials": 1200,
+    "horizon_min": 40.0,
+    "ambients": [
+      -10.0,
+      0.0,
+      15.0,
+      25.0,
+      35.0,
+      40.0
+    ],
+    "baseline": "CC-CV 0.5C, the rate B3 shows is safe across the whole fleet",
+    "zg_violations": 0,
+    "ccv_violations": 0,
+    "mean_gain_points": 1.2499586666816276,
+    "reach": {
+      "50": {
+        "target": 0.5,
+        "zg": 0.5808333333333333,
+        "ccv": 0.38166666666666665,
+        "points": 19.916666666666664,
+        "ratio": 1.5218340611353711
+      },
+      "60": {
+        "target": 0.6,
+        "zg": 0.44916666666666666,
+        "ccv": 0.025833333333333333,
+        "points": 42.333333333333336,
+        "ratio": 17.387096774193548
+      },
+      "70": {
+        "target": 0.7,
+        "zg": 0.1875,
+        "ccv": 0.0,
+        "points": 18.75,
+        "ratio": null
+      }
+    },
+    "by_ambient": [
+      {
+        "ambient_C": -10.0,
+        "trials": 205,
+        "zg_soc": 0.5627105547892023,
+        "ccv_soc": 0.4674214102072943,
+        "gain_points": 9.528914458190801,
+        "zg_violations": 0,
+        "ccv_violations": 0
+      },
+      {
+        "ambient_C": 0.0,
+        "trials": 163,
+        "zg_soc": 0.6098294110838207,
+        "ccv_soc": 0.46713899749074184,
+        "gain_points": 14.269041359307888,
+        "zg_violations": 0,
+        "ccv_violations": 0
+      },
+      {
+        "ambient_C": 15.0,
+        "trials": 212,
+        "zg_soc": 0.6995229109521269,
+        "ccv_soc": 0.4611954951252932,
+        "gain_points": 23.832741582683376,
+        "zg_violations": 0,
+        "ccv_violations": 0
+      },
+      {
+        "ambient_C": 25.0,
+        "trials": 208,
+        "zg_soc": 0.6669175866084931,
+        "ccv_soc": 0.47591702728773466,
+        "gain_points": 19.100055932075843,
+        "zg_violations": 0,
+        "ccv_violations": 0
+      },
+      {
+        "ambient_C": 35.0,
+        "trials": 208,
+        "zg_soc": 0.19656241844921285,
+        "ccv_soc": 0.4726062176322317,
+        "gain_points": -27.604379918301884,
+        "zg_violations": 0,
+        "ccv_violations": 0
+      },
+      {
+        "ambient_C": 40.0,
+        "trials": 204,
+        "zg_soc": 0.18256328693019688,
+        "ccv_soc": 0.4797678277082465,
+        "gain_points": -29.72045407780496,
+        "zg_violations": 0,
+        "ccv_violations": 0
+      }
+    ],
+    "wins_at": [
+      -10.0,
+      0.0,
+      15.0,
+      25.0
+    ],
+    "loses_at": [
+      35.0,
+      40.0
+    ],
+    "best_gain_points": 23.832741582683376,
+    "worst_gain_points": -29.72045407780496,
+    "crossover_between_C": [
+      25.0,
+      35.0
+    ],
+    "effective_ceiling_C": 32.5
+  }
+}

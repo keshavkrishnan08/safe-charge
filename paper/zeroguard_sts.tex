@@ -100,6 +100,16 @@ $+$\pGainSafe{} SOC points more than the safe protocol it replaces. On a policy 
 safe the filter intervenes in \pSafeClip\,\% of steps, and across a swept request its
 intervention is monotone and begins strictly before breaching does.
 
+The value is not uniform across domains and the paper measures where it is not. Holding every
+domain's incumbent to the same tune-then-deploy standard --- which the first version of this work
+applied only to the ground baseline --- the incumbent rule fails in two of four media and the
+certificate in none; in the other two the incumbent survives and still delivers more mission, and
+\S\ref{sec:cross} predicts which two in advance from whether closure is envelope- or
+energy-driven. On the ground, scored on the quantity a fleet actually buys, the certificate
+returns \gtReachSixtyRatio$\times$ as many vehicles to service inside a \gtWindow-minute window
+--- while costing \gtAmbForty{} points above \gtCeiling\,\degC{} ambient, where its own margin
+exceeds the available headroom.
+
 The plants are ours, which is the objection that matters, so the certificate is also run against a
 \textbf{Doyle--Fuller--Newman} cell --- a different model class, with concentration gradients the
 reduced-order model has no state for. Across \dSessions{} charging sessions it breached neither
@@ -1363,6 +1373,100 @@ The claim is that at equal safety the exact filter delivers more charge, and tha
 constraint class exactness is available at a cost that is fixed and known in advance.
 
 
+
+\section{The same standard in every domain}\label{sec:transfer}
+
+Two things were wrong with the per-domain comparisons, and both were ours.
+
+\textbf{The standard was applied unevenly.} \S\ref{sec:tuned} caught a methodological error ---
+a fixed de-rate tuned and evaluated on the same population --- and corrected it for the
+\emph{ground} domain by tuning on a fleet a manufacturer could characterise in advance and
+deploying on the fleet a vehicle actually meets. \S\ref{sec:domainbaselines} then compared
+against the air, water and space incumbents \emph{without} that correction: every fixed
+state-of-charge threshold there was swept against the very population it was scored on. The
+ground baseline was held to a stricter standard than the other three, which is backwards, and
+water and GEO --- where the fixed rule won --- are precisely the results the correction would
+move.
+
+\textbf{And the ground metric was the wrong quantity.} \S\ref{sec:tuned} reports mean state of
+charge after a fixed horizon. No operator buys state of charge. A robotaxi that is charging is a
+robotaxi not earning, so the quantity is minutes until it can be dispatched again.
+
+\subsection{Tune where you can characterise; deploy where the vehicle goes}
+
+Each domain's incumbent threshold is chosen on a benign population --- mild ambient, cells not
+yet aged --- taking the most permissive threshold that still recovers at the stated rate. It is
+then deployed, unchanged, on the population the vehicle meets. The certificate reserve is put
+through the identical procedure and, as everywhere else, is re-tuned not at all because it has
+nothing to tune. Targets differ by domain and are stated, because in the aerial case no rule of
+\emph{either} family recovers in 95\,\% of episodes and fixing the target there yields no
+comparison rather than a result.
+
+\begin{table}[t]
+\centering
+\caption{Recovery rate in characterisation $\rightarrow$ deployment. \tTrials{} missions per
+population per domain.}
+\label{tab:transfer}
+{\footnotesize
+\begin{tabular}{llrrl}
+\toprule
+domain & rule & char. & depl. & verdict \\
+\midrule
+Air ($\ge$\tAirTarget\,\%) & \tAirRule & \tAirTuned & \tAirDeployed & \tAirHolds \\
+ & certificate & \tAirCertTuned & \tAirCertDeployed & \tAirCertHolds \\
+\addlinespace
+Water ($\ge$\tWaterTarget\,\%) & \tWaterRule & \tWaterTuned & \tWaterDeployed & \tWaterHolds \\
+ & certificate & \tWaterCertTuned & \tWaterCertDeployed & \tWaterCertHolds \\
+\addlinespace
+Space ($\ge$\tSpaceTarget\,\%) & \tSpaceRule & \tSpaceTuned & \tSpaceDeployed & \tSpaceHolds \\
+ & certificate & \tSpaceCertTuned & \tSpaceCertDeployed & \tSpaceCertHolds \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+The correction changes one domain and not the others (Table~\ref{tab:transfer}). In the air the
+tuned threshold \textbf{fails}: chosen on evidence a manufacturer could actually have, it
+recovers \tAirTuned\,\% in characterisation and \tAirDeployed\,\% in deployment, below the target
+it was chosen to meet, while the certificate reserve goes \tAirCertTuned\,\% to
+\tAirCertDeployed\,\%. That is the ground transfer result of \S\ref{sec:tuned} reproduced in a
+second medium and in a different currency --- there it was violations, here it is failures to
+get home.
+
+Underwater and in GEO the incumbent \emph{survives} its transfer test, and the certificate
+remains behind on mission delivered: \tWaterGain\,\% and \tSpaceGain\,\%. We looked for the
+methodological error that would overturn those two results, applied the correction that had
+overturned the ground one, and it did not overturn them. \S\ref{sec:cross} already says why, and
+says it in advance rather than afterwards: a constraint-based clock can only predict endurance
+where closure is envelope-driven, and underwater and in eclipse it is energy-driven. The
+certificate is measuring the wrong thing there, and no amount of fairer baselining will change
+that.
+
+\subsection{Minutes back on the road}
+
+Scored on dispatch time instead of state of charge, over \gtTrials{} sessions across the
+deployment fleet against the CC--CV rate \S\ref{sec:tuned} showed is fleet-safe, the ground
+picture separates into two facts the average was hiding.
+
+The first is that the advantage is much larger than a mean SOC suggests. Within the
+\gtWindow-minute window, \gtReachSixtyZg\,\% of sessions reach a 60\,\% charge under the certificate
+against \gtReachSixtyCc\,\% under the fixed rate --- \gtReachSixtyRatio$\times$ as many vehicles
+returned to service --- and at 70\,\% the fixed rate reaches it in \gtReachSeventyCc\,\% of sessions.
+A fleet is sized on how many vehicles come back, not on the mean charge of those that do.
+
+The second is that the fleet mean of $+$\gtMean{} points is an average taken across a change of
+sign, and is therefore not a fact about any vehicle. By ambient the certificate delivers
+$+$\gtAmbFifteen{} points at 15\,\degC{} and \gtAmbForty{} at 40\,\degC, crossing over between
+\gtCrossLo{} and \gtCrossHi\,\degC.
+
+The reversal is not the theorem failing, and it is not a mystery. The thermal margin puts the
+certificate's effective ceiling at \gtCeiling\,\degC; above that ambient the cell can never sit
+below it, so the filter refuses to charge. It is right to refuse --- it breached nothing in
+\gtViol{} of \gtTrials{} sessions --- and refusing has a price. This is the passive-charging
+ceiling of \S\ref{sec:ground} reappearing as a performance number rather than a safety one, and
+it is the same margin-sizing question \S\ref{sec:durmargin} answers for pulses and does not
+answer here, because a charging session really does last half an hour.
+
+
 \section{External validation: the assumptions against measured cells}\label{sec:external}
 
 Everything to this point is simulation. The filter is checked against a reduced-order model,
@@ -1918,6 +2022,85 @@ no growing state, no library call, and no path on which it fails to terminate. T
 solver to qualify and no iteration cap to justify, which matters most exactly where
 qualification is hardest.
 
+
+\subsection{What it is worth, by domain}\label{sec:bydomain}
+
+The numbers above are scattered across nine sections, and the ones that go against us are the
+easiest to lose. Table~\ref{tab:bydomain} collects all of them in one place. It is not a summary
+of successes; two of the four domains are negative on mission delivered, and \S\ref{sec:cross}
+predicts which two before any of it was measured.
+
+\begin{table*}[t]
+\centering
+\caption{Every per-domain result, including the negative ones. ``Transfer'' is whether the
+incumbent rule, tuned on evidence available before deployment, still met its own target once
+deployed (\S\ref{sec:transfer}).}
+\label{tab:bydomain}
+{\footnotesize
+\begin{tabular}{@{}lllll@{}}
+\toprule
+& \textbf{Ground} & \textbf{Air} & \textbf{Water} & \textbf{Space} \\
+& robotaxi, shuttle, truck & quadrotor, eVTOL & AUV, glider, under-ice & LEO--GEO, Mars, lunar \\
+\midrule
+Incumbent survives transfer?
+ & \textbf{no} --- violates \bThreeTunedViolPct\,\%
+ & \textbf{no} --- \tAirTuned\,\%$\to$\tAirDeployed\,\%
+ & yes --- \tWaterTuned\,\%$\to$\tWaterDeployed\,\%
+ & yes --- \tSpaceTuned\,\%$\to$\tSpaceDeployed\,\% \\
+Certificate survives it?
+ & yes --- \bThreeZgViol/\bThreeTrials
+ & yes --- \tAirCertDeployed\,\%
+ & yes --- \tWaterCertDeployed\,\%
+ & yes --- \tSpaceCertDeployed\,\% \\
+\addlinespace
+Mission / charge delivered
+ & $+$\gtReachSixtyRatio$\times$ sessions to service
+ & $+$\tAirGain\,\% flight time
+ & \tWaterGain\,\%
+ & \tSpaceGain\,\% \\
+ & (\gtReachSixtyZg\,\% vs \gtReachSixtyCc\,\% to 60\,\%)
+ & at \tAirTarget\,\% recovery
+ & incumbent wins
+ & incumbent wins \\
+\addlinespace
+Closure is envelope-driven?
+ & n/a (charging)
+ & \emph{yes}, $\rho=\xRhoAir$
+ & \emph{no}, energy-driven
+ & partly, $\rho=\xRhoGeo$ \\
+Is the generalisation needed?
+ & no --- anchor is zero
+ & \textbf{yes} --- null-input browns out \aNullBrown/\aNullN
+ & yes --- load must be served
+ & yes --- bus load in eclipse \\
+\addlinespace
+Unattended safety
+ & \gRoboViol/\gRoboSessions{} over five years
+ & \aTurnViol/\aTurnTrials{} turnarounds
+ & \uSealViol/\uSealN{} sealed hull
+ & \sLeoViol/\sLeoCycles{} LEO cycles \\
+Recalibration cost
+ & none claimed
+ & none claimed
+ & \uNoRecalGap{} SOC points, 180 d
+ & \sNoGroundGap{} SOC points, 5 yr \\
+\addlinespace
+Where it costs
+ & above \gtCeiling\,\degC{} ambient (\gtAmbForty{} pts)
+ & cell refused above \aRefuseC\,C hover
+ & plating binds, never certified
+ & lunar night: no configuration \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+
+Read down the last three rows rather than the first three. The certificate's value is not
+uniform and was never going to be: it is largest where the \emph{constraint set} closes and
+smallest where the tank simply empties, and \S\ref{sec:cross} turns that into a test an
+integrator can run on their own vehicle before adopting anything. A method that claimed equal
+benefit in all four media would be one whose evaluation had not looked hard enough.
+
+
 \section{Limitations}\label{sec:limits}
 
 Stated in full, because several of them are load-bearing.
@@ -2078,6 +2261,10 @@ V4-9$^\dagger$ & \ref{sec:space} & array decay shrinks the window, not the certi
 V4-10$^\dagger$ & \ref{sec:space} & radiator loss degrades gracefully & it \emph{improves} charge: cold-limited \\
 V4-11 & \ref{sec:space} & the eclipse bus load is a nonzero anchor & null-input browns out every case \\
 \addlinespace
+\multicolumn{4}{@{}l}{\textit{B5 --- The same standard in every domain}}\\
+B5a$^\dagger$ & \ref{sec:transfer} & the incumbent stopping rule fails transfer in every domain & only in air; water and GEO survive it \\
+B5b$^\dagger$ & \ref{sec:transfer} & the ground gain is a single fleet number & it changes sign at \gtCeiling\,\degC{} ambient \\
+\addlinespace
 \multicolumn{4}{@{}l}{\textit{N2 --- Against higher-fidelity physics}}\\
 N2a$^\dagger$ & \ref{sec:dfn} & the ROM's transfer error fits inside the margin & only where a constraint binds; \dOverRatio$\times$ conservative elsewhere \\
 N2b & \ref{sec:dfn} & a ROM certificate keeps a DFN cell safe & \dCertViol/\dSessions{} certified, \dPlateClean/\dSessions{} on real plating \\
@@ -2100,7 +2287,7 @@ X5 & \ref{sec:cross} & every zero-failure claim has enough samples & \adequacyVi
 \end{longtable}}
 
 \vspace{4pt}
-\noindent Seventeen of \vExperiments{} are marked $\dagger$. A register in which nothing is marked
+\noindent Nineteen of \vExperiments{} are marked $\dagger$. A register in which nothing is marked
 is a register written after the results.
 
 \end{document}

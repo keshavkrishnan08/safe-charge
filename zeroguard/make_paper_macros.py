@@ -16,7 +16,7 @@ RES = os.path.join(HERE, "results")
 OUT = os.path.join(os.path.dirname(HERE), "paper", "vehicle_macros.tex")
 
 D = {}
-for k, f in (("n2", "n2_dfn.json"), ("b4", "b4_cbf.json"), ("p1", "p1_policy_filter.json"), ("p2", "p2_pack_dynamic.json"),
+for k, f in (("b5", "b5_domain_transfer.json"), ("n2", "n2_dfn.json"), ("b4", "b4_cbf.json"), ("p1", "p1_policy_filter.json"), ("p2", "p2_pack_dynamic.json"),
              ("m1", "m1_duration_margin.json"), ("d1", "d1_drive_cycles.json"), ("emb", "e13_embedded.json"),
              ("b3", "b3_tuned_derate.json"), ("b2", "b2_domain_baselines.json"), ("b", "b1_baselines.json"), ("n", "n1_nasa_validation.json"), ("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
              ("s", "v4_space.json"), ("x", "x_crossdomain.json"),
@@ -50,8 +50,10 @@ _P2 = 24 * 2 + 6 * 8 * 2
 _B4 = 6 * 400 + 400 + 7 * 600
 # N2: 6 open-loop DFN charges, 40 closed-loop, and 2 x 7 x 3 misspecification runs
 _N2 = 6 + 40 + 2 * 7 * 3
-m("vTotalEpisodes", f"{470_923 + _P1 + _P2 + _B4 + _N2:,}".replace(",", "{,}"))
-m("vExperiments", "56")
+# B5: 3 domains x 2 populations x 300 missions, plus 1200 ground sessions x 2 controllers
+_B5 = 3 * 2 * 300 + 1200 * 2
+m("vTotalEpisodes", f"{470_923 + _P1 + _P2 + _B4 + _N2 + _B5:,}".replace(",", "{,}"))
+m("vExperiments", "58")
 m("vPlatforms", "16")
 m("vClaims", "76")
 m("vFigures", "8")
@@ -419,6 +421,65 @@ if "m1" in D:
     for fn, tag in (("us06col.txt", "USsix"), ("uddscol.txt", "Udds"), ("hwycol.txt", "Hwfet")):
         if fn in mm["regen"]:
             m(f"mGain{tag}", num(mm["regen"][fn]["recovery_gain_points"], 1))
+
+# ---- the per-domain summary table needs a few figures the prose already quotes ----------
+m("xRhoAir", f"{x['x4_reserve']['per_case']['delivery-quadrotor']['width_vs_endurance']['rho']:+.2f}")
+m("xRhoGeo", f"{x['x4_reserve']['per_case']['geo-comsat']['width_vs_endurance']['rho']:+.2f}")
+m("aNullN", str(a["v2_1_anchor_vs_null"]["trials"]))
+m("aTurnViol", str(a["v2_9_turnaround"]["violations"]))
+m("aTurnTrials", num(a["v2_9_turnaround"]["trials"], 0, True))
+m("uSealViol", str(u["v3_1_sealed_hull"]["violations"]))
+m("uSealN", num(u["v3_1_sealed_hull"]["trials"], 0, True))
+m("uNoRecalGap", num(u["v3_9_no_recalibration"]["soc_gap_points"], 1))
+
+# ---- the same standard in every domain --------------------------------------------------
+if "b5" in D:
+    q = D["b5"]
+    m("tTrials", num(q["trials_per_domain"], 0, True))
+    m("tIncFails", str(len(q["incumbent_fails_transfer"])))
+    m("tCertFails", str(len(q["certificate_fails_transfer"])))
+    m("tDomains", str(len(q["domains"])))
+    tag = {"delivery-quadrotor": "Air", "under-ice-auv": "Water", "geo-comsat": "Space"}
+    for case, r in q["domains"].items():
+        k = tag[case]
+        m(f"t{k}Target", num(100 * r["target"], 0))
+        sd, rd = r["soc_deployed"], r["reserve_deployed"]
+        m(f"t{k}Rule", sd["rule"].replace("<=", "$\\le$").replace("%", "\\%"))
+        m(f"t{k}Tuned", num(100 * sd["tuned_recovery"], 1))
+        m(f"t{k}Deployed", num(100 * sd["deployed_recovery"], 1))
+        m(f"t{k}Holds", "holds" if sd["holds"] else "\\textbf{fails}")
+        m(f"t{k}CertTuned", num(100 * rd["tuned_recovery"], 1))
+        m(f"t{k}CertDeployed", num(100 * rd["deployed_recovery"], 1))
+        m(f"t{k}CertHolds", "holds" if rd["holds"] else "\\textbf{fails}")
+        if r.get("gain_pct") is not None:
+            m(f"t{k}Gain", num(r["gain_pct"], 1))
+            m(f"t{k}IncMin", num(r["soc_required"]["mission_s"] / 60, 1))
+            m(f"t{k}CertMin", num(r["reserve_required"]["mission_s"] / 60, 1))
+    g5 = q["ground"]
+    m("gtTrials", num(g5["trials"], 0, True))
+    m("gtWindow", num(g5["horizon_min"], 0))
+    m("gtMean", num(g5["mean_gain_points"], 1))
+    m("gtBest", num(g5["best_gain_points"], 0))
+    m("gtWorst", num(g5["worst_gain_points"], 0))
+    m("gtCeiling", num(g5["effective_ceiling_C"], 1))
+    m("gtViol", str(g5["zg_violations"]))
+    m("gtBaseViol", str(g5["ccv_violations"]))
+    # LaTeX forbids digits in control sequences, so the target is spelled out
+    WORD = {"50": "Fifty", "60": "Sixty", "70": "Seventy"}
+    for k, r in g5["reach"].items():
+        w = WORD[k]
+        m(f"gtReach{w}Zg", num(100 * r["zg"], 0))
+        m(f"gtReach{w}Cc", num(100 * r["ccv"], 0))
+        if r["ratio"]:
+            m(f"gtReach{w}Ratio", num(r["ratio"], 1))
+    for r in g5["by_ambient"]:
+        a = int(r["ambient_C"])
+        nm = ("Mten" if a == -10 else "Zero" if a == 0 else
+              "Fifteen" if a == 15 else "TwentyFive" if a == 25 else
+              "ThirtyFive" if a == 35 else "Forty")
+        m(f"gtAmb{nm}", num(r["gain_points"], 1))
+    m("gtCrossLo", num(g5["crossover_between_C"][0], 0))
+    m("gtCrossHi", num(g5["crossover_between_C"][1], 0))
 
 # ---- against a Doyle-Fuller-Newman plant ------------------------------------------------
 if "n2" in D:
