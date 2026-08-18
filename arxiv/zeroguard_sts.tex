@@ -2059,7 +2059,7 @@ refinement with a stated envelope rather than a knob.
 \section{Deployability: what it costs on a BMS microcontroller}\label{sec:embedded}
 
 The claim that the certificate ``fits inside any microcontroller a battery management system
-already contains'' is an assertion about software that has never been compiled for one. It
+already contains'' was an assertion about software that had never been compiled for one. It
 should be measured or withdrawn.
 
 \paragraph{It holds no growing state.} Over \embCalls{} projections the heap grows by
@@ -2300,11 +2300,19 @@ benefit in all four media would be one whose evaluation had not looked hard enou
 
 Stated in full, because several of them are load-bearing.
 
-\paragraph{No high-fidelity electrochemistry in this study.} The simulated results are
-reduced-order-model level or model-versus-model; the Doyle--Fuller--Newman validation of the
-underlying filter is prior work \cite{krishnan2026safe}, cited rather than re-derived.
-\S\ref{sec:external} is the exception and does not close the gap: it validates the
-\emph{assumptions} against measured cells, not the vehicle results.
+\paragraph{Most results are model-versus-model, and two are not.} The vehicle results in
+\S\ref{sec:ground}--\S\ref{sec:space} are reduced-order-model level. Two experiments are not:
+\S\ref{sec:dfn} runs the certificate against a Doyle--Fuller--Newman plant and \S\ref{sec:cyclelife}
+cycles one, both with PyBaMM's own degradation physics. Those are model-class transfer tests on
+the cell the ROM was fitted to, not independent-cell tests --- \S\ref{sec:external} covers that
+axis separately, and validates the \emph{assumptions} against measured cells rather than any
+vehicle result. Neither substitutes for hardware.
+
+\paragraph{No lifetime benefit was found.} Preventing plating ought to buy cycle life, and
+\S\ref{sec:cyclelife} looked for that and did not find it: over \clCycles{} cold cycles the three
+controllers lose within \clSpread{} points of the same capacity. The safety argument is scoped to
+the deposition onset and no life or warranty claim follows from it. That is a limitation of the
+result, not of the experiment --- the experiment is the reason the claim is not in the paper.
 
 \paragraph{The certified set is $\{T, V\}$; plating is enforced, never certified.}
 \S\ref{sec:cell} gives the reason and \S\ref{sec:water} shows it is not a technicality: in a
