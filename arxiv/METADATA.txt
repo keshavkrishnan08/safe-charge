@@ -19,117 +19,51 @@ Admissible Input Set
 ABSTRACT (paste as plain text)
 ------------------------------
 An autonomous vehicle's battery must be pushed hard enough to be useful and held back enough to
-be safe, and the state deciding where that line falls -- series resistance, plating margin,
-true capacity -- is not measurable in the field. Every unattended vehicle inherits the same
+be safe, and the state deciding where that line falls -- series resistance, plating margin, true
+capacity -- is not measurable in the field. Every unattended vehicle inherits the same
 compromise: a fixed de-rate chosen offline for the worst cell at the worst temperature at end of
-life, applied whatever the present state happens to be. The standard alternatives are to
-identify the pack online, which needs excitation an operational vehicle cannot inject, or to
-solve a constrained optimisation each step, whose iteration count a safety task slot cannot be
-sized around.
+life, applied whatever the present state happens to be. The alternatives are to identify the pack
+online, which needs excitation an operational vehicle cannot inject, or to solve a constrained
+optimisation each step, whose iteration count a safety task slot cannot be sized around.
 
 We prove that neither is necessary. Terminal voltage, temperature and the lithium-plating
-potential are each monotone in applied current -- the first two by the sign of the
-overpotential and the strict positivity of I^2R, the third because the plating proxy is affine
-and decreasing in current -- so the admissible input set is a single interval, and its
-edges are found by bisection in a fixed number of one-step model evaluations, with no
-optimiser, no convergence test, and no identification. The published form assumes the safe input
-is zero, which holds for a cell being charged and fails for any vehicle doing its job. That
-failure is a misdiagnosis: zero still satisfies every temperature and voltage constraint on a
-discharging pack; what zero cannot do is serve the load, which is a floor rather than a
-cap. Anchored Collapse adds the floor family and a second bisection -- 40
-fixed evaluations against 20.
+potential are each monotone in applied current, so the admissible input set is a single
+interval whose edges are found by bisection in a fixed number of one-step model
+evaluations -- no optimiser, no convergence test, no identification. The published form assumes
+the safe input is zero, which holds for a cell being charged and fails for any vehicle doing its
+job. That failure is a misdiagnosis: zero still satisfies every temperature and voltage
+constraint on a discharging pack; what zero cannot do is serve the load, which is a floor
+rather than a cap. Anchored Collapse adds the floor family and a second bisection --
+40 fixed evaluations against 20.
 
-What that buys is not speed but transfer. Tuned on a fleet a manufacturer could
-characterise in advance -- mild ambient, cells not yet aged -- the fastest safe fixed de-rate
-is 1.2C. Deployed on the fleet a vehicle actually meets, from -10 to 40 C and
-out to end of life, that same rate violates in 26.2 % of sessions. The
-certificate, re-tuned not at all because it has nothing to tune, violates in
-0 of 400. Matching its safety with a constant requires
-dropping to 0.5C, and against that constant it still delivers
-+2.0 % more charge. The honest claim is therefore parity-or-better on charge and
-a categorical difference on safety, not the large speed-up a single chosen baseline suggests.
-Against model-predictive control it returns the same answer -- to 0.66 SOC
-points -- at 20 model evaluations against 644, and the 20 is a proved
-bound while MPC's number is whatever its iteration cap allowed.
-Across 16 platforms in four media and 61 experiments totalling
-506,747 episodes, nothing was breached while the certificate reported feasible, the
-admissible set was a single interval in all 64,000 dense scans, and worst-case latency was
-123.9 \mus -- 1.24 % of a 10 ms ISO~26262 slot.
+What that buys is not speed but transfer. A de-rate tuned on a fleet a manufacturer could
+characterise in advance violates in 26.2 % of deployment sessions; the
+certificate, re-tuned not at all because it has nothing to tune, violates in 0 of
+400. And against the control-barrier-function quadratic program -- the standard safety
+filter, and the method's own family -- the relationship turns out to be closer than rivalry:
+enforced on the true model rather than a linearisation, the discrete-time CBF condition for a
+monotone constraint is an interval, so this is the bisection that solves that problem
+exactly, with gamma entering as a margin.
 
-The comparison a control reader asks for first is against the CBF quadratic program, and it is
-closer than a benchmark. Enforced on the true model instead of a linearisation, the discrete-time
-CBF condition for a monotone constraint defines an interval -- single-valued in all
-600 states tested -- so this method is the bisection that solves the CBF problem
-exactly, with \gamma entering as a margin. The QP is its linearised approximation, and the
-approximation is not free: given the exact plant and no margin, so that nothing else can absorb
-the error, the QP breaches in 7.0 % of sessions at the matched condition \gamma = 1
-where the bisection breaches in 0 of 600. Restoring its safety costs
-8.5 SOC points.
+Three things make the guarantee checkable rather than asserted. It is machine-checked in
+Lean~4 -- nine theorems, no sorry, no dependency on any axiom -- and the
+proof needs less than we claimed: safety holds for an arbitrary predicate, so monotonicity
+buys optimality, not safety. The two assumptions it consumes are tested against 33 cells
+measured by another laboratory, and the filter itself against a Doyle-Fuller-Newman plant, a
+different model class, where the affine plating proxy kept the DFN's actual electrode
+potential above the deposition onset in every session. And it ships: 2,064 B of compiled code,
+68 B of RAM, worst-case 123.9 micros -- 1.24 % of a 10 ms ISO~26262
+slot.
 
-The arrangement the method is for is a filter wrapping a controller it does not trust, and both
-halves of that are measured. A policy fitted by cross-entropy search to maximise delivered charge
-with no safety term breaches a certified constraint in 400 of 400
-sessions on its own and in 0 through the filter, while still delivering
-+16.7 SOC points more than the safe protocol it replaces. On a policy that was already
-safe the filter intervenes in 0.39 % of steps, and across a swept request its
-intervention is monotone and begins strictly before breaching does.
-
-The two application claims that carry furthest are checked against physics we did not write and
-against a compiler. Safety: the plating constraint the paper enforces but never certifies is
-what stands between a cold fast charge and metallic lithium on the anode -- the first link in the
-chain that ends in an internal short. Charging a DFN cell to a matched 70 % at
-0 C, the rate a de-rate exists to forbid drives the anode potential negative in
-2 of 8 sessions and deposits 20.4 mAh while it is there;
-the certificate crosses in 0, and holds a wider anode margin than the fixed
-de-rate at every ambient -- 19.8 minutes slower cold, where the constraint binds,
-and 23.8 faster warm, where it does not. Deployability: the filter is not an estimate of a
-footprint but a compiled one, 2,064 B of code and constants and 68 B of RAM, agreeing
-with the reference on feasibility at all 20,000 states tested and never exceeding it by more
-than one bisection quantum.
-
-The value is not uniform across domains and the paper measures where it is not. Holding every
-domain's incumbent to the same tune-then-deploy standard -- which the first version of this work
-applied only to the ground baseline -- the incumbent rule fails in two of four media and the
-certificate in none; in the other two the incumbent survives and still delivers more mission, and
-\S\refsec:cross predicts which two in advance from whether closure is envelope- or
-energy-driven. On the ground, scored on the quantity a fleet actually buys, the certificate
-returns 17.4x as many vehicles to service inside a 40-minute window
--- while costing -29.7 points above 32.5 C ambient, where its own margin
-exceeds the available headroom.
-
-The plants are ours, which is the objection that matters, so the certificate is also run against a
-Doyle-Fuller-Newman cell -- a different model class, with concentration gradients the
-reduced-order model has no state for. Across 40 charging sessions it breached neither
-certified constraint (peak 4.052 V against 4.20, 32.5 C against 45), and
-the affine plating proxy the paper enforces but never certifies kept DFN's actual negative
-electrode potential above the deposition onset in all of them. It holds with DFN transport
-properties misspecified by 20x and gives way at 50x.
-
-Two things make the guarantee checkable rather than asserted. It is machine-checked in
-Lean~4 -- nine theorems, no \textttsorry, no dependency on any axiom -- and the
-proofs turn out to need less than claimed: safety holds for an arbitrary predicate, so
-monotonicity buys optimality, not safety. And the two assumptions are tested against 33
-cells measured by another laboratory: resistance growth stays inside the assumed bound in
-100.00 % of 1,255 measurements over the life the certificate claims, and heat
-generation is confirmed monotone in current across 2,764 measured cycles
-(rho = +0.714), model-free.
-
-Five results contradicted the hypotheses they were written to test and are reported as findings:
-the certificate refuses the calibrated cell for a rotorcraft before takeoff above
-1.2C of hover draw; in a sealed hull the binding constraint is plating at every water
-temperature -- the one constraint the theorem enforces but cannot certify; in deep space a
-smaller radiator delivers more charge, the pack being cold-limited; under an ice shelf
-closure leaves 7 minutes against a 20-minute transit, making closure
-the wrong trigger; a fixed state-of-charge reserve, which we predicted would be badly
-miscalibrated, is not beaten where the mission ends on charge; and in a pack driven to
-divergence by those same EPA schedules, the cell that binds the certificate sits among the
-coldest in the pack, not the hottest, because the plating cap tightens as a cell cools --
-so the lumped pack model that every single-temperature simulation implicitly certifies against
-breaks no certified constraint at all and plates 19.4 % of cells.
+Across 16 platforms in four media, 61 experiments and 506,747
+episodes, nothing was breached while the certificate reported feasible. Twenty of those
+experiments contradicted the hypothesis they were written to test and are reported as findings
+-- among them the two media of four where the incumbent rule is not beaten, which the
+method predicts in advance from whether mission closure is envelope- or energy-driven.
 
 NOTES FOR THE SUBMISSION FORM
 -----------------------------
-Comments field:  43 pages, 10 figures, 61 experiments. Theorem machine-checked
+Comments field:  42 pages, 10 figures, 61 experiments. Theorem machine-checked
                  in Lean 4 (no sorry, no axioms); proof scripts and all
                  experiment code included in the repository.
 

@@ -45,113 +45,47 @@ Autonomous Vehicles, from Robotaxis to Deep Space}\\[5pt]
 \begin{abstract}
 \noindent
 An autonomous vehicle's battery must be pushed hard enough to be useful and held back enough to
-be safe, and the state deciding where that line falls --- series resistance, plating margin,
-true capacity --- is not measurable in the field. Every unattended vehicle inherits the same
+be safe, and the state deciding where that line falls --- series resistance, plating margin, true
+capacity --- is not measurable in the field. Every unattended vehicle inherits the same
 compromise: a fixed de-rate chosen offline for the worst cell at the worst temperature at end of
-life, applied whatever the present state happens to be. The standard alternatives are to
-identify the pack online, which needs excitation an operational vehicle cannot inject, or to
-solve a constrained optimisation each step, whose iteration count a safety task slot cannot be
-sized around.
+life, applied whatever the present state happens to be. The alternatives are to identify the pack
+online, which needs excitation an operational vehicle cannot inject, or to solve a constrained
+optimisation each step, whose iteration count a safety task slot cannot be sized around.
 
 We prove that neither is necessary. Terminal voltage, temperature and the lithium-plating
-potential are each \emph{monotone} in applied current --- the first two by the sign of the
-overpotential and the strict positivity of $I^2R$, the third because the plating proxy is affine
-and decreasing in current --- so the admissible input set is a single \textbf{interval}, and its
-edges are found by bisection in a \emph{fixed} number of one-step model evaluations, with no
-optimiser, no convergence test, and no identification. The published form assumes the safe input
-is zero, which holds for a cell being charged and fails for any vehicle doing its job. That
-failure is a misdiagnosis: zero still satisfies every temperature and voltage constraint on a
-discharging pack; what zero cannot do is serve the load, which is a \emph{floor} rather than a
-cap. \textbf{Anchored Collapse} adds the floor family and a second bisection --- \evalDischarge{}
-fixed evaluations against \evalCharge{}.
+potential are each \emph{monotone} in applied current, so the admissible input set is a single
+\textbf{interval} whose edges are found by bisection in a \emph{fixed} number of one-step model
+evaluations --- no optimiser, no convergence test, no identification. The published form assumes
+the safe input is zero, which holds for a cell being charged and fails for any vehicle doing its
+job. That failure is a misdiagnosis: zero still satisfies every temperature and voltage
+constraint on a discharging pack; what zero cannot do is serve the load, which is a \emph{floor}
+rather than a cap. \textbf{Anchored Collapse} adds the floor family and a second bisection ---
+\evalDischarge{} fixed evaluations against \evalCharge.
 
-What that buys is not speed but \emph{transfer}. Tuned on a fleet a manufacturer could
-characterise in advance --- mild ambient, cells not yet aged --- the fastest safe fixed de-rate
-is \bThreeTuned{}C. Deployed on the fleet a vehicle actually meets, from $-10$ to $40\,\degC$ and
-out to end of life, that same rate \textbf{violates in \bThreeTunedViolPct\,\% of sessions}. The
-certificate, re-tuned not at all because it has nothing to tune, violates in
-\textbf{\bThreeZgViol{} of \bThreeTrials{}}. Matching its safety with a constant requires
-dropping to \bThreeRequired{}C, and against that constant it still delivers
-$+$\bThreeGainPct\,\% more charge. The honest claim is therefore parity-or-better on charge and
-a categorical difference on safety, not the large speed-up a single chosen baseline suggests.
-Against model-predictive control it returns the \emph{same} answer --- to \bMpcGap{} SOC
-points --- at \bZgEval{} model evaluations against \bMpcMaxEval{}, and the \bZgEval{} is a proved
-bound while MPC's number is whatever its iteration cap allowed.
-Across \vPlatforms{} platforms in four media and \vExperiments{} experiments totalling
-\vTotalEpisodes{} episodes, nothing was breached while the certificate reported feasible, the
-admissible set was a single interval in all \scanTotal{} dense scans, and worst-case latency was
-\worstLatency\,$\mu$s --- \slotFraction\,\% of a 10\,ms ISO~26262 slot.
+What that buys is not speed but \emph{transfer}. A de-rate tuned on a fleet a manufacturer could
+characterise in advance violates in \bThreeTunedViolPct\,\% of deployment sessions; the
+certificate, re-tuned not at all because it has nothing to tune, violates in \bThreeZgViol{} of
+\bThreeTrials. And against the control-barrier-function quadratic program --- the standard safety
+filter, and the method's own family --- the relationship turns out to be closer than rivalry:
+enforced on the true model rather than a linearisation, the discrete-time CBF condition for a
+monotone constraint \emph{is} an interval, so this is the bisection that solves that problem
+exactly, with $\gamma$ entering as a margin.
 
-The comparison a control reader asks for first is against the CBF quadratic program, and it is
-closer than a benchmark. Enforced on the true model instead of a linearisation, the discrete-time
-CBF condition for a monotone constraint defines an \emph{interval} --- single-valued in all
-\cExactStates{} states tested --- so this method is the bisection that solves the CBF problem
-exactly, with $\gamma$ entering as a margin. The QP is its linearised approximation, and the
-approximation is not free: given the exact plant and no margin, so that nothing else can absorb
-the error, the QP breaches in \cIsoQpRate\,\% of sessions at the matched condition $\gamma = 1$
-where the bisection breaches in \cIsoZgViol{} of \cIsoTrials. Restoring its safety costs
-\cIsoGap{} SOC points.
-
-The arrangement the method is for is a filter wrapping a controller it does not trust, and both
-halves of that are measured. A policy fitted by cross-entropy search to maximise delivered charge
-with \emph{no safety term} breaches a certified constraint in \pLearnViol{} of \pTrials{}
-sessions on its own and in \pLearnFilt{} through the filter, while still delivering
-$+$\pGainSafe{} SOC points more than the safe protocol it replaces. On a policy that was already
-safe the filter intervenes in \pSafeClip\,\% of steps, and across a swept request its
-intervention is monotone and begins strictly before breaching does.
-
-The two application claims that carry furthest are checked against physics we did not write and
-against a compiler. \textbf{Safety:} the plating constraint the paper enforces but never certifies is
-what stands between a cold fast charge and metallic lithium on the anode --- the first link in the
-chain that ends in an internal short. Charging a DFN cell to a matched \plTarget\,\% at
-0\,\degC, the rate a de-rate exists to forbid drives the anode potential negative in
-\plColdFastOnset{} of \plSessions{} sessions and deposits \plAggRiskMah\,mAh while it is there;
-the certificate crosses in \plColdCertOnset, and holds a wider anode margin than the fixed
-de-rate at \emph{every} ambient --- \plMinutes{} minutes slower cold, where the constraint binds,
-and 23.8 faster warm, where it does not. \textbf{Deployability:} the filter is not an estimate of a
-footprint but a compiled one, \fwText\,B of code and constants and \fwRam\,B of RAM, agreeing
-with the reference on feasibility at all \fwStates{} states tested and never exceeding it by more
-than one bisection quantum.
-
-The value is not uniform across domains and the paper measures where it is not. Holding every
-domain's incumbent to the same tune-then-deploy standard --- which the first version of this work
-applied only to the ground baseline --- the incumbent rule fails in two of four media and the
-certificate in none; in the other two the incumbent survives and still delivers more mission, and
-\S\ref{sec:cross} predicts which two in advance from whether closure is envelope- or
-energy-driven. On the ground, scored on the quantity a fleet actually buys, the certificate
-returns \gtReachSixtyRatio$\times$ as many vehicles to service inside a \gtWindow-minute window
---- while costing \gtAmbForty{} points above \gtCeiling\,\degC{} ambient, where its own margin
-exceeds the available headroom.
-
-The plants are ours, which is the objection that matters, so the certificate is also run against a
-\textbf{Doyle--Fuller--Newman} cell --- a different model class, with concentration gradients the
-reduced-order model has no state for. Across \dSessions{} charging sessions it breached neither
-certified constraint (peak \dPeakV\,V against \dVmaxLim, \dPeakT\,\degC{} against \dTmaxLim), and
-the affine plating proxy the paper enforces but never certifies kept DFN's \emph{actual} negative
-electrode potential above the deposition onset in all of them. It holds with DFN transport
-properties misspecified by \dEcHeld$\times$ and gives way at \dEcBreak$\times$.
-
-Two things make the guarantee checkable rather than asserted. It is \textbf{machine-checked in
+Three things make the guarantee checkable rather than asserted. It is \textbf{machine-checked in
 Lean~4} --- \leanTheorems{} theorems, no \texttt{sorry}, no dependency on any axiom --- and the
-proofs turn out to need less than claimed: safety holds for an \emph{arbitrary} predicate, so
-monotonicity buys optimality, not safety. And the two assumptions are tested against \nCells{}
-cells measured by another laboratory: resistance growth stays inside the assumed bound in
-\nInsideEolFrac\,\% of \nEolMeas{} measurements over the life the certificate claims, and heat
-generation is confirmed monotone in current across \nDisCycles{} measured cycles
-($\rho = \nDisRho$), model-free.
+proof needs less than we claimed: safety holds for an \emph{arbitrary} predicate, so monotonicity
+buys optimality, not safety. The two assumptions it consumes are tested against \nCells{} cells
+measured by another laboratory, and the filter itself against a Doyle--Fuller--Newman plant, a
+different model class, where the affine plating proxy kept the DFN's \emph{actual} electrode
+potential above the deposition onset in every session. And it ships: \fwText\,B of compiled code,
+\fwRam\,B of RAM, worst-case \worstLatency\,$\mu$s --- \slotFraction\,\% of a 10\,ms ISO~26262
+slot.
 
-Five results contradicted the hypotheses they were written to test and are reported as findings:
-the certificate \emph{refuses} the calibrated cell for a rotorcraft before takeoff above
-\aRefuseC{}C of hover draw; in a sealed hull the binding constraint is plating at every water
-temperature --- the one constraint the theorem enforces but cannot certify; in deep space a
-\emph{smaller} radiator delivers more charge, the pack being cold-limited; under an ice shelf
-closure leaves \uIceClosureMed{} minutes against a \uIceTransit{}-minute transit, making closure
-the wrong trigger; a fixed state-of-charge reserve, which we predicted would be badly
-miscalibrated, is \emph{not} beaten where the mission ends on charge; and in a pack driven to
-divergence by those same EPA schedules, the cell that binds the certificate sits among the
-\emph{coldest} in the pack, not the hottest, because the plating cap tightens as a cell cools ---
-so the lumped pack model that every single-temperature simulation implicitly certifies against
-breaks no certified constraint at all and plates \qMeanPlatePct\,\% of cells.
+Across \vPlatforms{} platforms in four media, \vExperiments{} experiments and \vTotalEpisodes{}
+episodes, nothing was breached while the certificate reported feasible. \textbf{Twenty of those
+experiments contradicted the hypothesis they were written to test} and are reported as findings
+--- among them the two media of four where the incumbent rule is \emph{not} beaten, which the
+method predicts in advance from whether mission closure is envelope- or energy-driven.
 \end{abstract}
 
 \section{Introduction}
@@ -175,6 +109,48 @@ private car's decade of fast-charge stress in \gWeeks{} weeks (\S\ref{sec:ground
 de-rate it inherits was designed for a vehicle with a fundamentally different duty cycle. For a
 spacecraft it is worse still, because the de-rate is chosen before launch and can never be
 revisited.
+
+
+\subsection{Contributions}
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{A geometric fact, and its consequence.} Voltage, temperature and plating potential
+are monotone in current, so the admissible input set is an \emph{interval}. Its edges are found
+by bisection at a cost fixed before run time: \evalCharge{} model evaluations on charge,
+\evalDischarge{} on discharge. No optimiser, no convergence test, no identified model
+(\S\ref{sec:theory}).
+
+\item \textbf{Anchored Collapse.} The published theorem assumes the safe input is zero, which is
+true of a cell on a bench and false of any vehicle serving a load. Splitting the constraints into
+caps and floors and running a second bisection removes that assumption, and is what carries the
+result from a charger to a rotorcraft, an AUV and a spacecraft (\S\ref{sec:theory}).
+
+\item \textbf{It is the exact CBF filter, not a rival to it.} Enforced on the true model rather
+than a linearisation, the discrete-time control-barrier-function condition for a monotone
+constraint defines an interval. This work is the bisection that solves it exactly, with $\gamma$
+entering as a margin; the quadratic program people deploy is its linearised approximation
+(\S\ref{sec:cbf}).
+
+\item \textbf{Machine-checked, and it needed less than we claimed.} \leanTheorems{} theorems in
+Lean~4, no \texttt{sorry} and no axiom. Writing them showed that safety holds for an
+\emph{arbitrary} predicate: monotonicity buys optimality, not safety (\S\ref{sec:formal}).
+
+\item \textbf{The guarantee transfers where a tuned constant does not.} Held to a
+tune-then-deploy standard, the incumbent rule fails in two of four media and the certificate in
+none --- and in the other two the incumbent is \emph{not} beaten, which
+\S\ref{sec:cross} predicts in advance from whether mission closure is envelope- or energy-driven
+(\S\ref{sec:transfer}, \S\ref{sec:bydomain}).
+
+\item \textbf{Checked against physics we did not write, and a compiler.} The assumptions against
+\nCells{} cells from another laboratory; the filter against a Doyle--Fuller--Newman plant, where
+the affine plating proxy held the \emph{actual} electrode potential above the deposition onset;
+and the implementation as \fwText\,B of compiled C agreeing with the reference at all
+\fwStates{} states tested (\S\ref{sec:external}, \S\ref{sec:dfn}, \S\ref{sec:firmware}).
+
+\item \textbf{A register that was not written to pass.} \vExperiments{} experiments,
+\vTotalEpisodes{} episodes; twenty of them contradicted the hypothesis they were written to test
+and are reported as findings rather than removed (Appendix).
+\end{enumerate}
 
 \subsection{Two standard answers, and why neither reaches the vehicle}
 
@@ -1298,6 +1274,99 @@ rule, and is reported rather than hidden by choosing a friendlier target.
 
 
 
+\section{The same standard in every domain}\label{sec:transfer}
+
+Two things were wrong with the per-domain comparisons, and both were ours.
+
+\textbf{The standard was applied unevenly.} \S\ref{sec:tuned} caught a methodological error ---
+a fixed de-rate tuned and evaluated on the same population --- and corrected it for the
+\emph{ground} domain by tuning on a fleet a manufacturer could characterise in advance and
+deploying on the fleet a vehicle actually meets. \S\ref{sec:domainbaselines} then compared
+against the air, water and space incumbents \emph{without} that correction: every fixed
+state-of-charge threshold there was swept against the very population it was scored on. The
+ground baseline was held to a stricter standard than the other three, which is backwards, and
+water and GEO --- where the fixed rule won --- are precisely the results the correction would
+move.
+
+\textbf{And the ground metric was the wrong quantity.} \S\ref{sec:tuned} reports mean state of
+charge after a fixed horizon. No operator buys state of charge. A robotaxi that is charging is a
+robotaxi not earning, so the quantity is minutes until it can be dispatched again.
+
+\subsection{Tune where you can characterise; deploy where the vehicle goes}
+
+Each domain's incumbent threshold is chosen on a benign population --- mild ambient, cells not
+yet aged --- taking the most permissive threshold that still recovers at the stated rate. It is
+then deployed, unchanged, on the population the vehicle meets. The certificate reserve is put
+through the identical procedure and, as everywhere else, is re-tuned not at all because it has
+nothing to tune. Targets differ by domain and are stated, because in the aerial case no rule of
+\emph{either} family recovers in 95\,\% of episodes and fixing the target there yields no
+comparison rather than a result.
+
+\begin{table}[t]
+\centering
+\caption{Recovery rate in characterisation $\rightarrow$ deployment. \tTrials{} missions per
+population per domain.}
+\label{tab:transfer}
+{\footnotesize
+\begin{tabular}{llrrl}
+\toprule
+domain & rule & char. & depl. & verdict \\
+\midrule
+Air ($\ge$\tAirTarget\,\%) & \tAirRule & \tAirTuned & \tAirDeployed & \tAirHolds \\
+ & certificate & \tAirCertTuned & \tAirCertDeployed & \tAirCertHolds \\
+\addlinespace
+Water ($\ge$\tWaterTarget\,\%) & \tWaterRule & \tWaterTuned & \tWaterDeployed & \tWaterHolds \\
+ & certificate & \tWaterCertTuned & \tWaterCertDeployed & \tWaterCertHolds \\
+\addlinespace
+Space ($\ge$\tSpaceTarget\,\%) & \tSpaceRule & \tSpaceTuned & \tSpaceDeployed & \tSpaceHolds \\
+ & certificate & \tSpaceCertTuned & \tSpaceCertDeployed & \tSpaceCertHolds \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+The correction changes one domain and not the others (Table~\ref{tab:transfer}). In the air the
+tuned threshold \textbf{fails}: chosen on evidence a manufacturer could actually have, it
+recovers \tAirTuned\,\% in characterisation and \tAirDeployed\,\% in deployment, below the target
+it was chosen to meet, while the certificate reserve goes \tAirCertTuned\,\% to
+\tAirCertDeployed\,\%. That is the ground transfer result of \S\ref{sec:tuned} reproduced in a
+second medium and in a different currency --- there it was violations, here it is failures to
+get home.
+
+Underwater and in GEO the incumbent \emph{survives} its transfer test, and the certificate
+remains behind on mission delivered: \tWaterGain\,\% and \tSpaceGain\,\%. We looked for the
+methodological error that would overturn those two results, applied the correction that had
+overturned the ground one, and it did not overturn them. \S\ref{sec:cross} already says why, and
+says it in advance rather than afterwards: a constraint-based clock can only predict endurance
+where closure is envelope-driven, and underwater and in eclipse it is energy-driven. The
+certificate is measuring the wrong thing there, and no amount of fairer baselining will change
+that.
+
+\subsection{Minutes back on the road}
+
+Scored on dispatch time instead of state of charge, over \gtTrials{} sessions across the
+deployment fleet against the CC--CV rate \S\ref{sec:tuned} showed is fleet-safe, the ground
+picture separates into two facts the average was hiding.
+
+The first is that the advantage is much larger than a mean SOC suggests. Within the
+\gtWindow-minute window, \gtReachSixtyZg\,\% of sessions reach a 60\,\% charge under the certificate
+against \gtReachSixtyCc\,\% under the fixed rate --- \gtReachSixtyRatio$\times$ as many vehicles
+returned to service --- and at 70\,\% the fixed rate reaches it in \gtReachSeventyCc\,\% of sessions.
+A fleet is sized on how many vehicles come back, not on the mean charge of those that do.
+
+The second is that the fleet mean of $+$\gtMean{} points is an average taken across a change of
+sign, and is therefore not a fact about any vehicle. By ambient the certificate delivers
+$+$\gtAmbFifteen{} points at 15\,\degC{} and \gtAmbForty{} at 40\,\degC, crossing over between
+\gtCrossLo{} and \gtCrossHi\,\degC.
+
+The reversal is not the theorem failing, and it is not a mystery. The thermal margin puts the
+certificate's effective ceiling at \gtCeiling\,\degC; above that ambient the cell can never sit
+below it, so the filter refuses to charge. It is right to refuse --- it breached nothing in
+\gtViol{} of \gtTrials{} sessions --- and refusing has a price. This is the passive-charging
+ceiling of \S\ref{sec:ground} reappearing as a performance number rather than a safety one, and
+it is the same margin-sizing question \S\ref{sec:durmargin} answers for pulses and does not
+answer here, because a charging session really does last half an hour.
+
+
 \section{Against the CBF quadratic program}\label{sec:cbf}
 
 \S\ref{sec:related} places this work among predictive safety filters and control barrier
@@ -1424,403 +1493,6 @@ The build is for \texttt{\fwTarget}, not a Cortex-M part, because no cross-compi
 available here; the byte counts for state, tables and constants are architecture-independent and
 the code size is not, so that number should be read as indicative for a different instruction
 set rather than as a measurement of one.
-
-
-
-\section{What the plating constraint is worth}\label{sec:plating}
-
-The plating constraint is enforced everywhere in this paper and certified nowhere, and until now
-nothing said how much plating that prevents. ``Prevents lithium plating'' should carry a number
-or not be said.
-
-The chain worth being exact about is: plating deposits metallic lithium on the anode, deposits
-grow as dendrites, a dendrite bridging the separator is an internal short, and an internal short
-is the initiating event for thermal runaway. \textbf{Only the first link is measured here.} No
-controller in this section approaches a self-heating threshold --- the 45\,\degC{} limit is a
-service limit, not a fire one --- so nothing below prevents runaway by keeping a cell cool.
-What it does is keep the anode potential above the deposition onset, which is upstream of the
-whole chain. Dendrite growth, separator breach and runaway are not modelled and are not claimed.
-
-\paragraph{Two things had to be got right first.} Plating is a \emph{cold}-charge failure mode:
-the anode potential that must stay positive falls as the cell cools, because the kinetics that
-would intercalate the lithium slow while the current does not. On the DFN, 1.5C crosses the
-deposition onset at 0\,\degC{} and does not come near it at 25\,\degC. Testing plating at room
-temperature tests the regime where it does not happen.
-
-And it must be measured at \emph{matched charge}, because more charge plates more lithium. The
-first version of this experiment compared totals between controllers delivering different
-amounts and duly found the certificate --- which delivers more --- plating more than a slow
-de-rate. That is a units error, not a result. Every controller below therefore runs to the same
-\plTarget\,\% target, and what is compared is the damage done to deliver it and the time taken.
-The verification suite checks that each one actually \emph{reached} the target; at a shorter
-horizon the certificate did not, cold, and that check is what caught it.
-
-\begin{table}[t]
-\centering
-\caption{DFN charge to \plTarget\,\% SOC, \plSessions{} sessions per cell.
-``At risk'' is time spent with the anode potential at or below the deposition onset.}
-\label{tab:plating}
-{\footnotesize
-\begin{tabular}{@{}llrrrr@{}}
-\toprule
-& & onset & min $\phi$ & at risk & \\
-ambient & controller & crossed & (mV) & (min) & min \\
-\midrule
-0\,\degC & certificate & \plColdCertOnset/\plSessions & $+$\plColdCertPhi & \plCertRisk & \plColdCertMin \\
- & CC--CV 0.5C & \plColdSlowOnset/\plSessions & $+$\plColdSlowPhi & 0.0 & \plColdSlowMin \\
- & CC--CV 1.5C & \textbf{\plColdFastOnset/\plSessions} & \plColdFastPhi & \textbf{\plAggRisk} & \plColdFastMin \\
-\addlinespace
-10\,\degC & certificate & \plCoolCertOnset/\plSessions & $+$\plCoolCertPhi & 0.0 & \plCoolCertMin \\
- & CC--CV 0.5C & \plCoolSlowOnset/\plSessions & $+$\plCoolSlowPhi & 0.0 & \plCoolSlowMin \\
- & CC--CV 1.5C & \plCoolFastOnset/\plSessions & $+$\plCoolFastPhi & 0.0 & \plCoolFastMin \\
-\addlinespace
-25\,\degC & certificate & \plMildCertOnset/\plSessions & $+$\plMildCertPhi & 0.0 & \plMildCertMin \\
- & CC--CV 0.5C & \plMildSlowOnset/\plSessions & $+$\plMildSlowPhi & 0.0 & \plMildSlowMin \\
- & CC--CV 1.5C & \plMildFastOnset/\plSessions & $+$\plMildFastPhi & 0.0 & \plMildFastMin \\
-\bottomrule
-\end{tabular}}
-\end{table}
-
-\paragraph{What the constraint buys.} Cold, the rate a de-rate exists to forbid drives the anode
-negative in \plColdFastOnset{} of \plSessions{} sessions, spends \plAggRisk{} minutes in the
-depositing regime and lays down \plAggRiskMah\,mAh of metallic lithium while it is there. The
-certificate crosses in \plColdCertOnset{} of \plSessions, spends \plCertRisk{} minutes at risk,
-and holds the anode further from the onset than the fixed de-rate does \emph{at every ambient}
-(Table~\ref{tab:plating}).
-
-\paragraph{And what it costs.} That margin is not free, and the direction of the cost is the
-argument for a state-dependent limit rather than a fixed one. Cold, where the plating constraint
-genuinely binds, the certificate is \plMinutes{} minutes \emph{slower} than the 0.5C de-rate to
-the same charge. Warm, where it does not, the certificate is 11.0 and 23.8 minutes
-\emph{faster}. A fixed rate cannot do both; it is one number, chosen once, and it is
-simultaneously too slow at 25\,\degC{} and holding only $+$\plColdSlowPhi\,mV of anode margin at
-0\,\degC.
-
-\paragraph{The metric that fails, reported because it fails.} Total lithium plated does
-\emph{not} separate these controllers --- cold, the aggressive rate accumulates
-\plAggMah\,mAh against the certificate's \plCertMah. It charges in \plColdFastMin{} minutes
-against \plColdCertMin, so it accrues less of the slow background side reaction that proceeds
-whenever the anode potential is low, while entering the depositing regime the certificate never
-enters. Mass integrates a film that forms harmlessly; the onset crossing is the event. Reporting
-the mass alone would have made the fast rate look like the safer one.
-
-
-\section{The same standard in every domain}\label{sec:transfer}
-
-Two things were wrong with the per-domain comparisons, and both were ours.
-
-\textbf{The standard was applied unevenly.} \S\ref{sec:tuned} caught a methodological error ---
-a fixed de-rate tuned and evaluated on the same population --- and corrected it for the
-\emph{ground} domain by tuning on a fleet a manufacturer could characterise in advance and
-deploying on the fleet a vehicle actually meets. \S\ref{sec:domainbaselines} then compared
-against the air, water and space incumbents \emph{without} that correction: every fixed
-state-of-charge threshold there was swept against the very population it was scored on. The
-ground baseline was held to a stricter standard than the other three, which is backwards, and
-water and GEO --- where the fixed rule won --- are precisely the results the correction would
-move.
-
-\textbf{And the ground metric was the wrong quantity.} \S\ref{sec:tuned} reports mean state of
-charge after a fixed horizon. No operator buys state of charge. A robotaxi that is charging is a
-robotaxi not earning, so the quantity is minutes until it can be dispatched again.
-
-\subsection{Tune where you can characterise; deploy where the vehicle goes}
-
-Each domain's incumbent threshold is chosen on a benign population --- mild ambient, cells not
-yet aged --- taking the most permissive threshold that still recovers at the stated rate. It is
-then deployed, unchanged, on the population the vehicle meets. The certificate reserve is put
-through the identical procedure and, as everywhere else, is re-tuned not at all because it has
-nothing to tune. Targets differ by domain and are stated, because in the aerial case no rule of
-\emph{either} family recovers in 95\,\% of episodes and fixing the target there yields no
-comparison rather than a result.
-
-\begin{table}[t]
-\centering
-\caption{Recovery rate in characterisation $\rightarrow$ deployment. \tTrials{} missions per
-population per domain.}
-\label{tab:transfer}
-{\footnotesize
-\begin{tabular}{llrrl}
-\toprule
-domain & rule & char. & depl. & verdict \\
-\midrule
-Air ($\ge$\tAirTarget\,\%) & \tAirRule & \tAirTuned & \tAirDeployed & \tAirHolds \\
- & certificate & \tAirCertTuned & \tAirCertDeployed & \tAirCertHolds \\
-\addlinespace
-Water ($\ge$\tWaterTarget\,\%) & \tWaterRule & \tWaterTuned & \tWaterDeployed & \tWaterHolds \\
- & certificate & \tWaterCertTuned & \tWaterCertDeployed & \tWaterCertHolds \\
-\addlinespace
-Space ($\ge$\tSpaceTarget\,\%) & \tSpaceRule & \tSpaceTuned & \tSpaceDeployed & \tSpaceHolds \\
- & certificate & \tSpaceCertTuned & \tSpaceCertDeployed & \tSpaceCertHolds \\
-\bottomrule
-\end{tabular}}
-\end{table}
-
-The correction changes one domain and not the others (Table~\ref{tab:transfer}). In the air the
-tuned threshold \textbf{fails}: chosen on evidence a manufacturer could actually have, it
-recovers \tAirTuned\,\% in characterisation and \tAirDeployed\,\% in deployment, below the target
-it was chosen to meet, while the certificate reserve goes \tAirCertTuned\,\% to
-\tAirCertDeployed\,\%. That is the ground transfer result of \S\ref{sec:tuned} reproduced in a
-second medium and in a different currency --- there it was violations, here it is failures to
-get home.
-
-Underwater and in GEO the incumbent \emph{survives} its transfer test, and the certificate
-remains behind on mission delivered: \tWaterGain\,\% and \tSpaceGain\,\%. We looked for the
-methodological error that would overturn those two results, applied the correction that had
-overturned the ground one, and it did not overturn them. \S\ref{sec:cross} already says why, and
-says it in advance rather than afterwards: a constraint-based clock can only predict endurance
-where closure is envelope-driven, and underwater and in eclipse it is energy-driven. The
-certificate is measuring the wrong thing there, and no amount of fairer baselining will change
-that.
-
-\subsection{Minutes back on the road}
-
-Scored on dispatch time instead of state of charge, over \gtTrials{} sessions across the
-deployment fleet against the CC--CV rate \S\ref{sec:tuned} showed is fleet-safe, the ground
-picture separates into two facts the average was hiding.
-
-The first is that the advantage is much larger than a mean SOC suggests. Within the
-\gtWindow-minute window, \gtReachSixtyZg\,\% of sessions reach a 60\,\% charge under the certificate
-against \gtReachSixtyCc\,\% under the fixed rate --- \gtReachSixtyRatio$\times$ as many vehicles
-returned to service --- and at 70\,\% the fixed rate reaches it in \gtReachSeventyCc\,\% of sessions.
-A fleet is sized on how many vehicles come back, not on the mean charge of those that do.
-
-The second is that the fleet mean of $+$\gtMean{} points is an average taken across a change of
-sign, and is therefore not a fact about any vehicle. By ambient the certificate delivers
-$+$\gtAmbFifteen{} points at 15\,\degC{} and \gtAmbForty{} at 40\,\degC, crossing over between
-\gtCrossLo{} and \gtCrossHi\,\degC.
-
-The reversal is not the theorem failing, and it is not a mystery. The thermal margin puts the
-certificate's effective ceiling at \gtCeiling\,\degC; above that ambient the cell can never sit
-below it, so the filter refuses to charge. It is right to refuse --- it breached nothing in
-\gtViol{} of \gtTrials{} sessions --- and refusing has a price. This is the passive-charging
-ceiling of \S\ref{sec:ground} reappearing as a performance number rather than a safety one, and
-it is the same margin-sizing question \S\ref{sec:durmargin} answers for pulses and does not
-answer here, because a charging session really does last half an hour.
-
-
-\section{External validation: the assumptions against measured cells}\label{sec:external}
-
-Everything to this point is simulation. The filter is checked against a reduced-order model,
-and that model was calibrated against a Doyle--Fuller--Newman simulation. That is a defensible
-chain and it is still a chain of models, so the fair question is what happens when the
-assumptions meet a real cell.
-
-This section answers it with the NASA Ames Prognostics Center of Excellence battery data set:
-\nCells{} 18650 cells cycled to failure with periodic electrochemical impedance spectroscopy,
-published by a different laboratory, years before this work, for a different purpose. Nothing
-here was produced by us.
-
-The design point is that \textbf{the load-bearing assumptions are testable without any model at
-all.} The method does not need the ROM to be right about NASA's cells. It needs three things to
-be true of real cells, and each is a chemistry-independent statement about the shape of
-degradation.
-
-\subsection{The resistance bound holds}
-
-The filter never identifies resistance; it assumes a \emph{bound} on it, taken from a datasheet
-before the vehicle ships. If real cells leave that bound, every certificate in this paper is
-void. Across \nEIS{} impedance measurements, \textbf{\nInsideFrac\,\% lie inside the assumed
-bound $s_R = \nBound$} (Fig.~\ref{fig:external}a). Restricted to the life the certificate
-actually claims --- cells at or above 80\,\% of initial capacity, the standard automotive end of
-life --- the figure is \textbf{\nInsideEolFrac\,\% of \nEolMeas{} measurements}.
-
-Over the full measured life, including cells NASA ran down to \nCapWorst{} of initial capacity,
-\nViolations{} measurement exceeds the bound, on cell \nWorstCell{}, by 0.1\,\%. That is
-reported rather than trimmed: the bound is tight, and it is not a comfortable over-estimate.
-
-\subsection{Heat generation is monotone in current, measured}
-
-Hypothesis (A2) is the other load-bearing assumption, and it too can be checked without a model
---- though the obvious way of doing it does not work, and why is worth recording. Correlating
-instantaneous $\mathrm{d}T/\mathrm{d}t$ against instantaneous current returns nothing usable:
-stratifying by $T-T_{\mathrm{amb}}$ to control for cooling gives rank correlations that
-\emph{flip sign} between strata ($-0.34$ in the coldest, $+0.54$ in the warmest). NASA measures
-surface temperature, the core leads it by minutes, and over a charge whose total rise is under
-3\,K the thermal lag dominates the signal. Reporting either sign from that test would be an
-artefact of the instrument.
-
-The lag-free formulation is an energy balance over a whole cycle, which does not care how the
-heat arrives: total ohmic generation goes as $\int I^2\,\mathrm{d}t$, so a cycle's peak
-temperature rise should increase with it. Across \nDisCycles{} measured discharge cycles, with
-currents to \nMaxI\,A and temperature rises to \nMaxDT\,K, the rank correlation is
-\textbf{$\rho = \nDisRho$} ($p < 0.0005$; Fig.~\ref{fig:external}b). The charge cycles give
-$\nChgRho$, which is weaker for a mundane reason: NASA charges almost everything at a constant
-1.5\,A, so there is little current variation to correlate against.
-
-\subsection{Where the model does not transfer, and whether that matters}
-
-The harder question is how the ROM itself behaves on a cell it was never fitted to --- a 5\,Ah
-NMC model applied to $\sim$2\,Ah LCO cells with capacity rescaled and nothing else refitted.
-Measured one step ahead the question is meaningless, because NASA samples every $\sim$9\,s over
-which the temperature moves about 0.01\,K and predicting ``unchanged'' scores well. Integrated
-forward over a \nHorizon\,s horizon under the measured current, the transferred model scores
-RMSE \nRMSE\,\degC{} against a persistence baseline of \nPersist\,\degC{} --- a skill of
-\nSkill{}.
-
-The safety-relevant question is not the magnitude but the \emph{sign}. A model that
-over-predicts temperature yields a conservative certificate; one that under-predicts yields an
-unsafe one. \textbf{This transfer is not conservative}: the bias is \nBias\,\degC{} and it
-over-predicts in only \nOverFrac\,\% of forecasts. What rescues it is the margin. The worst
-under-prediction at the 5th percentile is \nUnderWorst\,\degC{} against a thermal margin of
-12.5\,\degC{} --- a factor of \textbf{\nMarginCover} of cover (Fig.~\ref{fig:external}c). The
-margin was not designed for cross-chemistry transfer; it happens to absorb it, and that is a
-fact about this data rather than a guarantee.
-
-\subsection{The filter permits a real protocol, and refuses where it said it would}
-
-A safety filter that refuses everything is safe and useless. Given the end-of-life resistance
-bound and the full throttled margin --- its most conservative configuration --- the certificate
-permits \textbf{\nPermitFrac\,\%} of NASA's measured charge steps, with a median headroom of
-\nHeadroom$\times$ the applied current. Of the refusals, \nRefuseCeil\,\% are cells measured
-above the throttled ceiling of \nCeiling\,\degC{}: the same frontier \S\ref{sec:ground}
-predicts from the margin alone, appearing unprompted in someone else's measurements.
-
-\subsection{One test that did not work}
-
-It was tempting to go further and ask whether the cells the filter would have refused are the
-cells that actually degraded. The mechanism would have been clean --- NASA cycled some cells at
-4\,\degC{}, the plating cap falls to a 0.70C floor below about 5.5\,\degC{}, and plating is what
-degrades a cold-charged cell.
-
-The association is not stable. Its sign \emph{changes} with how the capacity baseline is
-defined --- first measured discharge against the median of the largest few --- because NASA's
-first discharge on \nBadBaselines{} of \nCapCells{} cells is partial, giving baselines as low as
-0.068\,Ah for a 2\,Ah cell. Across the four defensible combinations of baseline and fade metric,
-$\rho$ ranges from $\nAssocLo$ to $\nAssocHi$, with significant results of both signs, and
-ambient temperature and cycle count sit behind both quantities. All four are reported in
-Table-form in the results file rather than one. \textbf{A result that flips sign with a
-defensible change of definition is not a result}, and selecting the flattering version would be
-the most misleading thing this study could do.
-
-\begin{figure}[t]\centering
-\includegraphics[width=0.88\textwidth]{FV9_external.pdf}
-\caption{The assumptions against cells this work did not produce. \textbf{(a)} Measured
-resistance growth for \nCells{} NASA cells against the datasheet bound the filter is given.
-\textbf{(b)} Hypothesis (A2), model-free: a cycle's peak temperature rise against its total
-ohmic generation. \textbf{(c)} The transferred model's error against the thermal margin that
-has to absorb it.}
-\label{fig:external}
-\end{figure}
-
-
-
-\section{External mission profiles: the EPA's driving schedules}\label{sec:cycles}
-
-Every mission profile so far was written by us. That is defensible where no standard exists and
-indefensible for the one domain where three have existed for decades. This section replaces the
-synthetic ground profile with the EPA's own dynamometer driving schedules, downloaded from
-\texttt{epa.gov}: \textbf{US06} (\dUSsixSec\,s, \dUSsixKm\,km, \dUSsixPeakkW\,kW peak --- the
-supplemental cycle written because the older ones were too gentle), \textbf{UDDS} (city
-stop-and-go, which is what a robotaxi actually does), and \textbf{HWFET} (sustained cruise). The
-speed traces are not ours and the vehicle model is textbook longitudinal dynamics; the only
-thing this work contributes to the simulation is the certificate.
-
-A drive cycle also exercises the two-sided certificate as nothing else here does, because it
-alternates between both cases every few seconds: under traction the demanded power is a
-\emph{floor}, under braking the regenerative current is a \emph{cap}.
-
-\paragraph{The safety claim transfers.} Across all three schedules, over \dRepeats{} runs each
-spanning ambient $-5$ to $35\,\degC$ and the full ageing envelope, the certificate breached a
-constraint \textbf{\dCertBreach{} times while reporting feasible}.
-
-\paragraph{And a fixed regen cap does not.} Production vehicles limit regeneration to a constant
-chosen offline. Which constant? The largest safe on UDDS is \dTunedCap{}C --- and that same cap,
-run on the schedules it was not tuned on, breaches \textbf{\dTunedBreachUSsix{} times on US06}
-and \dTunedBreachHwy{} on HWFET. Only \dUniversalCap{}C is safe on all three. This is the
-transfer failure of \S\ref{sec:tuned} appearing again on external inputs.
-
-\paragraph{But the certificate is over-conservative on regeneration, and that is a real cost.}
-Against the \dUniversalCap{}C cap that \emph{is} universally safe, the certificate recovers
-\dGainVsUniversal{} points \emph{less} braking energy. The diagnosis is specific and it points
-at a fixable design choice rather than at the theorem: the thermal margin
-$\delta_T = \delta_{T0} + K(s_R-1) = 12.5$\,K was sized for a thirty-minute charge, and it is
-being applied unchanged to a regeneration pulse lasting seconds. A margin that accounts for the duration
-over which heat actually accumulates recovers about half of that gap; \S\ref{sec:durmargin}
-builds and tests one. The remaining half is still unexplained.
-
-\paragraph{The certificate says this car cannot follow the cycle.} On average it refuses
-\dRefusalPct\,\% of traction steps --- the demanded tractive power lies outside the certified
-envelope for a cold, aged pack. That is a concrete, checkable engineering claim about a
-published schedule, and it is the kind of statement the method exists to make. Whether it is
-\emph{correct} is a question only hardware settles.
-
-
-\subsection{A margin that knows how long the operation lasts}\label{sec:durmargin}
-
-The regeneration shortfall above is worth chasing, because the diagnosis names a design choice
-rather than the theorem, and a diagnosis that is never tested is just an excuse.
-
-\paragraph{What the margin is actually for.} It is natural to read
-$\delta_T = \delta_{T0} + K(s_R-1)$ as covering the one-step prediction error, and that reading
-is wrong by more than an order of magnitude. At 540\,A over a 30\,s step, resistance being $s_R$
-times its assumed value adds \textbf{0.85\,K} --- against a margin of 12.5\,K. The margin is not
-covering one step. It covers \emph{accumulated} divergence, because a one-step filter applied
-repeatedly lets a model error compound: sixty consecutive steps of a half-hour charge, each
-diverging a fraction of a kelvin, is where 12.5\,K comes from.
-
-That makes applying it to regeneration a category error. A braking pulse lasts seconds and is
-followed by cooling; it cannot accumulate thirty minutes of divergence.
-
-\paragraph{The refinement.} Scale the margin by the duration over which current is sustained,
-\begin{equation}
-\delta_T(\tau) \;=\; \delta_{T0} \;+\; k\,(s_R-1)\,\tau, \qquad
-k = \mKrate\ \mathrm{K/s},
-\end{equation}
-with $k$ fixed by requiring $\tau = \mTauRef$\,s to reproduce the published $\delta_T =
-\mMarginRef$\,K exactly, which it does. $\tau$ is not a prediction: it is a property of the
-operating mode, supplied by the integrator. A charging session sustains current for its
-duration; a braking pulse for the length of the event. At $\tau = 60$\,s the margin is
-\mMarginMinute\,K, and at a 5\,s pulse \mMarginPulse\,K.
-
-\paragraph{It has to be tested, and it was.} A smaller margin is a weaker guarantee unless the
-divergence really is smaller. Sustained charging is unchanged --- \mChargeViol{} violations in
-\mChargeTrials{} sessions. On the EPA schedules the pulse margin recovers
-\textbf{$+$\mRegenGain{} points} more braking energy (US06 $+$\mGainUSsix{}, UDDS
-$+$\mGainUdds{}, HWFET $+$\mGainHwfet{}) with \textbf{\mRegenBreach{} breaches while
-certified}. That closes about half the gap to the universally-safe fixed cap of
-\S\ref{sec:cycles}; the rest remains open.
-
-\paragraph{And it has a floor, which had to be looked for properly.} Sweeping the assumed
-duration downward on a sustained charge found no failure at all --- which was a flaw in the
-test, not a property of the method: every plant was drawn \emph{inside} the resistance bound the
-estimator assumes, so the margin was never asked to absorb anything. Asked the other way round,
-holding the margin at its smallest and making the plant progressively wrong, the guarantee gives
-way at \textbf{\mFloorR$\times$ resistance --- \mFloorOver$\times$ beyond the assumed bound of
-\mBound$\times$}. That is the tolerance an integrator needs, and it is the reason this is a
-refinement with a stated envelope rather than a knob.
-
-
-\section{Deployability: what it costs on a BMS microcontroller}\label{sec:embedded}
-
-The claim that the certificate ``fits inside any microcontroller a battery management system
-already contains'' is an assertion about software that has never been compiled for one. It
-should be measured or withdrawn.
-
-\paragraph{It holds no growing state.} Over \embCalls{} projections the heap grows by
-\embBytesPerCall{} bytes per call --- Python's own object churn. There is no list, no queue, no
-history: nothing a C implementation would need to allocate.
-
-\paragraph{Single precision is adequate but not one-sided.} A Cortex-M4F has a
-single-precision FPU and no double. Across \embSpStates{} states the single-precision filter
-deviates from double by at most \embSpWorstmA\,mA, which is \embSpFrac\,\% of full scale ---
-but it deviates in \emph{both} directions, permitting slightly more current than double in
-\embSpLooseCount{} of them. Negligible in magnitude against a 12.5\,K thermal margin; not a
-guarantee, and not claimed as one.
-
-\paragraph{The search needs no floating point at all, and there the direction \emph{is}
-provable.} Representing current as an integer count of quanta makes the bisection's only
-arithmetic \texttt{mid = (lo + hi) >> 1}, exact on any integer unit. Rounding the midpoint down
-makes the result conservative by construction: across \embIntStates{} states at
-\embIntBits{}-bit resolution (\embIntQuantum\,A quanta) the integer search returned a value
-above the real-valued answer \textbf{\embIntAbove{} times}. For a build that needs a provable
-direction of error, the FPU-free one is the one to ship.
-
-\paragraph{Footprint.} \textbf{\embRam{} bytes of RAM} --- live state plus \embConstants{}
-calibration constants --- and \textbf{\embFlash{} bytes} of lookup tables for an FPU-free build
-(\embLutExp{} entries for the Arrhenius exponential, \embLutAsinh{} for the inverse hyperbolic
-sine, 128 for open-circuit voltage, each sized for 0.1\,\% interpolation error). Constant stack,
-no recursion, no variable-length structure, \evalCharge{}--\evalDischarge{} model evaluations.
-That is smaller than the interrupt vector table on the parts in question.
 
 
 
@@ -1960,6 +1632,112 @@ preference.
 
 
 
+\section{External validation: the assumptions against measured cells}\label{sec:external}
+
+Everything to this point is simulation. The filter is checked against a reduced-order model,
+and that model was calibrated against a Doyle--Fuller--Newman simulation. That is a defensible
+chain and it is still a chain of models, so the fair question is what happens when the
+assumptions meet a real cell.
+
+This section answers it with the NASA Ames Prognostics Center of Excellence battery data set:
+\nCells{} 18650 cells cycled to failure with periodic electrochemical impedance spectroscopy,
+published by a different laboratory, years before this work, for a different purpose. Nothing
+here was produced by us.
+
+The design point is that \textbf{the load-bearing assumptions are testable without any model at
+all.} The method does not need the ROM to be right about NASA's cells. It needs three things to
+be true of real cells, and each is a chemistry-independent statement about the shape of
+degradation.
+
+\subsection{The resistance bound holds}
+
+The filter never identifies resistance; it assumes a \emph{bound} on it, taken from a datasheet
+before the vehicle ships. If real cells leave that bound, every certificate in this paper is
+void. Across \nEIS{} impedance measurements, \textbf{\nInsideFrac\,\% lie inside the assumed
+bound $s_R = \nBound$} (Fig.~\ref{fig:external}a). Restricted to the life the certificate
+actually claims --- cells at or above 80\,\% of initial capacity, the standard automotive end of
+life --- the figure is \textbf{\nInsideEolFrac\,\% of \nEolMeas{} measurements}.
+
+Over the full measured life, including cells NASA ran down to \nCapWorst{} of initial capacity,
+\nViolations{} measurement exceeds the bound, on cell \nWorstCell{}, by 0.1\,\%. That is
+reported rather than trimmed: the bound is tight, and it is not a comfortable over-estimate.
+
+\subsection{Heat generation is monotone in current, measured}
+
+Hypothesis (A2) is the other load-bearing assumption, and it too can be checked without a model
+--- though the obvious way of doing it does not work, and why is worth recording. Correlating
+instantaneous $\mathrm{d}T/\mathrm{d}t$ against instantaneous current returns nothing usable:
+stratifying by $T-T_{\mathrm{amb}}$ to control for cooling gives rank correlations that
+\emph{flip sign} between strata ($-0.34$ in the coldest, $+0.54$ in the warmest). NASA measures
+surface temperature, the core leads it by minutes, and over a charge whose total rise is under
+3\,K the thermal lag dominates the signal. Reporting either sign from that test would be an
+artefact of the instrument.
+
+The lag-free formulation is an energy balance over a whole cycle, which does not care how the
+heat arrives: total ohmic generation goes as $\int I^2\,\mathrm{d}t$, so a cycle's peak
+temperature rise should increase with it. Across \nDisCycles{} measured discharge cycles, with
+currents to \nMaxI\,A and temperature rises to \nMaxDT\,K, the rank correlation is
+\textbf{$\rho = \nDisRho$} ($p < 0.0005$; Fig.~\ref{fig:external}b). The charge cycles give
+$\nChgRho$, which is weaker for a mundane reason: NASA charges almost everything at a constant
+1.5\,A, so there is little current variation to correlate against.
+
+\subsection{Where the model does not transfer, and whether that matters}
+
+The harder question is how the ROM itself behaves on a cell it was never fitted to --- a 5\,Ah
+NMC model applied to $\sim$2\,Ah LCO cells with capacity rescaled and nothing else refitted.
+Measured one step ahead the question is meaningless, because NASA samples every $\sim$9\,s over
+which the temperature moves about 0.01\,K and predicting ``unchanged'' scores well. Integrated
+forward over a \nHorizon\,s horizon under the measured current, the transferred model scores
+RMSE \nRMSE\,\degC{} against a persistence baseline of \nPersist\,\degC{} --- a skill of
+\nSkill{}.
+
+The safety-relevant question is not the magnitude but the \emph{sign}. A model that
+over-predicts temperature yields a conservative certificate; one that under-predicts yields an
+unsafe one. \textbf{This transfer is not conservative}: the bias is \nBias\,\degC{} and it
+over-predicts in only \nOverFrac\,\% of forecasts. What rescues it is the margin. The worst
+under-prediction at the 5th percentile is \nUnderWorst\,\degC{} against a thermal margin of
+12.5\,\degC{} --- a factor of \textbf{\nMarginCover} of cover (Fig.~\ref{fig:external}c). The
+margin was not designed for cross-chemistry transfer; it happens to absorb it, and that is a
+fact about this data rather than a guarantee.
+
+\subsection{The filter permits a real protocol, and refuses where it said it would}
+
+A safety filter that refuses everything is safe and useless. Given the end-of-life resistance
+bound and the full throttled margin --- its most conservative configuration --- the certificate
+permits \textbf{\nPermitFrac\,\%} of NASA's measured charge steps, with a median headroom of
+\nHeadroom$\times$ the applied current. Of the refusals, \nRefuseCeil\,\% are cells measured
+above the throttled ceiling of \nCeiling\,\degC{}: the same frontier \S\ref{sec:ground}
+predicts from the margin alone, appearing unprompted in someone else's measurements.
+
+\subsection{One test that did not work}
+
+It was tempting to go further and ask whether the cells the filter would have refused are the
+cells that actually degraded. The mechanism would have been clean --- NASA cycled some cells at
+4\,\degC{}, the plating cap falls to a 0.70C floor below about 5.5\,\degC{}, and plating is what
+degrades a cold-charged cell.
+
+The association is not stable. Its sign \emph{changes} with how the capacity baseline is
+defined --- first measured discharge against the median of the largest few --- because NASA's
+first discharge on \nBadBaselines{} of \nCapCells{} cells is partial, giving baselines as low as
+0.068\,Ah for a 2\,Ah cell. Across the four defensible combinations of baseline and fade metric,
+$\rho$ ranges from $\nAssocLo$ to $\nAssocHi$, with significant results of both signs, and
+ambient temperature and cycle count sit behind both quantities. All four are reported in
+Table-form in the results file rather than one. \textbf{A result that flips sign with a
+defensible change of definition is not a result}, and selecting the flattering version would be
+the most misleading thing this study could do.
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.88\textwidth]{FV9_external.pdf}
+\caption{The assumptions against cells this work did not produce. \textbf{(a)} Measured
+resistance growth for \nCells{} NASA cells against the datasheet bound the filter is given.
+\textbf{(b)} Hypothesis (A2), model-free: a cycle's peak temperature rise against its total
+ohmic generation. \textbf{(c)} The transferred model's error against the thermal margin that
+has to absorb it.}
+\label{fig:external}
+\end{figure}
+
+
+
 \section{Against a Doyle--Fuller--Newman plant}\label{sec:dfn}
 
 Every vehicle number in \S\ref{sec:ground}--\S\ref{sec:space} comes from a plant we wrote. The
@@ -2024,6 +1802,204 @@ and temperature rather than scalars; the first implementation scaled only what p
 \texttt{isinstance} check for a float and silently left the rest alone. Every row came back
 identical --- which reads exactly like robustness, and would have been published as robustness the
 experiment never demonstrated. It is caught now by a check that the sweep moved the plant at all.
+
+
+\section{What the plating constraint is worth}\label{sec:plating}
+
+The plating constraint is enforced everywhere in this paper and certified nowhere, and until now
+nothing said how much plating that prevents. ``Prevents lithium plating'' should carry a number
+or not be said.
+
+The chain worth being exact about is: plating deposits metallic lithium on the anode, deposits
+grow as dendrites, a dendrite bridging the separator is an internal short, and an internal short
+is the initiating event for thermal runaway. \textbf{Only the first link is measured here.} No
+controller in this section approaches a self-heating threshold --- the 45\,\degC{} limit is a
+service limit, not a fire one --- so nothing below prevents runaway by keeping a cell cool.
+What it does is keep the anode potential above the deposition onset, which is upstream of the
+whole chain. Dendrite growth, separator breach and runaway are not modelled and are not claimed.
+
+\paragraph{Two things had to be got right first.} Plating is a \emph{cold}-charge failure mode:
+the anode potential that must stay positive falls as the cell cools, because the kinetics that
+would intercalate the lithium slow while the current does not. On the DFN, 1.5C crosses the
+deposition onset at 0\,\degC{} and does not come near it at 25\,\degC. Testing plating at room
+temperature tests the regime where it does not happen.
+
+And it must be measured at \emph{matched charge}, because more charge plates more lithium. The
+first version of this experiment compared totals between controllers delivering different
+amounts and duly found the certificate --- which delivers more --- plating more than a slow
+de-rate. That is a units error, not a result. Every controller below therefore runs to the same
+\plTarget\,\% target, and what is compared is the damage done to deliver it and the time taken.
+The verification suite checks that each one actually \emph{reached} the target; at a shorter
+horizon the certificate did not, cold, and that check is what caught it.
+
+\begin{table}[t]
+\centering
+\caption{DFN charge to \plTarget\,\% SOC, \plSessions{} sessions per cell.
+``At risk'' is time spent with the anode potential at or below the deposition onset.}
+\label{tab:plating}
+{\footnotesize
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+& & onset & min $\phi$ & at risk & \\
+ambient & controller & crossed & (mV) & (min) & min \\
+\midrule
+0\,\degC & certificate & \plColdCertOnset/\plSessions & $+$\plColdCertPhi & \plCertRisk & \plColdCertMin \\
+ & CC--CV 0.5C & \plColdSlowOnset/\plSessions & $+$\plColdSlowPhi & 0.0 & \plColdSlowMin \\
+ & CC--CV 1.5C & \textbf{\plColdFastOnset/\plSessions} & \plColdFastPhi & \textbf{\plAggRisk} & \plColdFastMin \\
+\addlinespace
+10\,\degC & certificate & \plCoolCertOnset/\plSessions & $+$\plCoolCertPhi & 0.0 & \plCoolCertMin \\
+ & CC--CV 0.5C & \plCoolSlowOnset/\plSessions & $+$\plCoolSlowPhi & 0.0 & \plCoolSlowMin \\
+ & CC--CV 1.5C & \plCoolFastOnset/\plSessions & $+$\plCoolFastPhi & 0.0 & \plCoolFastMin \\
+\addlinespace
+25\,\degC & certificate & \plMildCertOnset/\plSessions & $+$\plMildCertPhi & 0.0 & \plMildCertMin \\
+ & CC--CV 0.5C & \plMildSlowOnset/\plSessions & $+$\plMildSlowPhi & 0.0 & \plMildSlowMin \\
+ & CC--CV 1.5C & \plMildFastOnset/\plSessions & $+$\plMildFastPhi & 0.0 & \plMildFastMin \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\paragraph{What the constraint buys.} Cold, the rate a de-rate exists to forbid drives the anode
+negative in \plColdFastOnset{} of \plSessions{} sessions, spends \plAggRisk{} minutes in the
+depositing regime and lays down \plAggRiskMah\,mAh of metallic lithium while it is there. The
+certificate crosses in \plColdCertOnset{} of \plSessions, spends \plCertRisk{} minutes at risk,
+and holds the anode further from the onset than the fixed de-rate does \emph{at every ambient}
+(Table~\ref{tab:plating}).
+
+\paragraph{And what it costs.} That margin is not free, and the direction of the cost is the
+argument for a state-dependent limit rather than a fixed one. Cold, where the plating constraint
+genuinely binds, the certificate is \plMinutes{} minutes \emph{slower} than the 0.5C de-rate to
+the same charge. Warm, where it does not, the certificate is 11.0 and 23.8 minutes
+\emph{faster}. A fixed rate cannot do both; it is one number, chosen once, and it is
+simultaneously too slow at 25\,\degC{} and holding only $+$\plColdSlowPhi\,mV of anode margin at
+0\,\degC.
+
+\paragraph{The metric that fails, reported because it fails.} Total lithium plated does
+\emph{not} separate these controllers --- cold, the aggressive rate accumulates
+\plAggMah\,mAh against the certificate's \plCertMah. It charges in \plColdFastMin{} minutes
+against \plColdCertMin, so it accrues less of the slow background side reaction that proceeds
+whenever the anode potential is low, while entering the depositing regime the certificate never
+enters. Mass integrates a film that forms harmlessly; the onset crossing is the event. Reporting
+the mass alone would have made the fast rate look like the safer one.
+
+
+\section{External mission profiles: the EPA's driving schedules}\label{sec:cycles}
+
+Every mission profile so far was written by us. That is defensible where no standard exists and
+indefensible for the one domain where three have existed for decades. This section replaces the
+synthetic ground profile with the EPA's own dynamometer driving schedules, downloaded from
+\texttt{epa.gov}: \textbf{US06} (\dUSsixSec\,s, \dUSsixKm\,km, \dUSsixPeakkW\,kW peak --- the
+supplemental cycle written because the older ones were too gentle), \textbf{UDDS} (city
+stop-and-go, which is what a robotaxi actually does), and \textbf{HWFET} (sustained cruise). The
+speed traces are not ours and the vehicle model is textbook longitudinal dynamics; the only
+thing this work contributes to the simulation is the certificate.
+
+A drive cycle also exercises the two-sided certificate as nothing else here does, because it
+alternates between both cases every few seconds: under traction the demanded power is a
+\emph{floor}, under braking the regenerative current is a \emph{cap}.
+
+\paragraph{The safety claim transfers.} Across all three schedules, over \dRepeats{} runs each
+spanning ambient $-5$ to $35\,\degC$ and the full ageing envelope, the certificate breached a
+constraint \textbf{\dCertBreach{} times while reporting feasible}.
+
+\paragraph{And a fixed regen cap does not.} Production vehicles limit regeneration to a constant
+chosen offline. Which constant? The largest safe on UDDS is \dTunedCap{}C --- and that same cap,
+run on the schedules it was not tuned on, breaches \textbf{\dTunedBreachUSsix{} times on US06}
+and \dTunedBreachHwy{} on HWFET. Only \dUniversalCap{}C is safe on all three. This is the
+transfer failure of \S\ref{sec:tuned} appearing again on external inputs.
+
+\paragraph{But the certificate is over-conservative on regeneration, and that is a real cost.}
+Against the \dUniversalCap{}C cap that \emph{is} universally safe, the certificate recovers
+\dGainVsUniversal{} points \emph{less} braking energy. The diagnosis is specific and it points
+at a fixable design choice rather than at the theorem: the thermal margin
+$\delta_T = \delta_{T0} + K(s_R-1) = 12.5$\,K was sized for a thirty-minute charge, and it is
+being applied unchanged to a regeneration pulse lasting seconds. A margin that accounts for the duration
+over which heat actually accumulates recovers about half of that gap; \S\ref{sec:durmargin}
+builds and tests one. The remaining half is still unexplained.
+
+\paragraph{The certificate says this car cannot follow the cycle.} On average it refuses
+\dRefusalPct\,\% of traction steps --- the demanded tractive power lies outside the certified
+envelope for a cold, aged pack. That is a concrete, checkable engineering claim about a
+published schedule, and it is the kind of statement the method exists to make. Whether it is
+\emph{correct} is a question only hardware settles.
+
+
+\subsection{A margin that knows how long the operation lasts}\label{sec:durmargin}
+
+The regeneration shortfall above is worth chasing, because the diagnosis names a design choice
+rather than the theorem, and a diagnosis that is never tested is just an excuse.
+
+\paragraph{What the margin is actually for.} It is natural to read
+$\delta_T = \delta_{T0} + K(s_R-1)$ as covering the one-step prediction error, and that reading
+is wrong by more than an order of magnitude. At 540\,A over a 30\,s step, resistance being $s_R$
+times its assumed value adds \textbf{0.85\,K} --- against a margin of 12.5\,K. The margin is not
+covering one step. It covers \emph{accumulated} divergence, because a one-step filter applied
+repeatedly lets a model error compound: sixty consecutive steps of a half-hour charge, each
+diverging a fraction of a kelvin, is where 12.5\,K comes from.
+
+That makes applying it to regeneration a category error. A braking pulse lasts seconds and is
+followed by cooling; it cannot accumulate thirty minutes of divergence.
+
+\paragraph{The refinement.} Scale the margin by the duration over which current is sustained,
+\begin{equation}
+\delta_T(\tau) \;=\; \delta_{T0} \;+\; k\,(s_R-1)\,\tau, \qquad
+k = \mKrate\ \mathrm{K/s},
+\end{equation}
+with $k$ fixed by requiring $\tau = \mTauRef$\,s to reproduce the published $\delta_T =
+\mMarginRef$\,K exactly, which it does. $\tau$ is not a prediction: it is a property of the
+operating mode, supplied by the integrator. A charging session sustains current for its
+duration; a braking pulse for the length of the event. At $\tau = 60$\,s the margin is
+\mMarginMinute\,K, and at a 5\,s pulse \mMarginPulse\,K.
+
+\paragraph{It has to be tested, and it was.} A smaller margin is a weaker guarantee unless the
+divergence really is smaller. Sustained charging is unchanged --- \mChargeViol{} violations in
+\mChargeTrials{} sessions. On the EPA schedules the pulse margin recovers
+\textbf{$+$\mRegenGain{} points} more braking energy (US06 $+$\mGainUSsix{}, UDDS
+$+$\mGainUdds{}, HWFET $+$\mGainHwfet{}) with \textbf{\mRegenBreach{} breaches while
+certified}. That closes about half the gap to the universally-safe fixed cap of
+\S\ref{sec:cycles}; the rest remains open.
+
+\paragraph{And it has a floor, which had to be looked for properly.} Sweeping the assumed
+duration downward on a sustained charge found no failure at all --- which was a flaw in the
+test, not a property of the method: every plant was drawn \emph{inside} the resistance bound the
+estimator assumes, so the margin was never asked to absorb anything. Asked the other way round,
+holding the margin at its smallest and making the plant progressively wrong, the guarantee gives
+way at \textbf{\mFloorR$\times$ resistance --- \mFloorOver$\times$ beyond the assumed bound of
+\mBound$\times$}. That is the tolerance an integrator needs, and it is the reason this is a
+refinement with a stated envelope rather than a knob.
+
+
+\section{Deployability: what it costs on a BMS microcontroller}\label{sec:embedded}
+
+The claim that the certificate ``fits inside any microcontroller a battery management system
+already contains'' is an assertion about software that has never been compiled for one. It
+should be measured or withdrawn.
+
+\paragraph{It holds no growing state.} Over \embCalls{} projections the heap grows by
+\embBytesPerCall{} bytes per call --- Python's own object churn. There is no list, no queue, no
+history: nothing a C implementation would need to allocate.
+
+\paragraph{Single precision is adequate but not one-sided.} A Cortex-M4F has a
+single-precision FPU and no double. Across \embSpStates{} states the single-precision filter
+deviates from double by at most \embSpWorstmA\,mA, which is \embSpFrac\,\% of full scale ---
+but it deviates in \emph{both} directions, permitting slightly more current than double in
+\embSpLooseCount{} of them. Negligible in magnitude against a 12.5\,K thermal margin; not a
+guarantee, and not claimed as one.
+
+\paragraph{The search needs no floating point at all, and there the direction \emph{is}
+provable.} Representing current as an integer count of quanta makes the bisection's only
+arithmetic \texttt{mid = (lo + hi) >> 1}, exact on any integer unit. Rounding the midpoint down
+makes the result conservative by construction: across \embIntStates{} states at
+\embIntBits{}-bit resolution (\embIntQuantum\,A quanta) the integer search returned a value
+above the real-valued answer \textbf{\embIntAbove{} times}. For a build that needs a provable
+direction of error, the FPU-free one is the one to ship.
+
+\paragraph{Footprint.} \textbf{\embRam{} bytes of RAM} --- live state plus \embConstants{}
+calibration constants --- and \textbf{\embFlash{} bytes} of lookup tables for an FPU-free build
+(\embLutExp{} entries for the Arrhenius exponential, \embLutAsinh{} for the inverse hyperbolic
+sine, 128 for open-circuit voltage, each sized for 0.1\,\% interpolation error). Constant stack,
+no recursion, no variable-length structure, \evalCharge{}--\evalDischarge{} model evaluations.
+That is smaller than the interrupt vector table on the parts in question.
+
 
 
 \section{What makes this one method}\label{sec:cross}
