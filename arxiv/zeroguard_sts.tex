@@ -71,6 +71,13 @@ enforced on the true model rather than a linearisation, the discrete-time CBF co
 monotone constraint \emph{is} an interval, so this is the bisection that solves that problem
 exactly, with $\gamma$ entering as a margin.
 
+Constrained reinforcement learning is the one alternative this paper used to dismiss without
+measuring, and it is measured now. A Lagrangian-constrained policy trained to a violation budget
+meets it --- \rlHardTrain\,\% of characterisation episodes --- and then violates in
+\rlHardDeploy\,\% of deployment sessions; quadrupling the search does not close the gap. A bound
+on the \emph{expectation} of violations over one distribution is not a per-step guarantee on
+another, and no amount of compute converts one into the other.
+
 Three things make the guarantee checkable rather than asserted. It is \textbf{machine-checked in
 Lean~4} --- \leanTheorems{} theorems, no \texttt{sorry}, no dependency on any axiom --- and the
 proof needs less than we claimed: safety holds for an \emph{arbitrary} predicate, so monotonicity
@@ -82,10 +89,11 @@ potential above the deposition onset in every session. And it ships: \fwText\,B 
 slot.
 
 Across \vPlatforms{} platforms in four media, \vExperiments{} experiments and \vTotalEpisodes{}
-episodes, nothing was breached while the certificate reported feasible. \textbf{Twenty of those
+episodes, nothing was breached while the certificate reported feasible. \textbf{Twenty-one of those
 experiments contradicted the hypothesis they were written to test} and are reported as findings
---- among them the two media of four where the incumbent rule is \emph{not} beaten, which the
-method predicts in advance from whether mission closure is envelope- or energy-driven.
+--- among them the two media of four where the incumbent rule is \emph{not} beaten, and a
+cycle-life benefit that plating prevention makes tempting to claim and that \clCycles{} cycles of
+DFN degradation do \emph{not} support.
 \end{abstract}
 
 \section{Introduction}
@@ -262,7 +270,8 @@ degradation mode \cite{yang2017plating}. Online estimation of resistance and cap
 \cite{plett2015,moura2017} --- and is exactly what this method deliberately does not require.
 Reinforcement learning has been applied to fast charging \cite{wei2022ddpg,attia2020}, and
 constrained RL offers expectation-level guarantees \cite{achiam2017cpo,altman1999constrained},
-which are the wrong shape for a constraint that must hold on every step of every episode. Our
+which are the wrong shape for a constraint that must hold on every step of every episode ---
+measured in \S\ref{sec:crl} rather than left as an assertion. Our
 position is that the policy may be learned and the safety must not be.
 
 \section{The cell, and which of its constraints are monotone}\label{sec:cell}
@@ -1642,6 +1651,75 @@ preference.
 
 
 
+
+\section{Against constrained reinforcement learning}\label{sec:crl}
+
+\S\ref{sec:related} says constrained RL offers expectation-level guarantees, ``which are the
+wrong shape for a constraint that must hold on every step of every episode'', cites
+\cite{achiam2017cpo,altman1999constrained}, and then benchmarks against CC--CV, a de-rate sweep,
+MPC and the CBF quadratic program --- never against the thing it dismisses. In a paper whose
+method is to measure rather than assert, that was the one assertion left standing.
+
+The baseline is a Lagrangian-constrained policy trained the way the cited literature trains one:
+charge delivered minus a multiplier times \emph{expected} constraint cost, with the multiplier
+raised while the measured violation rate sits above a budget and lowered when it falls below
+\cite{stooke2020pid}. It is given a richer state feedback than the certificate uses, the same
+cell, the same envelope, and --- like every other baseline in \S\ref{sec:transfer} --- it is
+fitted on a characterisation fleet and deployed on the one the vehicle meets.
+
+\paragraph{It meets its budget, and that is the problem.} Trained down to the tightest budget the
+policy violates in \rlBestTrain\,\% of characterisation episodes. Deployed, it violates in
+\rlBestDeploy\,\% of sessions; no budget in the sweep reaches zero, and the worst reaches
+\rlWorst\,\%. The certificate on the same fleet: \rlZgViol{} of \rlTrials, CP95 \rlZgCP\,\%.
+
+\paragraph{``You did not train it enough'' is the obvious objection, and it does not hold.} It is
+a fair objection --- with a small batch a 1\,\% violation rate is not even measurable, so the
+search cannot see the budget it is chasing. Retrained at the tightest budget with
+\rlHardIters{} iterations and a batch of \rlHardBatch, the policy reaches \rlHardTrain\,\% in
+training and still violates in \rlHardDeploy\,\% of deployment sessions --- a gap of
+\rlGapPoints{} points. More search moves the deployment rate by a few points and does not
+approach zero.
+
+That gap is the entire claim, stated precisely. Constrained RL is not bad at this problem; it is
+optimising a different functional. A bound on the \emph{expectation} of violations over a
+training distribution says nothing about any particular episode drawn from a different one, and
+a vehicle experiences particular episodes. No amount of compute converts an expectation into a
+per-step guarantee, because they are not the same object.
+
+\section{Cycle life: a claim that did not survive}\label{sec:cyclelife}
+
+Plating is the dominant fast-charge degradation mechanism, so a filter that prevents plating
+ought to show up as capacity retained. That inference is tempting, it is the largest claim
+available to this work, and \textbf{it is not supported}.
+
+\paragraph{Not with our own aging model.} The ROM ships one, and using it would have been the
+cheap route and a worthless one: its plating term accumulates damage proportional to
+$\mathrm{clip}(\text{margin} - \phi, 0, \infty)\cdot|I|$, where the margin is \emph{the same
+threshold the certificate enforces}. A filter holding $\phi \ge$ margin by construction scores
+exactly zero damage by construction. So the plant is DFN with the full degradation stack ---
+irreversible plating, solvent-diffusion-limited SEI, porosity change --- and the numbers are
+DFN's own capacity-loss variables, which do not know the certificate exists.
+
+\paragraph{The result.} Cycling \clCycles{} times at \clAmb\,\degC{} between 15\,\% and 70\,\%
+with a 1C discharge, capacity lost is \clCertFade\,\% under the certificate, \clSlowFade\,\%
+under CC--CV 0.5C and \clFastFade\,\% under CC--CV 1.5C. The spread is \clSpread{} points. The
+certificate is \emph{marginally worse} than the slow de-rate (\clVsSafe{} points), and its
+advantage over the fast rate, \clVsFast{} points, is noise.
+
+\paragraph{Why, and what it does not overturn.} The mechanism is the one \S\ref{sec:plating}
+already identified and it applies with more force here. DFN's plating variable is dominated by a
+slow background side reaction that accrues with cold time and total throughput --- which every
+controller spends similarly, since all three deliver the same charge --- rather than by the
+onset crossings the certificate prevents. Those crossings are real: the fast rate crossed in
+\clFastOnset{} of \clCycles{} cycles and the certificate in \clCertOnset. They are simply not
+what drives capacity fade in this regime.
+
+So \S\ref{sec:plating} stands and no life claim follows from it. The honest scope of the safety
+argument is the deposition onset --- the first link of the chain, where metallic lithium is laid
+down rather than consumed in a film --- and not calendar or cycle life, which this experiment
+looked for and did not find.
+
+
 \section{External validation: the assumptions against measured cells}\label{sec:external}
 
 Everything to this point is simulation. The filter is checked against a reduced-order model,
@@ -2378,6 +2456,10 @@ V4-9$^\dagger$ & \ref{sec:space} & array decay shrinks the window, not the certi
 V4-10$^\dagger$ & \ref{sec:space} & radiator loss degrades gracefully & it \emph{improves} charge: cold-limited \\
 V4-11 & \ref{sec:space} & the eclipse bus load is a nonzero anchor & null-input browns out every case \\
 \addlinespace
+\multicolumn{4}{@{}l}{\textit{B6, S2 --- The dismissed alternative, and the claim that failed}}\\
+B6  & \ref{sec:crl} & expectation-level guarantees are the wrong shape & \rlHardTrain\,\% in training, \rlHardDeploy\,\% deployed \\
+S2$^\dagger$ & \ref{sec:cyclelife} & preventing plating shows up as capacity retained & \emph{no}: \clSpread{} points separate all three controllers \\
+\addlinespace
 \multicolumn{4}{@{}l}{\textit{S1, E14 --- What the constraint buys, and what it costs to ship}}\\
 S1$^\dagger$  & \ref{sec:plating} & preventing plating shows up as less lithium plated & no: mass favours the fast rate; the onset crossing is the event \\
 S1b & \ref{sec:plating} & the certificate keeps the anode out of the depositing regime & \plColdCertOnset/\plSessions{} against \plColdFastOnset/\plSessions{} cold \\
@@ -2409,7 +2491,7 @@ X5 & \ref{sec:cross} & every zero-failure claim has enough samples & \adequacyVi
 \end{longtable}}
 
 \vspace{4pt}
-\noindent Twenty of \vExperiments{} are marked $\dagger$. A register in which nothing is marked
+\noindent Twenty-one of \vExperiments{} are marked $\dagger$. A register in which nothing is marked
 is a register written after the results.
 
 \end{document}

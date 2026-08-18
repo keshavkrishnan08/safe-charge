@@ -16,7 +16,7 @@ RES = os.path.join(HERE, "results")
 OUT = os.path.join(os.path.dirname(HERE), "paper", "vehicle_macros.tex")
 
 D = {}
-for k, f in (("e14", "e14_firmware.json"), ("s1", "s1_plating.json"), ("b5", "b5_domain_transfer.json"), ("n2", "n2_dfn.json"), ("b4", "b4_cbf.json"), ("p1", "p1_policy_filter.json"), ("p2", "p2_pack_dynamic.json"),
+for k, f in (("b6", "b6_constrained_rl.json"), ("s2", "s2_cycle_life.json"), ("e14", "e14_firmware.json"), ("s1", "s1_plating.json"), ("b5", "b5_domain_transfer.json"), ("n2", "n2_dfn.json"), ("b4", "b4_cbf.json"), ("p1", "p1_policy_filter.json"), ("p2", "p2_pack_dynamic.json"),
              ("m1", "m1_duration_margin.json"), ("d1", "d1_drive_cycles.json"), ("emb", "e13_embedded.json"),
              ("b3", "b3_tuned_derate.json"), ("b2", "b2_domain_baselines.json"), ("b", "b1_baselines.json"), ("n", "n1_nasa_validation.json"), ("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
              ("s", "v4_space.json"), ("x", "x_crossdomain.json"),
@@ -54,8 +54,11 @@ _N2 = 6 + 40 + 2 * 7 * 3
 _B5 = 3 * 2 * 300 + 1200 * 2
 # E14: 20,000 states through the compiled filter; S1: 3 ambients x 3 controllers x 8 DFN charges
 _E14, _S1 = 20_000, 3 * 3 * 8
-m("vTotalEpisodes", f"{470_923 + _P1 + _P2 + _B4 + _N2 + _B5 + _E14 + _S1:,}".replace(",", "{,}"))
-m("vExperiments", "61")
+# B6: 7 budgets + 1 hard retrain, each trained then evaluated on 200 + 400 sessions
+_B6 = 8 * 600 + 400
+_S2 = 3 * 50
+m("vTotalEpisodes", f"{470_923 + _P1 + _P2 + _B4 + _N2 + _B5 + _E14 + _S1 + _B6 + _S2:,}".replace(",", "{,}"))
+m("vExperiments", "63")
 m("vPlatforms", "16")
 m("vClaims", "76")
 m("vFigures", "8")
@@ -433,6 +436,39 @@ m("aTurnTrials", num(a["v2_9_turnaround"]["trials"], 0, True))
 m("uSealViol", str(u["v3_1_sealed_hull"]["violations"]))
 m("uSealN", num(u["v3_1_sealed_hull"]["trials"], 0, True))
 m("uNoRecalGap", num(u["v3_9_no_recalibration"]["soc_gap_points"], 1))
+
+# ---- against constrained reinforcement learning -----------------------------------------
+if "b6" in D:
+    r6 = D["b6"]
+    m("rlTrials", num(r6["trials"], 0, True))
+    m("rlWorst", num(100 * r6["worst_deploy_rate"], 0))
+    m("rlBestTrain", num(100 * r6["best_train_rate"], 1))
+    m("rlBestDeploy", num(100 * min(x["deploy"]["violation_rate"] for x in r6["rows"]), 0))
+    m("rlAnySafe", "yes" if r6["any_budget_safe_on_deployment"] else "no")
+    h = r6["hard_trained"]
+    m("rlHardTrain", num(100 * h["train"]["violation_rate"], 1))
+    m("rlHardDeploy", num(100 * h["deploy"]["violation_rate"], 0))
+    m("rlHardIters", str(h["iters"]))
+    m("rlHardBatch", str(h["batch"]))
+    m("rlZgViol", str(r6["zeroguard"]["violations"]))
+    m("rlZgCP", num(r6["zeroguard"]["cp95_upper_pct"], 2))
+    m("rlGapPoints", num(100 * (h["deploy"]["violation_rate"] - h["train"]["violation_rate"]), 0))
+
+# ---- cycle life: the claim that did not survive -----------------------------------------
+if "s2" in D:
+    s2 = D["s2"]
+    m("clCycles", str(s2["cycles"]))
+    m("clAmb", num(s2["T_amb"], 0))
+    m("clSpread", num(s2["fade_spread_pct"], 2))
+    m("clSupported", "no" if not s2["lifetime_benefit_supported"] else "yes")
+    for nm, tag in (("certificate", "Cert"), ("CC-CV 0.5C", "Slow"), ("CC-CV 1.5C", "Fast")):
+        c = s2["controllers"].get(nm, {})
+        if "total_pct" in c:
+            m(f"cl{tag}Fade", num(c["total_pct"], 2))
+            m(f"cl{tag}Plate", num(c["plate_pct"], 2))
+            m(f"cl{tag}Onset", str(c["onset_cycles"]))
+    m("clVsSafe", num(s2["plating_vs_safe_derate_pct"], 3))
+    m("clVsFast", num(s2["plating_saved_pct"], 3))
 
 # ---- the firmware, compiled ------------------------------------------------------------
 if "e14" in D:

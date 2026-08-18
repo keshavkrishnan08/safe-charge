@@ -64,7 +64,39 @@ B3 = "b3_tuned_derate.json"
 D1 = "d1_drive_cycles.json"
 EMB = "e13_embedded.json"
 M1 = "m1_duration_margin.json"
+B6 = "b6_constrained_rl.json"
+S2 = "s2_cycle_life.json"
 E14 = "e14_firmware.json"
+
+# ---- against constrained RL, which the related work dismissed without measuring ----------
+pred("B6    a Lagrangian-constrained policy meets its budget in training",
+     lambda: dig(B6, "best_train_rate") < 0.05,
+     "the constrained policy never met its own budget, so it is not a fair rendering")
+pred("B6    and violates on the deployment fleet at every budget",
+     lambda: not dig(B6, "any_budget_safe_on_deployment")
+     and dig(B6, "worst_deploy_rate") > 0.3,
+     "some budget transferred safely; the expectation-vs-per-step claim must be withdrawn")
+pred("B6    the train-to-deploy gap is the mechanism, and it is large",
+     lambda: dig(B6, "hard_trained", "deploy", "violation_rate")
+     - dig(B6, "hard_trained", "train", "violation_rate") > 0.3,
+     "the gap closed, so the paper's explanation of why is wrong")
+pred("B6    four times the search does not close it, so the limit is not our compute",
+     lambda: dig(B6, "hard_trained", "deploy", "violation_rate") > 0.3,
+     "harder training fixed it, which would make this a compute result and not a method one")
+eq("B6    while the certificate breaches nothing on the same fleet",
+   lambda: dig(B6, "zeroguard", "violations"), 0)
+
+# ---- cycle life: tested, and NOT supported ----------------------------------------------
+pred("S2    the lifetime benefit is NOT supported, and the paper must not claim one",
+     lambda: not dig(S2, "lifetime_benefit_supported") and dig(S2, "fade_spread_pct") < 1.0,
+     "capacity fade now separates the controllers; the stated negative is stale")
+pred("S2    the certificate is not better than the slow de-rate on fade, and this is reported",
+     lambda: dig(S2, "plating_vs_safe_derate_pct") < 0.0,
+     "the sign flipped; the honest reading in the paper needs rewriting")
+pred("S2    the aging model used is the DFN's, not the ROM's own circular one",
+     lambda: "plate_pct" in dig(S2, "controllers", "certificate")
+     and dig(S2, "controllers", "certificate", "plate_pct") > 0.0,
+     "the certificate scored zero plating damage, which is the signature of the circular model")
 S1 = "s1_plating.json"
 B5 = "b5_domain_transfer.json"
 

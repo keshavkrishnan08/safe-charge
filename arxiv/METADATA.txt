@@ -45,6 +45,13 @@ enforced on the true model rather than a linearisation, the discrete-time CBF co
 monotone constraint is an interval, so this is the bisection that solves that problem
 exactly, with gamma entering as a margin.
 
+Constrained reinforcement learning is the one alternative this paper used to dismiss without
+measuring, and it is measured now. A Lagrangian-constrained policy trained to a violation budget
+meets it -- 1.0 % of characterisation episodes -- and then violates in
+51 % of deployment sessions; quadrupling the search does not close the gap. A bound
+on the expectation of violations over one distribution is not a per-step guarantee on
+another, and no amount of compute converts one into the other.
+
 Three things make the guarantee checkable rather than asserted. It is machine-checked in
 Lean~4 -- nine theorems, no sorry, no dependency on any axiom -- and the
 proof needs less than we claimed: safety holds for an arbitrary predicate, so monotonicity
@@ -55,15 +62,16 @@ potential above the deposition onset in every session. And it ships: 2,064 B of 
 68 B of RAM, worst-case 123.9 micros -- 1.24 % of a 10 ms ISO~26262
 slot.
 
-Across 16 platforms in four media, 61 experiments and 506,747
-episodes, nothing was breached while the certificate reported feasible. Twenty of those
+Across 16 platforms in four media, 63 experiments and 512,097
+episodes, nothing was breached while the certificate reported feasible. Twenty-one of those
 experiments contradicted the hypothesis they were written to test and are reported as findings
--- among them the two media of four where the incumbent rule is not beaten, which the
-method predicts in advance from whether mission closure is envelope- or energy-driven.
+-- among them the two media of four where the incumbent rule is not beaten, and a
+cycle-life benefit that plating prevention makes tempting to claim and that 50 cycles of
+DFN degradation do not support.
 
 NOTES FOR THE SUBMISSION FORM
 -----------------------------
-Comments field:  42 pages, 10 figures, 61 experiments. Theorem machine-checked
+Comments field:  44 pages, 10 figures, 63 experiments. Theorem machine-checked
                  in Lean 4 (no sorry, no axioms); proof scripts and all
                  experiment code included in the repository.
 
