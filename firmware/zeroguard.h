@@ -21,8 +21,15 @@ typedef struct {
     float hA;             /* cooling coefficient, W/K                     */
 } zg_cell_t;
 
+typedef enum { ZG_CHARGE = 0, ZG_DISCHARGE = 1 } zg_mode_t;
+
 typedef struct {
     zg_cell_t cell;
+    zg_mode_t mode;       /* which family of constraints is live */
+    float     V_min;      /* per-cell voltage floor (discharge) */
+    float     soc_floor;  /* state-of-charge floor (discharge)  */
+    float     load_W;     /* irreducible load, watts (discharge) */
+    float     dSoc, dLoad;/* margins for those two              */
     int32_t   S;          /* cells in series   */
     int32_t   P;          /* strings in parallel */
     float     u_max;      /* actuator ceiling, pack amps */
@@ -37,6 +44,10 @@ typedef struct { float V; float T; float phi; float soc; float V1; } zg_out_t;
 void        zg_probe(const zg_cell_t *c, const zg_state_t *s, float I, float dt, float w,
                      zg_out_t *out);
 zg_status_t zg_limit(const zg_pack_t *p, const zg_state_t *s, float dt, float w, float *u_out);
+/* The two-sided certificate: the admissible interval [lo, hi]. On charge the floor family is
+ * empty and lo is zero; on discharge the load is a floor and the second bisection finds it. */
+zg_status_t zg_interval(const zg_pack_t *p, const zg_state_t *s, float dt, float w,
+                        float *lo_out, float *hi_out);
 zg_status_t zg_project(const zg_pack_t *p, const zg_state_t *s, float u_req, float dt, float w,
                        float *u_out);
 

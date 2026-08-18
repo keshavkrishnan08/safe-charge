@@ -18,23 +18,28 @@ int main(void)
 {
     zg_pack_t p;
     float dt, w;
-    if (scanf("%f %f %f %f %f %f %d %d %f %f %f %f %f %f %f %f",
-              &p.cell.scale_R, &p.cell.scale_Q, &p.cell.scale_plate,
+    int mode;
+    if (scanf("%d %f %f %f %f %f %f %d %d %f %f %f %f %f %f %f %f %f %f %f %f",
+              &mode, &p.cell.scale_R, &p.cell.scale_Q, &p.cell.scale_plate,
               &p.cell.Rfac, &p.cell.Qloss, &p.cell.hA,
               &p.S, &p.P, &p.u_max, &p.V_max, &p.T_max,
-              &p.dV, &p.dT, &p.dP, &dt, &w) != 16) return 1;
+              &p.V_min, &p.soc_floor, &p.load_W,
+              &p.dV, &p.dT, &p.dP, &p.dSoc, &p.dLoad, &dt) != 21) return 1;
+    if (scanf("%f", &w) != 1) return 1;
+    p.mode = (mode == 0) ? ZG_CHARGE : ZG_DISCHARGE;
 
     zg_state_t s;
     float u = 0.0f, sink = 0.0f;
     while (scanf("%f %f %f", &s.soc, &s.T, &s.V1) == 3) {
         struct timespec a, b;
-        zg_status_t st = zg_limit(&p, &s, dt, w, &u);      /* warm the caches */
+        float lo;
+        zg_status_t st = zg_interval(&p, &s, dt, w, &lo, &u);   /* warm the caches */
         clock_gettime(CLOCK_MONOTONIC, &a);
-        for (int i = 0; i < REPS; ++i) { st = zg_limit(&p, &s, dt, w, &u); sink += u; }
+        for (int i = 0; i < REPS; ++i) { st = zg_interval(&p, &s, dt, w, &lo, &u); sink += u; }
         clock_gettime(CLOCK_MONOTONIC, &b);
         const double ns = ((double)(b.tv_sec - a.tv_sec) * 1e9
                            + (double)(b.tv_nsec - a.tv_nsec)) / (double)REPS;
-        printf("%d %.1f\n", (int)st, ns);
+        printf("%d %.1f %.1f\n", (int)st, ns, ns);
     }
     return (sink == 12345.678f) ? 1 : 0;                   /* keep the loop from vanishing */
 }

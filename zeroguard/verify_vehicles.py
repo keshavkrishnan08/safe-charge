@@ -64,7 +64,30 @@ B3 = "b3_tuned_derate.json"
 D1 = "d1_drive_cycles.json"
 EMB = "e13_embedded.json"
 M1 = "m1_duration_margin.json"
+N3 = "n3_dfn_discharge.json"
 B6 = "b6_constrained_rl.json"
+
+# ---- the floor family, which is the contribution, against external physics ---------------
+eq("N3    the discharge certificate breaches nothing on a DFN plant",
+   lambda: dig(N3, "certified_breaches"), 0)
+pred("N3    and the load is met in full wherever it reported the load meetable",
+     lambda: dig(N3, "load_served_while_open"),
+     "the filter reported a load meetable and the DFN did not deliver it")
+pred("N3    refusals were actually tested, not avoided by an easy load",
+     lambda: dig(N3, "closed_steps") > 100,
+     "the envelope never closed, so the floor family's interesting case is untested")
+pred("N3    and the DFN agrees with the great majority of them",
+     lambda: dig(N3, "closure_precision") > 0.9,
+     "most refusals were unnecessary, so the floor search is badly over-conservative")
+
+# ---- and the firmware ships the floor family too ------------------------------------------
+eq("E14   the compiled discharge path agrees with the reference on feasibility",
+   lambda: dig(E14, "discharge_mismatches"), 0)
+pred("E14   its floor edge does not fall materially below the reference",
+     lambda: dig(E14, "discharge_lo_below_quantum") < 0.01 * dig(E14, "discharge_states"),
+     "the compiled floor edge under-serves the load more often than rounding explains")
+eq("E14   and the two-sided cost is the 40 evaluations the theory claims, less the bounds",
+   lambda: dig(E14, "discharge_evaluations"), 36)
 S2 = "s2_cycle_life.json"
 E14 = "e14_firmware.json"
 

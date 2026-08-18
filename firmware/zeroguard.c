@@ -1,4 +1,4 @@
-/* zeroguard.c -- the charge-direction safety certificate, as firmware.
+/* zeroguard.c -- the two-sided safety certificate, as firmware.
  *
  * E13 measured what this *would* cost on a battery-management microcontroller: bytes of state,
  * bytes of table, whether the search needs an FPU. Those were estimates made from a Python
@@ -17,6 +17,12 @@
  *   conservative than double in 2 672 of 20 000 states -- which is why the margin exists and
  *   why e14_firmware.py measures the resulting deviation against it rather than assuming it
  *   away.
+ *
+ * Both directions are implemented. On charge the constraints are all caps and one bisection
+ * suffices -- ZG_BITS + 2 evaluations. On discharge the load is a *floor*: the pack must deliver
+ * it or the vehicle is not doing its job, and a second bisection finds that edge, for
+ * 2*ZG_BITS + 4. That second family is the paper's contribution, so shipping only the first
+ * would have been shipping the part that was already published.
  *
  * Constraints of the standards this is meant to satisfy, met by construction rather than by
  * inspection: no heap, no recursion, no variable-length structure, no unbounded loop. Every
@@ -91,21 +97,43 @@ void zg_probe(const zg_cell_t *c, const zg_state_t *s, float I, float dt, float 
  * same reason it is declared there -- it does not follow from the comparison sense. */
 static int zg_caps_ok(const zg_pack_t *p, const zg_out_t *o)
 {
-    if (!(o->V   <= p->V_max - p->dV))          return 0;
-    if (!(o->T   <= p->T_max - p->dT))          return 0;
-    if (!(o->phi >= ZG_PLATE_MARGIN + p->dP))   return 0;
+    if (!(o->T <= p->T_max - p->dT)) return 0;
+    if (p->mode == ZG_CHARGE) {
+        if (!(o->V   <= p->V_max - p->dV))        return 0;
+        if (!(o->phi >= ZG_PLATE_MARGIN + p->dP)) return 0;
+    } else {
+        /* On discharge the cell sags: voltage and state of charge are floors on the *signal*
+         * and caps on the *current*, which is the distinction the reference calls a
+         * constraint's side. It does not follow from the comparison sense. */
+        if (!(o->V   >= p->V_min     + p->dV))    return 0;
+        if (!(o->soc >= p->soc_floor + p->dSoc))  return 0;
+    }
     return 1;
 }
 
+/* Every constraint that bounds u from *below*: the load must be met. Discharge only. */
+static int zg_floors_ok(const zg_pack_t *p, const zg_out_t *o, float u)
+{
+    if (p->mode != ZG_DISCHARGE) return 1;
+    const float P_elec = (float)p->S * o->V * u;
+    return (P_elec >= p->load_W + p->dLoad);
+}
+
+/* Pack current to cell current. The sign is the whole difference between the two modes and it
+ * is easy to drop: positive charges the cell, so a *discharge* of u amps is -u/P into the model.
+ * Omitting the flip compiles, runs, and disagrees with the reference on a seventh of all states
+ * -- which is how it was found. */
 static void zg_probe_pack(const zg_pack_t *p, const zg_state_t *s, float u, float dt, float w,
                           zg_out_t *o)
 {
-    zg_probe(&p->cell, s, u / (float)p->P, dt, w, o);
+    const float i_cell = u / (float)p->P;
+    zg_probe(&p->cell, s, (p->mode == ZG_CHARGE) ? i_cell : -i_cell, dt, w, o);
 }
 
 /* The temperature-dependent plating ceiling, and the actuator's own limit. */
 static float zg_hi_bound(const zg_pack_t *p, const zg_state_t *s)
 {
+    if (p->mode == ZG_DISCHARGE) return p->u_max;   /* plating does not cap a discharge */
     float crate = 1.00f + 0.067f * (s->T - 10.0f);
     if (crate < 0.70f) crate = 0.70f;
     if (crate > 2.00f) crate = 2.00f;
@@ -143,6 +171,38 @@ zg_status_t zg_limit(const zg_pack_t *p, const zg_state_t *s, float dt, float w,
         if (zg_caps_ok(p, &o)) lo = mid; else hi = mid;
     }
     *u_out = (float)lo * q;
+    return ZG_OK;
+}
+
+/* The two-sided form. The floor search is bounded by u_hi, not u_max: delivered power is
+ * S*V(u)*u with V falling in u, so it peaks at the maximum-power point and falls beyond it.
+ * The voltage cap keeps the search on the rising branch, where the feasible set is a suffix. */
+zg_status_t zg_interval(const zg_pack_t *p, const zg_state_t *s, float dt, float w,
+                        float *lo_out, float *hi_out)
+{
+    float u_hi;
+    const zg_status_t st = zg_limit(p, s, dt, w, &u_hi);
+    if (st != ZG_OK) { *lo_out = *hi_out = 0.0f; return st; }
+    *hi_out = u_hi;
+
+    if (p->mode == ZG_CHARGE) { *lo_out = 0.0f; return ZG_OK; }
+
+    zg_out_t o;
+    zg_probe_pack(p, s, 0.0f, dt, w, &o);
+    if (zg_floors_ok(p, &o, 0.0f)) { *lo_out = 0.0f; return ZG_OK; }
+    zg_probe_pack(p, s, u_hi, dt, w, &o);
+    if (!zg_floors_ok(p, &o, u_hi)) {           /* the load costs more than the caps allow */
+        *lo_out = u_hi; return ZG_INFEASIBLE;
+    }
+    uint32_t lo = 0u, hi = 1u << ZG_BITS;
+    const float q = u_hi / (float)(1u << ZG_BITS);
+    for (int k = 0; k < ZG_BITS; ++k) {
+        const uint32_t mid = (lo + hi) >> 1;
+        const float um = (float)mid * q;
+        zg_probe_pack(p, s, um, dt, w, &o);
+        if (zg_floors_ok(p, &o, um)) hi = mid; else lo = mid;
+    }
+    *lo_out = (float)hi * q;                     /* round *up*: the load is met, conservatively */
     return ZG_OK;
 }
 

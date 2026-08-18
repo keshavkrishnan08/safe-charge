@@ -69,23 +69,37 @@ def reference(est, states, marg):
     return out
 
 
-def _feed(exe, est, states, marg):
-    """Feed the same pack and the same states to the compiled binary."""
+def _feed(exe, est, states, marg, w=W):
+    """Feed the same pack and the same states to the compiled binary.
+
+    The margin vector is ordered by the platform's own `limits`, which differ between the two
+    modes, so it is unpacked per mode rather than by position -- getting that wrong would make
+    the two implementations disagree for a reason that has nothing to do with the port.
+    """
     c = est.cell
-    hdr = (f"{c.scale['R']} {c.scale['Q']} {c.scale['plate']} 1.0 0.0 {c.cooling.hA} "
+    disch = est.mode == "discharge"
+    if disch:
+        dT, dV, dSoc, dLoad = marg[0], marg[1], marg[2], marg[3]
+        dP = 0.0
+    else:
+        dV, dT, dP = marg[0], marg[1], marg[2]
+        dSoc = dLoad = 0.0
+    hdr = (f"{1 if disch else 0} "
+           f"{c.scale['R']} {c.scale['Q']} {c.scale['plate']} 1.0 0.0 {c.cooling.hA} "
            f"{est.S} {est.P} {est.u_max} {est.V_max} {est.T_max} "
-           f"{marg[0]} {marg[1]} {marg[2]} {DT} {W}\n")
+           f"{est.V_min} {est.soc_floor} {getattr(est, 'load_W', 0.0)} "
+           f"{dV} {dT} {dP} {dSoc} {dLoad} {DT} {w}\n")
     body = "".join(f"{s['soc']!r} {s['T']!r} {s['V1']!r}\n" for s in states)
     r = subprocess.run([exe], input=hdr + body, capture_output=True, text=True, check=True)
     out = []
     for line in r.stdout.strip().splitlines():
-        a, b = line.split()
-        out.append((int(a), float(b)))
+        parts = line.split()
+        out.append((int(parts[0]), float(parts[1]), float(parts[2])))
     return out
 
 
 def firmware(exe, est, states, marg):
-    return _feed(exe, est, states, marg)
+    return [(a, hi) for a, _lo, hi in _feed(exe, est, states, marg)]
 
 
 def main(n=20000, seed=SEED):
@@ -171,8 +185,8 @@ def main(n=20000, seed=SEED):
     # none of which depends on the data beyond selecting among them.
     tstates = states[:2000]
     tim = _feed(bench, est, tstates, marg)
-    ns = np.array([b for _a, b in tim])
-    full = np.array([b for a, b in tim if a == 0])
+    ns = np.array([b for _a, b, _c in tim])
+    full = np.array([b for a, b, _c in tim if a == 0])
     print(f"\n  time per call on the compiled routine, {len(ns):,} states x 2 000 repetitions")
     print(f"    median {np.median(ns)/1000:.3f} us, p99 {np.percentile(ns,99)/1000:.3f}, "
           f"max {ns.max()/1000:.3f} us")
@@ -187,6 +201,49 @@ def main(n=20000, seed=SEED):
                ns_full_path_median=float(np.median(full)) if len(full) else None,
                paths="infeasible at anchor (1 eval), feasible at ceiling (2), bisection (18)",
                wcet_bounded_by_construction=True)
+
+    # ---- and the half of the theorem that is actually new -------------------------------
+    # Everything above tests the charge direction, which is the published case. Anchored
+    # Collapse's contribution is the *floor* family, and shipping only the caps would have
+    # been shipping the part that was already known.
+    print(f"\n  the discharge direction, where the floor family lives")
+    dl = P.Platform(P.Cell(cooling=P.Newtonian(P.load_params()["hA"]),
+                           scale=dict(R=V.S_R, Q=V.ENVELOPE["Q"][0],
+                                      plate=V.ENVELOPE["plate"][1])),
+                    S=1, P=1, mode="discharge", T_max=45.0, V_max=4.20, V_min=3.00,
+                    soc_floor=0.10, load_W=10.0, w_nominal=W)
+    dmarg = V.margins(dl)
+    rng2 = np.random.default_rng(seed + 9)
+    dstates = [dl.init(float(rng2.uniform(0.15, 0.95)), float(rng2.uniform(-5.0, 40.0)))
+               for _ in range(n // 2)]
+    dref = [A.interval(dl, s, DT, W, dmarg) for s in dstates]
+    dfw = _feed(exe, dl, dstates, dmarg)
+    dmis = sum(1 for (rl, rh, rs), (fs, fl, fh) in zip(dref, dfw)
+               if (0 if rs == "ok" else 1) != fs)
+    both = [(rl, rh, fl, fh) for (rl, rh, rs), (fs, fl, fh) in zip(dref, dfw)
+            if rs == "ok" and fs == 0]
+    dlo = np.array([fl - rl for rl, _rh, fl, _fh in both])
+    dhi = np.array([fh - rh for _rl, rh, _fl, fh in both])
+    dq = dl.u_max / (1 << 16)
+    print(f"    {len(dstates):,} states, {dmis} feasibility mismatches")
+    print(f"    upper edge: worst high {1000*dhi.max():+.3f} mA against a "
+          f"{1000*dq:.3f} mA quantum")
+    print(f"    lower edge: worst *low* {1000*dlo.min():+.3f} mA -- the direction that would "
+          f"under-serve the load")
+    out.update(discharge_states=len(dstates), discharge_mismatches=dmis,
+               discharge_quantum_A=float(dq),
+               discharge_hi_max_dev_A=float(dhi.max()),
+               discharge_lo_min_dev_A=float(dlo.min()),
+               discharge_lo_below_quantum=int((dlo < -dq).sum()),
+               discharge_hi_above_quantum=int((dhi > dq).sum()),
+               discharge_evaluations=2 * 16 + 4)
+    print(f"    the floor edge falls more than a quantum below the reference in "
+          f"{out['discharge_lo_below_quantum']} of {len(dlo):,}; the cap edge rises above it "
+          f"in {out['discharge_hi_above_quantum']}")
+    print(f"    cost on this path is {out['discharge_evaluations']} evaluations, against "
+          f"{f14_evals} on charge" if False else
+          f"    cost on this path is {out['discharge_evaluations']} evaluations, against "
+          f"{18} on charge")
 
     print(f"\n  the deviation stays inside the margins the filter already carries, so the "
           f"guarantee survives the port; it is not bit-identical and the paper does not say "

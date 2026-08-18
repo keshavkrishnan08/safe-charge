@@ -1508,6 +1508,21 @@ current is worth \fwVcost\,mV of terminal voltage (\fwVfrac\,\% of the voltage m
 \fwTcost\,K. The guarantee survives the port with the margin it already carries, and does not
 need a new one.
 
+\paragraph{Both directions ship.} Everything above is the charge path, which is the published
+case; shipping only that would have shipped the part that was already known. The floor family is
+implemented too: on discharge the load bounds the current from below and a second bisection finds
+that edge, for \fwDisEvals{} evaluations against \fwEvals. Over \fwDisStates{} discharge states
+the compiled routine and the reference never disagree about feasibility (\fwDisMismatch{}
+mismatches); the cap edge sits at most \fwDisHi\,mA above the reference and the floor edge at most
+\fwDisLo\,mA below it, against a quantum of \fwDisQ\,mA, with the floor falling more than a
+quantum low in \fwDisBelow{} states.
+
+Writing it surfaced the one bug worth recording. Pack current becomes cell current by dividing by
+the parallel count, and on discharge it must also change \emph{sign} --- positive charges the
+cell. The first version omitted the flip. It compiled, ran, produced plausible currents, and
+disagreed with the reference on a seventh of all states, which is how it was found; a version
+that merely rounded differently would have hidden there indefinitely.
+
 The build is for \texttt{\fwTarget}, not a Cortex-M part, because no cross-compiler was
 available here; the byte counts for state, tables and constants are architecture-independent and
 the code size is not, so that number should be read as indicative for a different instruction
@@ -1685,6 +1700,36 @@ optimising a different functional. A bound on the \emph{expectation} of violatio
 training distribution says nothing about any particular episode drawn from a different one, and
 a vehicle experiences particular episodes. No amount of compute converts an expectation into a
 per-step guarantee, because they are not the same object.
+
+
+\section{The floor family against a DFN plant}\label{sec:dfndischarge}
+
+Anchored Collapse's contribution is the floor. Null-Input Collapse already handled caps; what
+this work adds is that a vehicle serving a load has a constraint bounding its current from
+\emph{below}, and a second bisection to find that edge. Everything novel is on the discharge
+side --- and until now every external check was on the other one. \S\ref{sec:dfn} runs a DFN
+plant on charge, \S\ref{sec:plating} and \S\ref{sec:cyclelife} likewise, the discharge in the
+latter an unfiltered constant current. The half of the theorem that was already published had
+external physics behind it; the half that is new did not.
+
+A DFN cell serves a constant electrical load, from \dcLoadLo{} to \dcLoadHi\,W per cell, while
+the anchored filter chooses the current. Four constraints are live and they pull both ways:
+temperature and state of charge cap the current, terminal voltage caps it too (a cell sags under
+load), and the load power is a floor.
+
+Across \dcSteps{} filtered discharge steps the DFN reports \dcBreachV{} voltage and \dcBreachT{}
+temperature breaches (CP95 \dcCP\,\%). Wherever the certificate reported the load meetable, the
+DFN delivered it --- never below \dcServed\,\% of demand. Above 100\,\% is not an error:
+\texttt{Platform.anchor} sizes current at the lowest bus voltage the constraints permit, so it
+deliberately over-estimates and the cell then sits above that voltage.
+
+\paragraph{And the refusals were audited.} The interesting case for a floor is not the step it
+permits but the step it refuses. The envelope closed on \dcRefused{} of \dcSteps{} steps, meaning
+the load could not be met inside the caps. Pushing to meet it anyway and asking the DFN what
+would have happened, \dcRight{} of those refusals were correct and \dcWrong{} were not ---
+\dcPrecision\,\%. The remainder are steps where there was room and the margin took it, which is
+the price of a margin and is reported as such rather than folded into the success count.
+
 
 \section{Cycle life: a claim that did not survive}\label{sec:cyclelife}
 
@@ -2463,6 +2508,9 @@ V4-8  & \ref{sec:space} & no ground loop costs charge, not safety & costs \sNoGr
 V4-9$^\dagger$ & \ref{sec:space} & array decay shrinks the window, not the certificate & never becomes binding in \sArrayYears{} years \\
 V4-10$^\dagger$ & \ref{sec:space} & radiator loss degrades gracefully & it \emph{improves} charge: cold-limited \\
 V4-11 & \ref{sec:space} & the eclipse bus load is a nonzero anchor & null-input browns out every case \\
+\addlinespace
+\multicolumn{4}{@{}l}{\textit{N3 --- The floor family, externally}}\\
+N3  & \ref{sec:dfndischarge} & the floor family holds against DFN physics & \dcBreach/\dcSteps{} breaches; \dcPrecision\,\% of refusals correct \\
 \addlinespace
 \multicolumn{4}{@{}l}{\textit{B6, S2 --- The dismissed alternative, and the claim that failed}}\\
 B6  & \ref{sec:crl} & expectation-level guarantees are the wrong shape & \rlHardTrain\,\% in training, \rlHardDeploy\,\% deployed \\

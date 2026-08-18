@@ -16,7 +16,7 @@ RES = os.path.join(HERE, "results")
 OUT = os.path.join(os.path.dirname(HERE), "paper", "vehicle_macros.tex")
 
 D = {}
-for k, f in (("b6", "b6_constrained_rl.json"), ("s2", "s2_cycle_life.json"), ("e14", "e14_firmware.json"), ("s1", "s1_plating.json"), ("b5", "b5_domain_transfer.json"), ("n2", "n2_dfn.json"), ("b4", "b4_cbf.json"), ("p1", "p1_policy_filter.json"), ("p2", "p2_pack_dynamic.json"),
+for k, f in (("n3", "n3_dfn_discharge.json"), ("b6", "b6_constrained_rl.json"), ("s2", "s2_cycle_life.json"), ("e14", "e14_firmware.json"), ("s1", "s1_plating.json"), ("b5", "b5_domain_transfer.json"), ("n2", "n2_dfn.json"), ("b4", "b4_cbf.json"), ("p1", "p1_policy_filter.json"), ("p2", "p2_pack_dynamic.json"),
              ("m1", "m1_duration_margin.json"), ("d1", "d1_drive_cycles.json"), ("emb", "e13_embedded.json"),
              ("b3", "b3_tuned_derate.json"), ("b2", "b2_domain_baselines.json"), ("b", "b1_baselines.json"), ("n", "n1_nasa_validation.json"), ("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
              ("s", "v4_space.json"), ("x", "x_crossdomain.json"),
@@ -57,8 +57,9 @@ _E14, _S1 = 20_000, 3 * 3 * 8
 # B6: 7 budgets + 1 hard retrain, each trained then evaluated on 200 + 400 sessions
 _B6 = 8 * 600 + 400
 _S2 = 3 * 50
-m("vTotalEpisodes", f"{470_923 + _P1 + _P2 + _B4 + _N2 + _B5 + _E14 + _S1 + _B6 + _S2:,}".replace(",", "{,}"))
-m("vExperiments", "63")
+_N3 = 960          # filtered discharge steps on the DFN
+m("vTotalEpisodes", f"{470_923 + _P1 + _P2 + _B4 + _N2 + _B5 + _E14 + _S1 + _B6 + _S2 + _N3:,}".replace(",", "{,}"))
+m("vExperiments", "64")
 m("vPlatforms", "16")
 m("vClaims", "76")
 m("vFigures", "8")
@@ -437,6 +438,22 @@ m("uSealViol", str(u["v3_1_sealed_hull"]["violations"]))
 m("uSealN", num(u["v3_1_sealed_hull"]["trials"], 0, True))
 m("uNoRecalGap", num(u["v3_9_no_recalibration"]["soc_gap_points"], 1))
 
+# ---- the floor family against DFN --------------------------------------------------------
+if "n3" in D:
+    d3 = D["n3"]
+    m("dcSteps", num(d3["total_steps"], 0, True))
+    m("dcBreachV", str(d3["breach_V"]))
+    m("dcBreachT", str(d3["breach_T"]))
+    m("dcBreach", str(d3["certified_breaches"]))
+    m("dcCP", num(d3["cp95_upper_pct"], 3))
+    m("dcServed", num(100 * d3["min_service_fraction_open"], 1))
+    m("dcRefused", num(d3["closed_steps"], 0, True))
+    m("dcRight", num(d3["closed_correct"], 0, True))
+    m("dcWrong", str(d3["closed_wrong"]))
+    m("dcPrecision", num(100 * d3["closure_precision"], 0))
+    m("dcLoadLo", num(min(d3["loads_W"]), 0))
+    m("dcLoadHi", num(max(d3["loads_W"]), 0))
+
 # ---- against constrained reinforcement learning -----------------------------------------
 if "b6" in D:
     r6 = D["b6"]
@@ -494,6 +511,14 @@ if "e14" in D:
     m("fwSlotPct", f"{f14['slot_fraction_pct']:.3f}")
     m("fwBenchStates", num(f14["bench_states"], 0, True))
     m("fwSpread", num(f14["spread_ratio"], 0))
+    m("fwDisStates", num(f14["discharge_states"], 0, True))
+    m("fwDisMismatch", str(f14["discharge_mismatches"]))
+    m("fwDisEvals", str(f14["discharge_evaluations"]))
+    m("fwDisHi", f"{1000*f14['discharge_hi_max_dev_A']:.2f}")
+    m("fwDisLo", f"{1000*f14['discharge_lo_min_dev_A']:.2f}")
+    m("fwDisQ", f"{1000*f14['discharge_quantum_A']:.3f}")
+    m("fwDisBelow", str(f14["discharge_lo_below_quantum"]))
+    m("fwDisAbove", str(f14["discharge_hi_above_quantum"]))
 
 # ---- capacity lost to plating, measured by the DFN --------------------------------------
 if "s1" in D:
