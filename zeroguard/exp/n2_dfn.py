@@ -48,7 +48,7 @@ V_MAX, T_MAX = 4.20, 45.0
 PHI_ONSET = 0.0
 
 
-def build(param_set="OKane2022", tweak=None):
+def build(param_set="OKane2022", tweak=None, T_amb=None):
     """A DFN cell with lumped thermal and irreversible plating, driven by an input current.
 
     The voltage cut-off is pushed out of the way deliberately: a solver event that halts the
@@ -60,8 +60,9 @@ def build(param_set="OKane2022", tweak=None):
     model = pybamm.lithium_ion.DFN(options=opts)
     pv = pybamm.ParameterValues(param_set)
     pv["Current function [A]"] = pybamm.InputParameter("I")
-    pv["Ambient temperature [K]"] = T_AMB_C + K0
-    pv["Initial temperature [K]"] = T_AMB_C + K0
+    amb = T_AMB_C if T_amb is None else float(T_amb)
+    pv["Ambient temperature [K]"] = amb + K0
+    pv["Initial temperature [K]"] = amb + K0
     pv["Upper voltage cut-off [V]"] = 5.0
     pv["Lower voltage cut-off [V]"] = 2.0
     if tweak:

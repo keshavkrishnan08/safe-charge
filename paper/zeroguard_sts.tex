@@ -100,6 +100,19 @@ $+$\pGainSafe{} SOC points more than the safe protocol it replaces. On a policy 
 safe the filter intervenes in \pSafeClip\,\% of steps, and across a swept request its
 intervention is monotone and begins strictly before breaching does.
 
+The two application claims that carry furthest are checked against physics we did not write and
+against a compiler. \textbf{Safety:} the plating constraint the paper enforces but never certifies is
+what stands between a cold fast charge and metallic lithium on the anode --- the first link in the
+chain that ends in an internal short. Charging a DFN cell to a matched \plTarget\,\% at
+0\,\degC, the rate a de-rate exists to forbid drives the anode potential negative in
+\plColdFastOnset{} of \plSessions{} sessions and deposits \plAggRiskMah\,mAh while it is there;
+the certificate crosses in \plColdCertOnset, and holds a wider anode margin than the fixed
+de-rate at \emph{every} ambient --- \plMinutes{} minutes slower cold, where the constraint binds,
+and 23.8 faster warm, where it does not. \textbf{Deployability:} the filter is not an estimate of a
+footprint but a compiled one, \fwText\,B of code and constants and \fwRam\,B of RAM, agreeing
+with the reference on feasibility at all \fwStates{} states tested and never exceeding it by more
+than one bisection quantum.
+
 The value is not uniform across domains and the paper measures where it is not. Holding every
 domain's incumbent to the same tune-then-deploy standard --- which the first version of this work
 applied only to the ground baseline --- the incumbent rule fails in two of four media and the
@@ -1374,6 +1387,124 @@ constraint class exactness is available at a cost that is fixed and known in adv
 
 
 
+
+\subsection{The firmware, compiled}\label{sec:firmware}
+
+Everything above is an estimate. Bytes of state were counted from a Python dictionary, table
+sizes from an interpolation error study, and ``needs no FPU'' from the observation that a
+midpoint is an integer operation. Those are reasonable ways to size a footprint and no way at
+all to establish one: \emph{fits in a kilobyte} is a claim about a binary, and there was no
+binary.
+
+\texttt{firmware/zeroguard.c} is one. The charge-direction certificate in C99, with the integer
+bisection and a float32 model, no heap, no recursion, no variable-length structure, and every
+loop bound a compile-time constant --- so worst-case execution time is a property of the source
+rather than of the data, which is the property a safety task slot is actually sized against. Its
+constants are \emph{generated} from the same calibration files the Python filter loads; had they
+been transcribed, the two could drift and every agreement number below would be measuring a copy
+of itself.
+
+Built at \texttt{-Os} with \texttt{-Wall -Wextra -Werror} and no warnings, it occupies
+\textbf{\fwText\,B} of code and constants --- \fwOcv{} of that the open-circuit-voltage table ---
+with \fwData\,B of writable data and \fwRam\,B of RAM live across a call. One call is exactly
+\fwEvals{} model evaluations.
+
+\paragraph{Does it agree with the reference?} Not bit-for-bit, and it was never going to: the
+reference computes in float64 and bisects in floating point, the firmware computes in float32
+and bisects in integers. The question is which way the disagreement points. Over \fwStates{}
+states with an identical pack and identical margins, the two never disagreed about
+\emph{feasibility} (\fwMismatch{} mismatches), and the returned current differed by at most
+\fwMaxDev\,mA against a bisection quantum of \fwQuantum\,mA --- the firmware exceeded the
+reference by more than one quantum in \fwAbove{} states. Where it was higher at all, the extra
+current is worth \fwVcost\,mV of terminal voltage (\fwVfrac\,\% of the voltage margin) and
+\fwTcost\,K. The guarantee survives the port with the margin it already carries, and does not
+need a new one.
+
+The build is for \texttt{\fwTarget}, not a Cortex-M part, because no cross-compiler was
+available here; the byte counts for state, tables and constants are architecture-independent and
+the code size is not, so that number should be read as indicative for a different instruction
+set rather than as a measurement of one.
+
+
+
+\section{What the plating constraint is worth}\label{sec:plating}
+
+The plating constraint is enforced everywhere in this paper and certified nowhere, and until now
+nothing said how much plating that prevents. ``Prevents lithium plating'' should carry a number
+or not be said.
+
+The chain worth being exact about is: plating deposits metallic lithium on the anode, deposits
+grow as dendrites, a dendrite bridging the separator is an internal short, and an internal short
+is the initiating event for thermal runaway. \textbf{Only the first link is measured here.} No
+controller in this section approaches a self-heating threshold --- the 45\,\degC{} limit is a
+service limit, not a fire one --- so nothing below prevents runaway by keeping a cell cool.
+What it does is keep the anode potential above the deposition onset, which is upstream of the
+whole chain. Dendrite growth, separator breach and runaway are not modelled and are not claimed.
+
+\paragraph{Two things had to be got right first.} Plating is a \emph{cold}-charge failure mode:
+the anode potential that must stay positive falls as the cell cools, because the kinetics that
+would intercalate the lithium slow while the current does not. On the DFN, 1.5C crosses the
+deposition onset at 0\,\degC{} and does not come near it at 25\,\degC. Testing plating at room
+temperature tests the regime where it does not happen.
+
+And it must be measured at \emph{matched charge}, because more charge plates more lithium. The
+first version of this experiment compared totals between controllers delivering different
+amounts and duly found the certificate --- which delivers more --- plating more than a slow
+de-rate. That is a units error, not a result. Every controller below therefore runs to the same
+\plTarget\,\% target, and what is compared is the damage done to deliver it and the time taken.
+The verification suite checks that each one actually \emph{reached} the target; at a shorter
+horizon the certificate did not, cold, and that check is what caught it.
+
+\begin{table}[t]
+\centering
+\caption{DFN charge to \plTarget\,\% SOC, \plSessions{} sessions per cell.
+``At risk'' is time spent with the anode potential at or below the deposition onset.}
+\label{tab:plating}
+{\footnotesize
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+& & onset & min $\phi$ & at risk & \\
+ambient & controller & crossed & (mV) & (min) & min \\
+\midrule
+0\,\degC & certificate & \plColdCertOnset/\plSessions & $+$\plColdCertPhi & \plCertRisk & \plColdCertMin \\
+ & CC--CV 0.5C & \plColdSlowOnset/\plSessions & $+$\plColdSlowPhi & 0.0 & \plColdSlowMin \\
+ & CC--CV 1.5C & \textbf{\plColdFastOnset/\plSessions} & \plColdFastPhi & \textbf{\plAggRisk} & \plColdFastMin \\
+\addlinespace
+10\,\degC & certificate & \plCoolCertOnset/\plSessions & $+$\plCoolCertPhi & 0.0 & \plCoolCertMin \\
+ & CC--CV 0.5C & \plCoolSlowOnset/\plSessions & $+$\plCoolSlowPhi & 0.0 & \plCoolSlowMin \\
+ & CC--CV 1.5C & \plCoolFastOnset/\plSessions & $+$\plCoolFastPhi & 0.0 & \plCoolFastMin \\
+\addlinespace
+25\,\degC & certificate & \plMildCertOnset/\plSessions & $+$\plMildCertPhi & 0.0 & \plMildCertMin \\
+ & CC--CV 0.5C & \plMildSlowOnset/\plSessions & $+$\plMildSlowPhi & 0.0 & \plMildSlowMin \\
+ & CC--CV 1.5C & \plMildFastOnset/\plSessions & $+$\plMildFastPhi & 0.0 & \plMildFastMin \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\paragraph{What the constraint buys.} Cold, the rate a de-rate exists to forbid drives the anode
+negative in \plColdFastOnset{} of \plSessions{} sessions, spends \plAggRisk{} minutes in the
+depositing regime and lays down \plAggRiskMah\,mAh of metallic lithium while it is there. The
+certificate crosses in \plColdCertOnset{} of \plSessions, spends \plCertRisk{} minutes at risk,
+and holds the anode further from the onset than the fixed de-rate does \emph{at every ambient}
+(Table~\ref{tab:plating}).
+
+\paragraph{And what it costs.} That margin is not free, and the direction of the cost is the
+argument for a state-dependent limit rather than a fixed one. Cold, where the plating constraint
+genuinely binds, the certificate is \plMinutes{} minutes \emph{slower} than the 0.5C de-rate to
+the same charge. Warm, where it does not, the certificate is 11.0 and 23.8 minutes
+\emph{faster}. A fixed rate cannot do both; it is one number, chosen once, and it is
+simultaneously too slow at 25\,\degC{} and holding only $+$\plColdSlowPhi\,mV of anode margin at
+0\,\degC.
+
+\paragraph{The metric that fails, reported because it fails.} Total lithium plated does
+\emph{not} separate these controllers --- cold, the aggressive rate accumulates
+\plAggMah\,mAh against the certificate's \plCertMah. It charges in \plColdFastMin{} minutes
+against \plColdCertMin, so it accrues less of the slow background side reaction that proceeds
+whenever the anode potential is low, while entering the depositing regime the certificate never
+enters. Mass integrates a film that forms harmlessly; the onset crossing is the event. Reporting
+the mass alone would have made the fast rate look like the safer one.
+
+
 \section{The same standard in every domain}\label{sec:transfer}
 
 Two things were wrong with the per-domain comparisons, and both were ours.
@@ -2261,6 +2392,11 @@ V4-9$^\dagger$ & \ref{sec:space} & array decay shrinks the window, not the certi
 V4-10$^\dagger$ & \ref{sec:space} & radiator loss degrades gracefully & it \emph{improves} charge: cold-limited \\
 V4-11 & \ref{sec:space} & the eclipse bus load is a nonzero anchor & null-input browns out every case \\
 \addlinespace
+\multicolumn{4}{@{}l}{\textit{S1, E14 --- What the constraint buys, and what it costs to ship}}\\
+S1$^\dagger$  & \ref{sec:plating} & preventing plating shows up as less lithium plated & no: mass favours the fast rate; the onset crossing is the event \\
+S1b & \ref{sec:plating} & the certificate keeps the anode out of the depositing regime & \plColdCertOnset/\plSessions{} against \plColdFastOnset/\plSessions{} cold \\
+E14 & \ref{sec:firmware} & the certificate fits a BMS microcontroller & \fwText\,B code, \fwRam\,B RAM, \fwMismatch{} verdict mismatches \\
+\addlinespace
 \multicolumn{4}{@{}l}{\textit{B5 --- The same standard in every domain}}\\
 B5a$^\dagger$ & \ref{sec:transfer} & the incumbent stopping rule fails transfer in every domain & only in air; water and GEO survive it \\
 B5b$^\dagger$ & \ref{sec:transfer} & the ground gain is a single fleet number & it changes sign at \gtCeiling\,\degC{} ambient \\
@@ -2287,7 +2423,7 @@ X5 & \ref{sec:cross} & every zero-failure claim has enough samples & \adequacyVi
 \end{longtable}}
 
 \vspace{4pt}
-\noindent Nineteen of \vExperiments{} are marked $\dagger$. A register in which nothing is marked
+\noindent Twenty of \vExperiments{} are marked $\dagger$. A register in which nothing is marked
 is a register written after the results.
 
 \end{document}

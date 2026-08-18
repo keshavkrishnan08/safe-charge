@@ -42,6 +42,8 @@ VEHICLE_STAGES = [
     ("D1  the EPA's own driving schedules", "exp/d1_drive_cycles.py"),
     ("E13 deployability on a BMS microcontroller", "exp/e13_embedded.py"),
     ("M1  a margin that knows how long the operation lasts", "exp/m1_duration_margin.py"),
+    ("E14 the firmware, compiled and diffed against the reference", "exp/e14_firmware.py"),
+    ("S1  capacity lost to plating, measured by the DFN", "exp/s1_plating.py"),
     ("B5  the same standard in every domain", "exp/b5_domain_transfer.py"),
     ("N2  the certificate against a Doyle-Fuller-Newman plant", "exp/n2_dfn.py"),
     ("B4  against the control-barrier-function filter", "exp/b4_cbf.py"),

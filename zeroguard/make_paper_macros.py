@@ -16,7 +16,7 @@ RES = os.path.join(HERE, "results")
 OUT = os.path.join(os.path.dirname(HERE), "paper", "vehicle_macros.tex")
 
 D = {}
-for k, f in (("b5", "b5_domain_transfer.json"), ("n2", "n2_dfn.json"), ("b4", "b4_cbf.json"), ("p1", "p1_policy_filter.json"), ("p2", "p2_pack_dynamic.json"),
+for k, f in (("e14", "e14_firmware.json"), ("s1", "s1_plating.json"), ("b5", "b5_domain_transfer.json"), ("n2", "n2_dfn.json"), ("b4", "b4_cbf.json"), ("p1", "p1_policy_filter.json"), ("p2", "p2_pack_dynamic.json"),
              ("m1", "m1_duration_margin.json"), ("d1", "d1_drive_cycles.json"), ("emb", "e13_embedded.json"),
              ("b3", "b3_tuned_derate.json"), ("b2", "b2_domain_baselines.json"), ("b", "b1_baselines.json"), ("n", "n1_nasa_validation.json"), ("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
              ("s", "v4_space.json"), ("x", "x_crossdomain.json"),
@@ -52,8 +52,10 @@ _B4 = 6 * 400 + 400 + 7 * 600
 _N2 = 6 + 40 + 2 * 7 * 3
 # B5: 3 domains x 2 populations x 300 missions, plus 1200 ground sessions x 2 controllers
 _B5 = 3 * 2 * 300 + 1200 * 2
-m("vTotalEpisodes", f"{470_923 + _P1 + _P2 + _B4 + _N2 + _B5:,}".replace(",", "{,}"))
-m("vExperiments", "58")
+# E14: 20,000 states through the compiled filter; S1: 3 ambients x 3 controllers x 8 DFN charges
+_E14, _S1 = 20_000, 3 * 3 * 8
+m("vTotalEpisodes", f"{470_923 + _P1 + _P2 + _B4 + _N2 + _B5 + _E14 + _S1:,}".replace(",", "{,}"))
+m("vExperiments", "61")
 m("vPlatforms", "16")
 m("vClaims", "76")
 m("vFigures", "8")
@@ -431,6 +433,55 @@ m("aTurnTrials", num(a["v2_9_turnaround"]["trials"], 0, True))
 m("uSealViol", str(u["v3_1_sealed_hull"]["violations"]))
 m("uSealN", num(u["v3_1_sealed_hull"]["trials"], 0, True))
 m("uNoRecalGap", num(u["v3_9_no_recalibration"]["soc_gap_points"], 1))
+
+# ---- the firmware, compiled ------------------------------------------------------------
+if "e14" in D:
+    f14 = D["e14"]
+    m("fwText", num(f14["text_bytes"], 0, True))
+    m("fwData", str(f14["data_bytes"]))
+    m("fwOcv", str(f14["ocv_table_bytes"]))
+    m("fwRam", str(f14["ram_bytes"]))
+    m("fwStates", num(f14["states"], 0, True))
+    m("fwMismatch", str(f14["status_mismatches"]))
+    m("fwQuantum", f"{1000*f14['quantum_A']:.1f}")
+    m("fwMaxDev", f"{1000*f14['max_dev_A']:.1f}")
+    m("fwMinDev", f"{1000*f14['min_dev_A']:.1f}")
+    m("fwAbove", str(f14["above_reference_by_a_quantum"]))
+    m("fwVcost", f"{1000*f14['worst_voltage_cost_V']:.3f}")
+    m("fwVfrac", num(100 * f14["worst_voltage_frac_margin"], 2))
+    m("fwTcost", f"{f14['worst_thermal_cost_K']:.4f}")
+    m("fwCompiler", f14["compiler"])
+    m("fwTarget", f14["target"].replace("_", "-"))
+    m("fwEvals", str(f14["evaluations"]))
+
+# ---- capacity lost to plating, measured by the DFN --------------------------------------
+if "s1" in D:
+    s1 = D["s1"]
+    m("plTarget", num(100 * s1["target_soc"], 0))
+    m("plSessions", str(s1["sessions_per_cell"]))
+    m("plCertMah", num(s1["cold_cert_plated_mAh"], 1))
+    m("plAggMah", num(s1["cold_aggressive_plated_mAh"], 1))
+    m("plAggRatio", num(s1["cold_aggressive_ratio"], 1))
+    m("plAggOnset", str(s1["cold_aggressive_onset"]))
+    m("plCertOnset", str(s1["cold_cert_onset"]))
+    m("plCertPhi", num(s1["cold_cert_min_phi_mV"], 1))
+    m("plSafeMah", num(s1["cold_safe_plated_mAh"], 1))
+    m("plSafeRatio", num(s1["cold_safe_ratio"], 2))
+    m("plMinutes", num(abs(s1["cold_minutes_saved"]), 1))
+    m("plAggRisk", num(s1["cold_agg_at_risk_min"], 1))
+    m("plAggRiskMah", num(s1["cold_agg_at_risk_mAh"], 1))
+    m("plCertRisk", num(s1["cold_cert_at_risk_min"], 0))
+    m("plCertMin", num(s1["cold_cert_minutes"], 1))
+    m("plSafeMin", num(s1["cold_safe_minutes"], 1))
+    WORD = {"0": "Cold", "10": "Cool", "25": "Mild"}
+    for amb, rec in s1["by_ambient"].items():
+        w = WORD[amb]
+        for nm, tg in (("certificate", "Cert"), ("CC-CV 0.5C", "Slow"), ("CC-CV 1.5C", "Fast")):
+            if nm in rec:
+                m(f"pl{w}{tg}Mah", num(rec[nm]["plated_mAh"], 1))
+                m(f"pl{w}{tg}Onset", str(rec[nm]["onset_crossed"]))
+                m(f"pl{w}{tg}Min", num(rec[nm]["median_minutes"], 1))
+                m(f"pl{w}{tg}Phi", num(rec[nm]["min_phi_mV"], 1))
 
 # ---- the same standard in every domain --------------------------------------------------
 if "b5" in D:

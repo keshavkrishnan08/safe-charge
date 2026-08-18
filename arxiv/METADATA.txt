@@ -51,8 +51,8 @@ a categorical difference on safety, not the large speed-up a single chosen basel
 Against model-predictive control it returns the same answer -- to 0.66 SOC
 points -- at 20 model evaluations against 644, and the 20 is a proved
 bound while MPC's number is whatever its iteration cap allowed.
-Across 16 platforms in four media and 58 experiments totalling
-486,675 episodes, nothing was breached while the certificate reported feasible, the
+Across 16 platforms in four media and 61 experiments totalling
+506,747 episodes, nothing was breached while the certificate reported feasible, the
 admissible set was a single interval in all 64,000 dense scans, and worst-case latency was
 123.9 \mus -- 1.24 % of a 10 ms ISO~26262 slot.
 
@@ -73,6 +73,19 @@ sessions on its own and in 0 through the filter, while still delivering
 +16.7 SOC points more than the safe protocol it replaces. On a policy that was already
 safe the filter intervenes in 0.39 % of steps, and across a swept request its
 intervention is monotone and begins strictly before breaching does.
+
+The two application claims that carry furthest are checked against physics we did not write and
+against a compiler. Safety: the plating constraint the paper enforces but never certifies is
+what stands between a cold fast charge and metallic lithium on the anode -- the first link in the
+chain that ends in an internal short. Charging a DFN cell to a matched 70 % at
+0 C, the rate a de-rate exists to forbid drives the anode potential negative in
+2 of 8 sessions and deposits 20.4 mAh while it is there;
+the certificate crosses in 0, and holds a wider anode margin than the fixed
+de-rate at every ambient -- 19.8 minutes slower cold, where the constraint binds,
+and 23.8 faster warm, where it does not. Deployability: the filter is not an estimate of a
+footprint but a compiled one, 2,064 B of code and constants and 68 B of RAM, agreeing
+with the reference on feasibility at all 20,000 states tested and never exceeding it by more
+than one bisection quantum.
 
 The value is not uniform across domains and the paper measures where it is not. Holding every
 domain's incumbent to the same tune-then-deploy standard -- which the first version of this work
@@ -116,7 +129,7 @@ breaks no certified constraint at all and plates 19.4 % of cells.
 
 NOTES FOR THE SUBMISSION FORM
 -----------------------------
-Comments field:  40 pages, 10 figures, 58 experiments. Theorem machine-checked
+Comments field:  43 pages, 10 figures, 61 experiments. Theorem machine-checked
                  in Lean 4 (no sorry, no axioms); proof scripts and all
                  experiment code included in the repository.
 

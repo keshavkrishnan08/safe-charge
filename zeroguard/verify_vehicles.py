@@ -64,7 +64,54 @@ B3 = "b3_tuned_derate.json"
 D1 = "d1_drive_cycles.json"
 EMB = "e13_embedded.json"
 M1 = "m1_duration_margin.json"
+E14 = "e14_firmware.json"
+S1 = "s1_plating.json"
 B5 = "b5_domain_transfer.json"
+
+# ---- the firmware, compiled --------------------------------------------------------------
+pred("E14   the certificate compiles to under two kilobytes of code and constants",
+     lambda: dig(E14, "text_bytes") < 4096,
+     "the compiled filter no longer fits the footprint the paper claims")
+pred("E14   and needs under 128 bytes of RAM, with no heap and no recursion",
+     lambda: dig(E14, "ram_bytes") < 128 and dig(E14, "heap_allocations") == 0
+     and not dig(E14, "recursion"),
+     "the firmware's memory claims no longer hold")
+eq("E14   it agrees with the reference on feasibility at every state tested",
+   lambda: dig(E14, "status_mismatches"), 0)
+pred("E14   and never exceeds the reference current by more than one bisection quantum",
+     lambda: dig(E14, "above_reference_by_a_quantum") == 0,
+     "the port returns more current than the reference, so the guarantee does not transfer")
+pred("E14   where it is higher at all, the excess is small against the margins it carries",
+     lambda: dig(E14, "within_margin")
+     and dig(E14, "worst_voltage_frac_margin") < 0.05,
+     "the port's deviation is no longer comfortably inside the margin")
+
+# ---- what the plating constraint is actually worth ---------------------------------------
+pred("S1    plating is measured where it happens, which is cold",
+     lambda: 0.0 in dig(S1, "ambients")
+     and dig(S1, "by_ambient", "0", "CC-CV 1.5C", "plated_mAh")
+     > dig(S1, "by_ambient", "25", "CC-CV 1.5C", "plated_mAh"),
+     "the cold case does not plate more than the mild one, so the regime claim is wrong")
+pred("S1    and at matched delivered charge, so the comparison is not a units error",
+     lambda: all(r["reached_target"] == r["sessions"]
+                 for r in dig(S1, "by_ambient", "0").values()),
+     "not every controller reached the common target, so the plating figures are not comparable")
+pred("S1    the rate a de-rate forbids crosses the deposition onset; the certificate does not",
+     lambda: dig(S1, "cold_aggressive_onset") > 0 and dig(S1, "cold_cert_onset") == 0,
+     "the onset separation between the two controllers is gone")
+pred("S1    and it spends real time in the depositing regime, which is the damage",
+     lambda: dig(S1, "cold_agg_at_risk_min") > 0 and dig(S1, "cold_agg_at_risk_mAh") > 1.0
+     and dig(S1, "cold_cert_at_risk_min") == 0,
+     "no controller spent time past the onset, so there is nothing to have prevented")
+pred("S1    total plated mass does NOT separate them, and the paper says so",
+     lambda: dig(S1, "mass_metric_favours_aggressive"),
+     "the mass metric now favours the certificate; the caveat about it is stale and misleading")
+pred("S1    the certificate holds a wider anode margin than the de-rate at every ambient",
+     lambda: dig(S1, "margin_beats_derate_everywhere"),
+     "the de-rate holds a wider plating margin somewhere, so the adaptivity claim is wrong")
+pred("S1    and pays for it in time when cold while gaining time when warm",
+     lambda: dig(S1, "faster_when_warm_slower_when_cold"),
+     "the cold/warm trade no longer reverses, so the state-dependence claim must be restated")
 N2 = "n2_dfn.json"
 
 # ---- the transfer standard, applied evenly ----------------------------------------------
