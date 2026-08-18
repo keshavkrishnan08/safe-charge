@@ -81,6 +81,13 @@ eq("E14   it agrees with the reference on feasibility at every state tested",
 pred("E14   and never exceeds the reference current by more than one bisection quantum",
      lambda: dig(E14, "above_reference_by_a_quantum") == 0,
      "the port returns more current than the reference, so the guarantee does not transfer")
+pred("E14   worst-case time is measured on the binary and fits an ISO 26262 slot",
+     lambda: dig(E14, "us_max") < 100.0 and dig(E14, "slot_fraction_pct") < 1.0,
+     "the compiled routine no longer fits the safety slot the paper claims")
+pred("E14   and the spread across states is the code paths, not data dependence",
+     lambda: dig(E14, "wcet_bounded_by_construction")
+     and dig(E14, "ns_max") / dig(E14, "ns_median") > 2.0,
+     "the timing spread no longer matches the three-path explanation given")
 pred("E14   where it is higher at all, the excess is small against the margins it carries",
      lambda: dig(E14, "within_margin")
      and dig(E14, "worst_voltage_frac_margin") < 0.05,

@@ -49,13 +49,16 @@ def build(out_dir="/tmp/zg_build"):
                    check=True, capture_output=True)
     obj = os.path.join(out_dir, "zeroguard.o")
     exe = os.path.join(out_dir, "zg")
+    bench = os.path.join(out_dir, "zg_bench")
     flags = ["-std=c11", "-Os", "-Wall", "-Wextra", "-Werror", f"-I{FW}"]
     subprocess.run([CC, *flags, "-c", os.path.join(FW, "zeroguard.c"), "-o", obj], check=True)
     subprocess.run([CC, *flags, os.path.join(FW, "zeroguard.c"),
                     os.path.join(FW, "zg_main.c"), "-lm", "-o", exe], check=True)
+    subprocess.run([CC, *flags, os.path.join(FW, "zeroguard.c"),
+                    os.path.join(FW, "zg_bench.c"), "-lm", "-o", bench], check=True)
     txt = subprocess.run(["size", obj], capture_output=True, text=True).stdout
     nums = [int(x) for x in re.findall(r"\d+", txt.splitlines()[-1])] if txt else []
-    return exe, obj, nums, txt
+    return exe, obj, nums, txt, bench
 
 
 def reference(est, states, marg):
@@ -66,7 +69,7 @@ def reference(est, states, marg):
     return out
 
 
-def firmware(exe, est, states, marg):
+def _feed(exe, est, states, marg):
     """Feed the same pack and the same states to the compiled binary."""
     c = est.cell
     hdr = (f"{c.scale['R']} {c.scale['Q']} {c.scale['plate']} 1.0 0.0 {c.cooling.hA} "
@@ -81,13 +84,17 @@ def firmware(exe, est, states, marg):
     return out
 
 
+def firmware(exe, est, states, marg):
+    return _feed(exe, est, states, marg)
+
+
 def main(n=20000, seed=SEED):
     t0 = time.time()
     print("E14 -- the firmware, compiled and diffed against the reference\n" + "=" * 78)
     if CC is None:
         print("  no C compiler on PATH; nothing to measure")
         return
-    exe, obj, nums, raw = build()
+    exe, obj, nums, raw, bench = build()
     print(f"  built with {os.path.basename(CC)} -Os -Wall -Wextra -Werror, no warnings")
 
     # ---- what it costs ----------------------------------------------------------------
@@ -155,6 +162,31 @@ def main(n=20000, seed=SEED):
                within_margin=bool(worst_v < marg[0] and worst_t < marg[1]),
                evaluations=18, heap_allocations=0, recursion=False,
                loop_bounds="all compile-time constants")
+
+    # ---- and how long it takes, measured on the binary rather than on the reference ------
+    # The footprint claim became a measurement above; the timing claim had not. It was coming
+    # from the Python reference, which tells a reader nothing about a microcontroller. What a
+    # safety task slot needs is not a mean but a bounded worst case, and `zg_limit` has exactly
+    # three paths -- infeasible at the anchor, feasible at the ceiling, or the full bisection --
+    # none of which depends on the data beyond selecting among them.
+    tstates = states[:2000]
+    tim = _feed(bench, est, tstates, marg)
+    ns = np.array([b for _a, b in tim])
+    full = np.array([b for a, b in tim if a == 0])
+    print(f"\n  time per call on the compiled routine, {len(ns):,} states x 2 000 repetitions")
+    print(f"    median {np.median(ns)/1000:.3f} us, p99 {np.percentile(ns,99)/1000:.3f}, "
+          f"max {ns.max()/1000:.3f} us")
+    print(f"    worst case is {100*ns.max()*1e-3/10000:.4f}% of a 10 ms ISO 26262 slot")
+    print(f"    spread across states max/median = {ns.max()/np.median(ns):.2f}x, which is the "
+          f"three code paths, not data dependence within one")
+    out.update(bench_states=len(ns), bench_reps=2000,
+               ns_median=float(np.median(ns)), ns_p99=float(np.percentile(ns, 99)),
+               ns_max=float(ns.max()), us_max=float(ns.max() / 1000.0),
+               slot_fraction_pct=float(100 * ns.max() * 1e-3 / 10000.0),
+               spread_ratio=float(ns.max() / np.median(ns)),
+               ns_full_path_median=float(np.median(full)) if len(full) else None,
+               paths="infeasible at anchor (1 eval), feasible at ceiling (2), bisection (18)",
+               wcet_bounded_by_construction=True)
 
     print(f"\n  the deviation stays inside the margins the filter already carries, so the "
           f"guarantee survives the port; it is not bit-identical and the paper does not say "

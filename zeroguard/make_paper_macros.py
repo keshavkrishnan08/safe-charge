@@ -453,6 +453,11 @@ if "e14" in D:
     m("fwCompiler", f14["compiler"])
     m("fwTarget", f14["target"].replace("_", "-"))
     m("fwEvals", str(f14["evaluations"]))
+    m("fwUsMax", f"{f14['us_max']:.2f}")
+    m("fwUsMed", f"{f14['ns_median']/1000:.3f}")
+    m("fwSlotPct", f"{f14['slot_fraction_pct']:.3f}")
+    m("fwBenchStates", num(f14["bench_states"], 0, True))
+    m("fwSpread", num(f14["spread_ratio"], 0))
 
 # ---- capacity lost to plating, measured by the DFN --------------------------------------
 if "s1" in D:

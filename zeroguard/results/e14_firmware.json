@@ -24,5 +24,16 @@
   "evaluations": 18,
   "heap_allocations": 0,
   "recursion": false,
-  "loop_bounds": "all compile-time constants"
+  "loop_bounds": "all compile-time constants",
+  "bench_states": 2000,
+  "bench_reps": 2000,
+  "ns_median": 25.5,
+  "ns_p99": 408.55499999999995,
+  "ns_max": 1061.5,
+  "us_max": 1.0615,
+  "slot_fraction_pct": 0.010615000000000001,
+  "spread_ratio": 41.627450980392155,
+  "ns_full_path_median": 224.5,
+  "paths": "infeasible at anchor (1 eval), feasible at ceiling (2), bisection (18)",
+  "wcet_bounded_by_construction": true
 }

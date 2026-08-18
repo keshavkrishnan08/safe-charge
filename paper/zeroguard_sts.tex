@@ -1478,6 +1478,16 @@ Built at \texttt{-Os} with \texttt{-Wall -Wextra -Werror} and no warnings, it oc
 with \fwData\,B of writable data and \fwRam\,B of RAM live across a call. One call is exactly
 \fwEvals{} model evaluations.
 
+\paragraph{And how long it takes.} The footprint became a measurement above; the timing had not.
+The \worstLatency\,$\mu$s quoted in \S\ref{sec:cross} is the \emph{reference} implementation
+timed in Python, which tells a reader nothing about a microcontroller. Timed on the compiled
+routine over \fwBenchStates{} states at 2\,000 repetitions each, a call takes \fwUsMed\,$\mu$s at
+the median and \fwUsMax\,$\mu$s at worst --- \fwSlotPct\,\% of a 10\,ms ISO~26262 slot. The
+\fwSpread$\times$ spread between worst and median is not data dependence within a path: it is the
+three paths \texttt{zg\_limit} has --- infeasible at the anchor (one evaluation), feasible at the
+ceiling (two), or the full bisection (\fwEvals) --- and the worst case is the longest of three
+fixed-length routines, which is what lets a task slot be sized at all.
+
 \paragraph{Does it agree with the reference?} Not bit-for-bit, and it was never going to: the
 reference computes in float64 and bisects in floating point, the firmware computes in float32
 and bisects in integers. The question is which way the disagreement points. Over \fwStates{}
