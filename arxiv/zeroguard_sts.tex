@@ -27,7 +27,7 @@
 \theoremstyle{remark}
 \newtheorem{remark}{Remark}
 
-\newcommand{\degC}{\textdegree C}
+\newcommand{\degC}{\ifmmode{^\circ}\mathrm{C}\else\textdegree C\fi}
 \captionsetup{font=small,labelfont=bf,skip=4pt}
 \setlength{\parskip}{0pt}
 \linespread{1.0}

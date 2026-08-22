@@ -27,7 +27,7 @@
 \theoremstyle{remark}
 \newtheorem{remark}{Remark}
 
-\newcommand{\degC}{\textdegree C}
+\newcommand{\degC}{\ifmmode{^\circ}\mathrm{C}\else\textdegree C\fi}
 \captionsetup{font=small,labelfont=bf,skip=4pt}
 \setlength{\parskip}{0pt}
 \linespread{1.0}
@@ -148,55 +148,6 @@ and the implementation as \fwText\,B of compiled C agreeing with the reference a
 \vTotalEpisodes{} episodes; twenty of them contradicted the hypothesis they were written to test
 and are reported as findings rather than removed (Appendix).
 \end{enumerate}
-
-\subsection{Two standard answers, and why neither reaches the vehicle}
-
-The first is \emph{identification}: estimate the pack's internal state online and de-rate against
-the estimate. Estimating resistance and capacity well requires excitation --- current profiles
-rich enough to be informative --- which an operational vehicle is not free to inject. Worse, the
-guarantee becomes conditional on the estimator having converged, which is a claim about a
-transient nobody audits.
-
-The second is \emph{constrained optimisation}: solve a small model-predictive control problem
-each step and let the solver enforce the constraints. This is the standard modern answer, and a
-good one, with a specific defect --- a quadratic program's iteration count depends on its data.
-A safety-critical task slot is sized for the worst case, and if the worst case is unbounded the
-slot cannot be sized at all. In practice this is handled with iteration caps and fallback logic:
-by having a plan for when the guarantee does not hold.
-
-\subsection{The result}
-
-We take a third path, whose value is that it needs neither. The observation is geometric rather
-than numerical:
-
-\begin{quote}
-If every constraint is monotone in a scalar input, and one input is known to be safe, then the
-set of admissible inputs is not a complicated region to be searched. It is a single interval,
-and its edges can be located by bisection in a fixed number of one-step model evaluations.
-\end{quote}
-
-Bisection needs no optimiser, no convergence test, and --- critically --- no identification of
-the plant, because a monotone \emph{bound} on the uncertain parameter suffices where a point
-estimate would be required. A datasheet end-of-life resistance figure is such a bound and is
-known before the vehicle ships.
-
-The contribution of this paper is to establish that this result survives contact with real
-vehicles, which required repairing it first. Section~\ref{sec:theory} shows that the failure
-observed when the filter is placed on a hovering rotorcraft is not the failure it appears to be,
-and develops \textbf{Anchored Collapse}, which covers discharge as well as charge. Sections
-\ref{sec:domains}--\ref{sec:domains} then take it across four media --- ground, air, water, vacuum
---- across \vPlatforms{} platforms and \vExperiments{} experiments.
-
-\paragraph{Contributions.} \textbf{(i)} \emph{Anchored Collapse} (\S\ref{sec:anchored}), a
-generalisation covering constraints requiring the input to be \emph{large} enough --- what every
-vehicle's irreducible load imposes and what the original theorem cannot express --- at a cost of
-\evalDischarge{} fixed evaluations rather than \evalCharge{}. \textbf{(ii)} A two-sided
-certificate and a \emph{reserve} (\S\ref{sec:reserve}): the gap between the edges is how much
-room the vehicle has left, which the one-sided version cannot report and which yields an abort
-rule for vehicles that cannot afford to find their limit empirically. \textbf{(iii)} A
-certificate that refuses \emph{designs}, not just commands.
-\textbf{(iv)} Application across four media (\S\ref{sec:domains}), including
-where the result does \emph{not} hold and what that costs.
 
 
 \subsection{Related work}\label{sec:related}
@@ -607,6 +558,51 @@ frontier rather than as a pass.
 \paragraph{What the table says.} Read the last three rows rather than the first three. A method
 claiming equal benefit in all four media would be one whose evaluation had not looked hard
 enough.
+
+
+\subsection{One vehicle, end to end}\label{sec:casestudy}
+
+The table is a summary and summaries are easy to skim past, so here is a single vehicle followed
+from arrival to dispatch, with every number drawn from the experiments above.
+
+A compact urban robotaxi, 96S45P, arrives at a 350\,kW charger at 12\,\% charge. It has been on
+the road since dawn; its pack is at whatever temperature the day has left it at, its cells have
+aged unevenly, and nothing on board can measure the three quantities that decide how hard it may
+be charged. Today it is the twelfth session of the day --- a private car accumulates this much
+fast-charge stress in \gWeeks{} weeks.
+
+\textbf{What it does today.} It applies the de-rate its manufacturer chose. That rate was picked
+on evidence available before the vehicle shipped: a mild climate, cells not yet aged, the fastest
+constant current that was safe on that population --- \bThreeTuned C. Deployed across the fleet
+this vehicle actually belongs to, from $-10$ to 40\,\degC{} and out to end of life, that rate
+violates a certified constraint in \textbf{\bThreeTunedViolPct\,\% of sessions}. To be safe
+everywhere it must fall to \bThreeRequired C, and at that rate the vehicle reaches a 60\,\%
+charge inside a \gtWindow-minute window in \textbf{\gtReachSixtyCc\,\% of sessions}. It mostly
+does not go back into service; it sits.
+
+\textbf{What it does with the certificate.} At each 30\,s step the filter evaluates the cell
+model \evalCharge{} times --- always \evalCharge, never more --- and returns the largest current
+that keeps voltage, temperature and the plating potential inside their limits for the next step,
+at the worst corner of the envelope its estimator is allowed to assume. It identifies nothing. It
+converges to nothing. Across \bThreeTrials{} deployment sessions it violates a certified
+constraint \textbf{\bThreeZgViol{} times}, and it returns the vehicle to service at 60\,\% charge
+in \textbf{\gtReachSixtyZg\,\% of sessions} --- \gtReachSixtyRatio$\times$ as many.
+
+\textbf{What it costs, and where.} Not nothing, and not uniformly. On a mild day at 15\,\degC{} the
+certificate delivers $+$\gtAmbFifteen{} points more charge than the fixed rate; on a 40\,\degC{}
+afternoon it delivers \gtAmbForty{} points --- \emph{less} than the fixed rate, not more ---
+because its own thermal margin puts its effective ceiling at \gtCeiling\,\degC{} and above that
+ambient the cell can never sit below it, so the filter refuses. It is right to refuse --- it breached nothing in
+\gtViol{} of \gtTrials{} sessions --- and refusing has a price. A fleet mean of
+$+$\gtMean{} points is the average of those two regimes and is not a fact about any vehicle.
+
+\textbf{And it runs on the hardware already in the car.} \fwText\,B of code and constants,
+\fwRam\,B of RAM, no heap and no recursion, worst case \fwUsMax\,$\mu$s --- \fwSlotPct\,\% of a
+10\,ms ISO~26262 task slot. It is a firmware change, not a new part, which is the difference
+between a result and a deployment.
+
+Over five years of that duty cycle, never recalibrated, the certificate breached
+\gRoboViol{} of \gRoboSessions{} sessions.
 
 \subsection{Where the method belongs, decided in advance}\label{sec:cross}
 
