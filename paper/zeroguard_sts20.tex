@@ -71,8 +71,8 @@ And a Lagrangian-constrained policy that meets its violation budget in training
 (\rlHardTrain\,\%) violates in \rlHardDeploy\,\% of deployment sessions --- an expectation over
 one distribution is not a per-step guarantee on another.
 
-The theorem is \textbf{machine-checked in Lean~4} (\leanTheorems{} theorems, no \texttt{sorry},
-no axioms), and the proof needs less than we claimed: safety holds for an \emph{arbitrary}
+The theorem is \textbf{machine-checked in Lean~4} (\leanThms{} theorems, no \texttt{sorry},
+\leanFreeWord{} of them axiom-free), and the proof needs less than we claimed: safety holds for an \emph{arbitrary}
 predicate, so monotonicity buys optimality, not safety. The assumptions are tested against
 \nCells{} cells measured by another laboratory and the filter against a Doyle--Fuller--Newman
 plant in both directions. It compiles to \fwText\,B and \fwRam\,B of RAM, worst case
@@ -129,8 +129,9 @@ than a linearisation, the discrete-time control-barrier-function condition for a
 constraint defines an interval. This work is the bisection that solves it exactly, with $\gamma$
 entering as a margin; the quadratic program people deploy is its linearised approximation.
 
-\item \textbf{Machine-checked, and it needed less than we claimed.} \leanTheorems{} theorems in
-Lean~4, no \texttt{sorry} and no axiom. Writing them showed that safety holds for an
+\item \textbf{Machine-checked, and the hypothesis is proved sharp.} \leanThms{} theorems in
+Lean~4, no \texttt{sorry}, \leanFreeWord{} depending on no axiom at all. Monotonicity is proved
+\emph{necessary} for optimality, not merely sufficient. Writing them showed that safety holds for an
 \emph{arbitrary} predicate: monotonicity buys optimality, not safety.
 
 \item \textbf{The guarantee transfers where a tuned constant does not.} Held to a
@@ -345,19 +346,44 @@ $u_{\mathrm{hi}}$. This ordering is checked on every discharge platform, not ass
 \subsection{Machine-checked}\label{sec:formal}
 
 Theorem~\ref{thm:anchored} and the soundness of the bisection are formalised in Lean~4 and
-checked mechanically (\texttt{formal/AnchoredCollapse.lean}). \leanTheorems{} theorems compile with no
-\texttt{sorry}, and Lean reports that each \textbf{depends on no axioms at all} --- not
-classical choice, not propositional extensionality. The proofs turned out to need less than
-the paper assumes: they are stated over an arbitrary type carrying a $\le$ relation, with no
-order axiom used anywhere, so they hold without transitivity, antisymmetry or totality.
+checked mechanically (\texttt{formal/AnchoredCollapse.lean}). \leanThms{} theorems compile
+against \texttt{\leanToolchain} with \leanSorry{} occurrences of \texttt{sorry} and no mathlib
+dependency; the numbers here are read out of the build by
+\texttt{zeroguard/exp/l1\_lean\_audit.py} rather than transcribed, so they cannot drift from the
+artifact.
 
-Writing the proofs also \emph{weakened} the method's hypotheses. The safety guarantee turns out
-never to touch the cap/floor structure at all: \texttt{bisect\_sound\_any\_predicate} holds for
-an \emph{arbitrary} predicate, monotone or not, connected or not. So (A2) buys
-\textbf{optimality, not safety} --- a non-monotone constraint set costs delivered charge, because
-the bisection finds only the first admissible interval, and it cannot cost the guarantee. For
-anyone applying this to a plant whose constraint structure they have not verified, that is the
-difference between a method they must first prove things about and one they can simply run.
+The axiom audit is per theorem because it is not uniform. \textbf{\leanFreeWord{} of the
+\leanThms{} depend on no axioms whatsoever} --- not classical choice, not propositional
+extensionality. The remaining \leanUsing{} depend on \leanAxioms{} alone, entering through core's
+\texttt{Nat} division lemmas. Nothing anywhere depends on \texttt{Classical.choice} or
+\texttt{sorryAx}. The proofs are stated over an arbitrary type carrying a $\le$ relation with no
+order axiom used, so they hold without transitivity, antisymmetry or totality.
+
+\paragraph{Writing them weakened the hypotheses, and then sharpened them.} The safety guarantee
+turns out never to touch the cap/floor structure at all: \texttt{bisect\_sound\_any\_predicate}
+holds for an \emph{arbitrary} predicate, monotone or not, connected or not. So (A2) buys
+\textbf{optimality, not safety}.
+
+That statement was an observation. It is now a pair of theorems, and together they say the
+hypothesis is exactly the right one rather than merely a convenient one.
+
+\emph{With} monotonicity, \texttt{bisect\_brackets\_edge} proves the search \emph{brackets} the
+true edge: everything at or below the returned point is admissible and everything at or above
+the upper endpoint is not, so the entire error is the bracket width. That is what converts a
+fixed iteration count into a fixed \emph{accuracy} --- \evalCharge{} evaluations do not merely
+terminate, they localise the edge to $2^{-18}$ of the actuator range.
+
+\emph{Without} it, the answer can be arbitrarily poor while remaining perfectly safe. A
+constraint feasible at $0$ and at $4$ and nowhere between --- a plant with two disjoint
+operating bands --- is proved outside the hypothesis, and the bisection is proved to return $0$
+while $4$ is admissible, at \emph{every} budget up to 24 iterations. It cannot recover: every
+probe between the bands reports infeasible, so nothing in the transcript says a second band
+exists. More compute does not help, because the gap is a property of the constraint rather than
+of the budget.
+
+That is the practical statement for anyone applying this to a plant whose structure they have
+not verified: you may lose charge, you cannot lose the guarantee, and the amount you can lose is
+unbounded.
 
 The property worth checking mechanically is not the collapse theorem but
 \texttt{bisect\_sound}: \emph{every} state the bisection can reach has a feasible lower

@@ -64,7 +64,29 @@ B3 = "b3_tuned_derate.json"
 D1 = "d1_drive_cycles.json"
 EMB = "e13_embedded.json"
 M1 = "m1_duration_margin.json"
+LEAN = "l1_lean_audit.json"
 N3 = "n3_dfn_discharge.json"
+
+# ---- the Lean development, audited from the build rather than the manuscript --------------
+pred("L1    the Lean development builds and is mathlib-free",
+     lambda: dig(LEAN, "build_ok") and dig(LEAN, "mathlib_free"),
+     "the formal development no longer builds, or has acquired a mathlib dependency")
+eq("L1    and contains no `sorry`",
+   lambda: dig(LEAN, "sorries"), 0)
+pred("L1    no theorem depends on sorryAx or on classical choice",
+     lambda: not dig(LEAN, "uses_sorryAx") and not dig(LEAN, "uses_choice"),
+     "a theorem now rests on choice or on sorry, which the paper's claim rules out")
+pred("L1    the paper's axiom claim is per-theorem, because it is no longer uniform",
+     lambda: dig(LEAN, "n_axiom_free") >= 12 and dig(LEAN, "n_axiom_using") > 0
+     and dig(LEAN, "axioms_used") == ["propext"],
+     "the axiom audit changed shape; the paper must be restated to match the build")
+pred("L1    monotonicity is shown necessary for optimality, not just sufficient",
+     lambda: "bisect_not_optimal_without_cap" in dig(LEAN, "theorem_names")
+     and "gappy_not_cap" in dig(LEAN, "theorem_names"),
+     "the necessity counterexample is gone, so the sharpness claim is unsupported")
+pred("L1    and exactness under monotonicity is proved, not asserted",
+     lambda: "bisect_brackets_edge" in dig(LEAN, "theorem_names"),
+     "the bracketing theorem is gone, so 'fixed cost = fixed accuracy' is unsupported")
 B6 = "b6_constrained_rl.json"
 
 # ---- the floor family, which is the contribution, against external physics ---------------

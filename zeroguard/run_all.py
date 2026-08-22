@@ -42,6 +42,7 @@ VEHICLE_STAGES = [
     ("D1  the EPA's own driving schedules", "exp/d1_drive_cycles.py"),
     ("E13 deployability on a BMS microcontroller", "exp/e13_embedded.py"),
     ("M1  a margin that knows how long the operation lasts", "exp/m1_duration_margin.py"),
+    ("L1  the Lean audit, read from the build", "exp/l1_lean_audit.py"),
     ("N3  the floor family against a DFN plant", "exp/n3_dfn_discharge.py"),
     ("B6  against constrained reinforcement learning", "exp/b6_constrained_rl.py"),
     ("S2  cycle life, read from the DFN", "exp/s2_cycle_life.py"),

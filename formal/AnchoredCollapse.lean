@@ -177,6 +177,112 @@ theorem bisect_sound_any_midpoint {α : Type _} [LE α] (P : α → Prop) [Decid
     P (bisect mid hmid n B).lo ∧ P (bisect mid' hmid' n B).lo :=
   ⟨(bisect mid hmid n B).lo_ok, (bisect mid' hmid' n B).lo_ok⟩
 
+
+/-! ### 2c. What monotonicity is *for*
+
+`bisect_sound_any_predicate` shows safety never needed the cap structure. The obvious next
+question is what the structure does buy, and the answer is **exactness**: with it, the bisection
+brackets the true edge, so the only error is the bracket width. Without it, the returned answer
+can be arbitrarily far below the best admissible input while remaining perfectly safe.
+
+Both directions are proved here. Together they say the hypothesis is not merely sufficient for
+the method to work -- it is what separates a filter that is right from one that is merely not
+wrong. -/
+
+/-- The bracket is nested: the lower endpoint never falls and the upper never rises.
+
+    `[LE α]` supplies no reflexivity or transitivity -- deliberately, since the rest of this
+    development never needs them -- so this one statement takes both as explicit hypotheses
+    rather than importing an order class for it. Any real input type has them. -/
+theorem bisect_nested {α : Type _} [LE α] {P : α → Prop} [DecidablePred P]
+    (hrefl : ∀ a : α, a ≤ a) (htrans : ∀ a b c : α, a ≤ b → b ≤ c → a ≤ c)
+    (mid : α → α → α) (hmid : ∀ a b : α, a ≤ b → a ≤ mid a b ∧ mid a b ≤ b)
+    (n : Nat) (B : Bracket P) :
+    B.lo ≤ (bisect mid hmid n B).lo ∧ (bisect mid hmid n B).hi ≤ B.hi := by
+  induction n generalizing B with
+  | zero => exact ⟨hrefl _, hrefl _⟩
+  | succ k ih =>
+      have h := ih (B.step mid hmid)
+      have hm := hmid B.lo B.hi B.le
+      refine ⟨htrans _ _ _ ?_ h.1, htrans _ _ _ h.2 ?_⟩
+      · simp only [Bracket.step]
+        split
+        · exact hm.1
+        · exact hrefl _
+      · simp only [Bracket.step]
+        split
+        · exact hrefl _
+        · exact hm.2
+
+/-- **Exactness under monotonicity.** When the predicate is a cap, everything at or below the
+    returned point is feasible and everything at or above the upper endpoint is not. The true
+    threshold therefore lies inside `[lo, hi]`, and the bracket width is the *entire* error --
+    which is what makes a fixed iteration count a fixed accuracy rather than a hope. -/
+theorem bisect_brackets_edge {α : Type _} [LE α] {P : α → Prop} [DecidablePred P]
+    (hP : IsCap P)
+    (mid : α → α → α) (hmid : ∀ a b : α, a ≤ b → a ≤ mid a b ∧ mid a b ≤ b)
+    (n : Nat) (B : Bracket P) :
+    (∀ u, u ≤ (bisect mid hmid n B).lo → P u) ∧
+    (∀ u, (bisect mid hmid n B).hi ≤ u → ¬ P u) := by
+  refine ⟨fun u hu => hP (bisect mid hmid n B).lo_ok hu, fun u hu hPu => ?_⟩
+  exact (bisect mid hmid n B).hi_bad (hP hPu hu)
+
+/-! #### The converse: without a cap, the answer can be arbitrarily poor
+
+A concrete witness rather than an abstract argument, because the point is that this is not an
+edge case a careful implementer avoids. `gappy` is feasible at `0` and at `4` and nowhere
+between: a plant with two disjoint operating bands, which is exactly what a non-monotone
+constraint looks like. The bisection is perfectly safe on it -- it returns `0`, which is
+feasible -- and it never finds `4`. -/
+
+/-- A constraint with two disjoint feasible bands. Not a cap: `4` is feasible and `2` is not. -/
+def gappy : Nat → Prop := fun n => n = 0 ∨ n = 4
+
+instance : DecidablePred gappy := fun n =>
+  inferInstanceAs (Decidable (n = 0 ∨ n = 4))
+
+/-- `gappy` really is not a cap, so it is outside the theorem's hypothesis. -/
+theorem gappy_not_cap : ¬ IsCap gappy := by
+  intro h
+  have : gappy 2 := h (Or.inr rfl) (by decide)
+  cases this with
+  | inl h0 => exact absurd h0 (by decide)
+  | inr h4 => exact absurd h4 (by decide)
+
+/-- The arithmetic midpoint on `Nat`, which is what a real implementation uses. -/
+def natMid (a b : Nat) : Nat := (a + b) / 2
+
+theorem natMid_between : ∀ a b : Nat, a ≤ b → a ≤ natMid a b ∧ natMid a b ≤ b := by
+  intro a b h
+  unfold natMid
+  refine ⟨(Nat.le_div_iff_mul_le (by decide)).mpr ?_, Nat.div_le_of_le_mul ?_⟩
+  · -- a * 2 = a + a ≤ a + b
+    exact Nat.le_trans (Nat.le_of_eq (Nat.mul_two a)) (Nat.add_le_add_left h a)
+  · -- a + b ≤ b + b = 2 * b
+    exact Nat.le_trans (Nat.add_le_add_right h b) (Nat.le_of_eq (Nat.two_mul b).symm)
+
+/-- A starting bracket for `gappy`: `0` feasible, `5` not. -/
+def gappyBracket : Bracket gappy :=
+  { lo := 0, hi := 5, lo_ok := Or.inl rfl, hi_bad := by decide, le := by decide }
+
+/-- **Monotonicity is necessary for optimality.** On a constraint that is not a cap, the
+    bisection converges to `0` while `4` is admissible: safe, and wrong by the full width of the
+    domain. No iteration count fixes it -- the search has no way to learn that the upper band
+    exists, because every probe it makes between the bands says "infeasible".
+
+    This is the precise content of "monotonicity buys optimality, not safety". -/
+theorem bisect_not_optimal_without_cap :
+    gappy 4 ∧ (bisect natMid natMid_between 8 gappyBracket).lo = 0 :=
+  ⟨Or.inr rfl, rfl⟩
+
+/-- And it stays wrong however long it runs. More iterations cannot help: every probe between
+    the two bands reports infeasible, so the search has no way to learn the upper band exists.
+    Checked by evaluation at every budget up to 24, which is well past the point where the
+    bracket has collapsed. -/
+theorem bisect_not_optimal_at_any_budget :
+    ∀ k : Fin 25, (bisect natMid natMid_between k.val gappyBracket).lo = 0 := by
+  decide
+
 /-! ### 3. Putting them together -/
 
 /-- **The filter is sound.** If the caps are caps, the floors are floors, and the bisection is
@@ -210,6 +316,12 @@ that these are proofs rather than assertions: anything resting on `sorryAx` woul
 #print axioms bisect_sound_any_predicate
 #print axioms bisect_sound_any_midpoint
 #print axioms filter_sound
+#print axioms bisect_nested
+#print axioms bisect_brackets_edge
+#print axioms gappy_not_cap
+#print axioms bisect_not_optimal_without_cap
+#print axioms natMid_between
+#print axioms bisect_not_optimal_at_any_budget
 
 end AnchoredCollapse
 

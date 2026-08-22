@@ -16,7 +16,7 @@ RES = os.path.join(HERE, "results")
 OUT = os.path.join(os.path.dirname(HERE), "paper", "vehicle_macros.tex")
 
 D = {}
-for k, f in (("n3", "n3_dfn_discharge.json"), ("b6", "b6_constrained_rl.json"), ("s2", "s2_cycle_life.json"), ("e14", "e14_firmware.json"), ("s1", "s1_plating.json"), ("b5", "b5_domain_transfer.json"), ("n2", "n2_dfn.json"), ("b4", "b4_cbf.json"), ("p1", "p1_policy_filter.json"), ("p2", "p2_pack_dynamic.json"),
+for k, f in (("lean", "l1_lean_audit.json"), ("n3", "n3_dfn_discharge.json"), ("b6", "b6_constrained_rl.json"), ("s2", "s2_cycle_life.json"), ("e14", "e14_firmware.json"), ("s1", "s1_plating.json"), ("b5", "b5_domain_transfer.json"), ("n2", "n2_dfn.json"), ("b4", "b4_cbf.json"), ("p1", "p1_policy_filter.json"), ("p2", "p2_pack_dynamic.json"),
              ("m1", "m1_duration_margin.json"), ("d1", "d1_drive_cycles.json"), ("emb", "e13_embedded.json"),
              ("b3", "b3_tuned_derate.json"), ("b2", "b2_domain_baselines.json"), ("b", "b1_baselines.json"), ("n", "n1_nasa_validation.json"), ("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
              ("s", "v4_space.json"), ("x", "x_crossdomain.json"),
@@ -722,6 +722,21 @@ if "p2" in D:
     m("qSpreadT", num(us["spread_T_K"], 1))
     m("qSpreadSoc", num(100 * us["spread_soc"], 1))
     m("qSwitchRate", num(100 * us["switch_rate"], 0))
+
+# ---- the Lean audit, read from the build --------------------------------------------------
+if "lean" in D:
+    la = D["lean"]
+    WORD = {12: "twelve", 13: "thirteen", 14: "fourteen", 15: "fifteen", 16: "sixteen"}
+    m("leanThms", str(la["theorems"]))
+    m("leanThmsWord", WORD.get(la["theorems"], str(la["theorems"])))
+    m("leanFree", str(la["n_axiom_free"]))
+    m("leanFreeWord", WORD.get(la["n_axiom_free"], str(la["n_axiom_free"])))
+    m("leanUsing", str(la["n_axiom_using"]))
+    m("leanAxioms", ", ".join(f"\\texttt{{{a}}}" for a in la["axioms_used"]) or "none")
+    m("leanSorry", str(la["sorries"]))
+    m("leanToolchain", la["toolchain"].replace("_", "-"))
+    m("leanNoSorry", "no" if not la["uses_sorryAx"] else "YES")
+    m("leanNoChoice", "no" if not la["uses_choice"] else "YES")
 
 # ---- the Lean development, counted from the source so it cannot go stale ---------------
 LEAN = os.path.join(os.path.dirname(HERE), "formal", "AnchoredCollapse.lean")

@@ -1,0 +1,56 @@
+{
+  "build_ok": true,
+  "theorems": 15,
+  "theorem_names": [
+    "admissible_ordConvex",
+    "admissible_isCap_of_no_floors",
+    "between_admissible",
+    "bisect_sound",
+    "bisect_le",
+    "bisect_hi_bad",
+    "bisect_sound_any_predicate",
+    "bisect_sound_any_midpoint",
+    "bisect_nested",
+    "bisect_brackets_edge",
+    "gappy_not_cap",
+    "natMid_between",
+    "bisect_not_optimal_without_cap",
+    "bisect_not_optimal_at_any_budget",
+    "filter_sound"
+  ],
+  "sorries": 0,
+  "axiom_free": [
+    "admissible_isCap_of_no_floors",
+    "admissible_ordConvex",
+    "between_admissible",
+    "bisect_brackets_edge",
+    "bisect_hi_bad",
+    "bisect_le",
+    "bisect_nested",
+    "bisect_sound",
+    "bisect_sound_any_midpoint",
+    "bisect_sound_any_predicate",
+    "filter_sound",
+    "gappy_not_cap"
+  ],
+  "axiom_using": {
+    "bisect_not_optimal_without_cap": [
+      "propext"
+    ],
+    "natMid_between": [
+      "propext"
+    ],
+    "bisect_not_optimal_at_any_budget": [
+      "propext"
+    ]
+  },
+  "n_axiom_free": 12,
+  "n_axiom_using": 3,
+  "axioms_used": [
+    "propext"
+  ],
+  "uses_sorryAx": false,
+  "uses_choice": false,
+  "toolchain": "leanprover/lean4:v4.15.0",
+  "mathlib_free": true
+}
