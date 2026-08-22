@@ -564,12 +564,6 @@ Where it costs
 \end{tabular}}
 \end{table*}
 
-\paragraph{The structural results.} The admissible set was a single interval in all
-\scanTotal{} dense scans across every platform (\scanDisconnected{} disconnected), the cost was
-\evalCharge{} evaluations on charge and \evalDischarge{} on discharge everywhere without
-exception, and on a \gTruckCells-cell truck pack the certified pack current equalled its weakest
-cell's to $\gTruckDev$\,A. Nothing was breached while the certificate reported feasible in
-\vTotalEpisodes{} episodes.
 
 \paragraph{Four results that contradicted their own hypothesis.} These are worth more than the
 clean sheets, because a register in which nothing is marked is a register written after the
@@ -643,61 +637,6 @@ energy-driven and the width says nothing.
 That is a test an integrator can run on their own vehicle before adopting anything, and it is why
 Table~\ref{tab:bydomain} has two columns where the incumbent is not beaten. Air and ground are
 envelope-driven and the method helps there; water and deep space are not, and it does not.
-
-
-\section{Compared to what?}\label{sec:baselines}
-
-Every safety number so far has the form ``the filter violated nothing''. That is necessary and
-not sufficient, because a controller that refuses to charge violates nothing either. The claims
-that carry weight are comparative, and until this section the only comparison was against a
-crippled version of the same method. Table~\ref{tab:baselines} puts the certificate against what
-is actually deployed and what the literature actually recommends: \bTrials{} sessions per
-controller, identical plants, identical seeds, identical margins.
-
-\begin{table}[t]\centering\small
-\caption{Four controllers on the same plants. Cost is counted in one-step \emph{model
-evaluations} rather than seconds, because wall-clock depends on the language and the machine
-while the evaluation count is a property of the algorithm --- and is what a task budget is
-sized around.}
-\label{tab:baselines}
-\begin{tabular}{@{}lrrrrl@{}}
-\toprule
-\textbf{Controller} & \textbf{Violations} & \textbf{Mean SOC} & \textbf{Evals (med)} &
-\textbf{Evals (max)} & \textbf{Worst case known?} \\
-\midrule
-CC-CV at \bDerateC{}C (safe on this population) & \bViolDerate{} & \bSocDerate{} & 1 & 1 & --- \\
-CC-CV at \bFastestSafeC{}C (also safe here) & \bViolOneC{} & \bSocOneC{} & 1 & 1 & --- \\
-CC-CV at \bAggrC{}C (first unsafe rate) & --- & --- & 1 & 1 & --- \\
-MPC, horizon 1 (SLSQP) & \bViolMpcOne{} & \bSocMpcOne{} & 11 & \bMpcMaxEval{} & no \\
-MPC, horizon 3 (SLSQP) & \bViolMpcThree{} & \bSocMpcThree{} & 94 & 502 & no \\
-\textbf{ZEROGUARD} & \textbf{\bViolZg{}} & \textbf{\bSocZg{}} & 20 & \textbf{\bZgEval{}} &
-\textbf{yes, $=$ \bZgEval{}} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\paragraph{Against MPC: the same problem, solved two ways.} This is the comparison that matters
-for the run-time claim, because that claim is only interesting if the solver is solving the same
-problem. It is: horizon-1 MPC and the bisection agree on delivered charge to
-\textbf{\bMpcGap{} SOC points}. The certificate is not a cheaper approximation of MPC --- on
-this problem it is an exact solver for it.
-
-The difference is what it costs to be sure. The bisection spends at most \bZgEval{} model
-evaluations, and that is a \emph{bound}: proved in \S\ref{sec:formal}, known before any data
-arrives, never exceeded. SLSQP's worst observed cost was \bMpcMaxEval{} evaluations, a factor of
-\bMpcRatio{} higher --- and that number is not a bound. It is whatever the iteration cap
-happened to allow, its iteration count varied by \bMpcIterSpread{} across states, and removing
-the cap removes the number. A safety task slot can be sized around the first quantity and cannot
-be sized around the second.
-
-\paragraph{What this does not show.} SLSQP is a general-purpose nonlinear solver and a
-specialised QP or an explicit-MPC lookup would be faster; the comparison is against the standard
-approach as it is usually implemented, not against the best conceivable optimiser. What no
-optimiser removes is the data-dependence: the argument here is about the \emph{shape} of the
-cost, not its constant.
-
-
-
 
 
 \section{The same standard in every domain}\label{sec:transfer}
@@ -796,7 +735,7 @@ answer here, because a charging session really does last half an hour.
 \section{Against the CBF quadratic program}\label{sec:cbf}
 
 \S\ref{sec:related} places this work among predictive safety filters and control barrier
-functions, and \S\ref{sec:baselines} then benchmarks it against CC--CV, a de-rate sweep and MPC.
+functions, and \S\ref{sec:transfer} then benchmarks it against CC--CV, a de-rate sweep and MPC.
 That leaves the obvious comparison unmeasured. The CBF quadratic program is \emph{the} standard
 safety filter, and this method claims to replace the optimisation inside it, so the comparison
 is not optional.
@@ -913,6 +852,58 @@ a vehicle experiences particular episodes. No amount of compute converts an expe
 per-step guarantee, because they are not the same object.
 
 
+
+
+
+\section{It is not about batteries}\label{sec:motor}
+
+The Lean development proves the certificate sound for an \emph{arbitrary} predicate over an
+arbitrary type carrying a $\le$ relation. Nothing in it mentions electrochemistry. And every
+platform in this paper is a lithium cell, so the generality has been proved and never
+demonstrated --- which is precisely the gap a reader should be suspicious of, because a proof
+of generality that is never exercised is indistinguishable from a proof that is vacuous in
+practice.
+
+So the identical filter --- \texttt{zeroguard/anchored.py}, not a line changed, not an adapter
+written --- is run on a \mtPower\,kW permanent-magnet traction motor. The physics shares nothing
+with a cell: no state of charge, no plating, no open-circuit voltage, no diffusion. What it
+shares is the only thing the theorem asks for.
+
+\begin{itemize}\itemsep1pt
+\item \textbf{The input} is phase current amplitude, a scalar.
+\item \textbf{Winding temperature} rises with $I^2R$ copper loss --- monotone for the same
+reason a cell's does, which is the one piece of physics the two plants have in common.
+\item \textbf{Terminal voltage} is $\sqrt{(k_e\omega + IR)^2 + (\omega L I)^2}$ against the DC
+link --- monotone in $I$, by a completely different mechanism than a cell's overpotential.
+\item \textbf{Demagnetisation} is a current ceiling that \emph{tightens as the rotor heats} ---
+structurally the same shape as the plating cap, from unrelated physics. It is written $\ge$ and
+bounds current from above, so its \emph{side} must be declared rather than inferred, exactly as
+\S\ref{sec:theory} requires.
+\item \textbf{And a floor.} A vehicle holding a grade must deliver $\tau\omega \ge P_{\mathrm{dem}}$
+or it rolls backwards. Zero current is safe for every cap and serves nothing --- which is the
+Anchored Collapse case, on a plant that is not a battery.
+\end{itemize}
+
+\paragraph{It holds, and it holds for the stated reason.} Every channel is monotone in current
+across \mtStates{} sampled states, with the worst violation exactly zero. The admissible set was
+a single interval in \emph{all} \mtScan{} states scanned (\mtDisc{} disconnected), and the
+bisection's edges agree with a dense scan to \mtDev\,A against a scan step of \mtStep\,A.
+Climbing a steepening grade until the envelope closes, the filter breached nothing in
+\mtRuns{} runs (CP95 \mtCP\,\%); the envelope closed in \mtClosed{} of them and the reserve
+warned first in \mtWarned, with a median lead of \mtLead\,s and a fifth percentile of
+\mtLeadP\,s.
+
+The cost took the three values the theory predicts and no others: \mtPaths{} evaluations ---
+caps only, caps plus a floor check, or both bisections --- with a maximum of \mtEvalsMax, which
+is exactly the discharge bound of \S\ref{sec:theory}. It was not tuned to match; it is the same
+code counting the same probes on a different plant.
+
+\paragraph{What this changes.} The contribution is not a battery result that happens to
+generalise. It is a statement about a class of control problems --- \emph{scalar input, monotone
+constraints, a known-safe anchor} --- of which fast charging is one instance and a traction
+motor is another. The battery is where the problem was found, not where the method ends. We
+claim only what is demonstrated: two instances, one of them not a cell, certified by the same
+code at the same proved cost.
 
 
 \section{External validation: the assumptions against measured cells}\label{sec:external}
@@ -1187,6 +1178,9 @@ S1--S2 & 2 & Plating quantified against electrode physics. $\dagger$ Total plate
 the \emph{fast} rate; $\dagger$ no cycle-life benefit at all \\
 D1, M1 & 2 & EPA schedules. $\dagger$ The certificate recovers less regeneration than a fixed
 cap; a duration-aware margin recovers about half of that \\
+T1, L1 & 2 & The identical filter on a \mtPower\,kW traction motor --- no cell in it ---
+and the Lean audit read from the build. $\dagger$ Three of \leanThms{} theorems need
+\leanAxioms{} after the sharpening, where all previously needed none \\
 P1--P2, E13--E14 & 6 & A learned policy filtered; pack heterogeneity; the compiled firmware.
 $\dagger$ The binding cell is among the \emph{coldest}, not the hottest \\
 \bottomrule

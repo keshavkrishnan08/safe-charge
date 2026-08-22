@@ -78,6 +78,17 @@ meets it --- \rlHardTrain\,\% of characterisation episodes --- and then violates
 on the \emph{expectation} of violations over one distribution is not a per-step guarantee on
 another, and no amount of compute converts one into the other.
 
+Two results sharpen what the theorem is. Writing the Lean proofs showed the hypothesis is not
+merely sufficient but \emph{necessary}: with monotonicity the bisection provably \emph{brackets}
+the true edge, so a fixed iteration count is a fixed accuracy; without it, a constraint feasible
+at $0$ and at $4$ and nowhere between is proved to make the search return $0$ at every budget,
+safe and unboundedly suboptimal. And the generality the proof asserts is demonstrated rather
+than assumed: the identical filter code, unmodified, certifies a \mtPower\,kW permanent-magnet
+traction motor --- no state of charge, no plating, no open-circuit voltage --- with every channel
+monotone, a single interval in \mtScan{} of \mtScan{} states, \mtBreach{} breaches in
+\mtRuns{} climbing grades, and a cost bounded by the same \evalDischarge{} the theory proves.
+The battery is where the problem was found, not where the method ends.
+
 Three things make the guarantee checkable rather than asserted. It is \textbf{machine-checked in
 Lean~4} --- \leanThms{} theorems, no \texttt{sorry}, \leanFreeWord{} of them depending on no axiom at all --- and the
 proof needs less than we claimed: safety holds for an \emph{arbitrary} predicate, so monotonicity
@@ -1799,6 +1810,63 @@ down rather than consumed in a film --- and not calendar or cycle life, which th
 looked for and did not find.
 
 
+
+\section{It is not about batteries}\label{sec:motor}
+
+The Lean development proves the certificate sound for an \emph{arbitrary} predicate over an
+arbitrary type carrying a $\le$ relation. Nothing in it mentions electrochemistry. And every
+platform in this paper is a lithium cell, so the generality has been proved and never
+demonstrated --- which is precisely the gap a reader should be suspicious of, because a proof
+of generality that is never exercised is indistinguishable from a proof that is vacuous in
+practice.
+
+So the identical filter --- \texttt{zeroguard/anchored.py}, not a line changed, not an adapter
+written --- is run on a \mtPower\,kW permanent-magnet traction motor. The physics shares nothing
+with a cell: no state of charge, no plating, no open-circuit voltage, no diffusion. What it
+shares is the only thing the theorem asks for.
+
+\begin{itemize}\itemsep1pt
+\item \textbf{The input} is phase current amplitude, a scalar.
+\item \textbf{Winding temperature} rises with $I^2R$ copper loss --- monotone for the same
+reason a cell's does, which is the one piece of physics the two plants have in common.
+\item \textbf{Terminal voltage} is $\sqrt{(k_e\omega + IR)^2 + (\omega L I)^2}$ against the DC
+link: monotone in $I$, and arrived at from a completely different mechanism than a cell's
+overpotential.
+\item \textbf{Demagnetisation} is a current ceiling that \emph{tightens as the rotor heats} ---
+structurally the same shape as the plating cap, from unrelated physics. It is written $\ge$ and
+bounds current from above, so its \emph{side} must be declared rather than inferred, exactly as
+\S\ref{sec:theory} requires.
+\item \textbf{And a floor.} A vehicle holding a grade must deliver $\tau\omega \ge P_{\mathrm{dem}}$
+or it rolls backwards. Zero current is safe for every cap and serves nothing --- which is the
+Anchored Collapse case, on a plant that is not a battery.
+\end{itemize}
+
+\paragraph{It holds, and it holds for the stated reason.} Every channel is monotone in current
+across \mtStates{} sampled states, with the worst violation exactly zero. The admissible set was
+a single interval in \emph{all} \mtScan{} states scanned (\mtDisc{} disconnected), and the
+bisection's edges agree with a dense scan to \mtDev\,A against a scan step of \mtStep\,A.
+Climbing a steepening grade until the envelope closes, the filter breached nothing in
+\mtRuns{} runs (CP95 \mtCP\,\%); the envelope closed in \mtClosed{} of them and the reserve
+warned first in \mtWarned, with a median lead of \mtLead\,s and a fifth percentile of
+\mtLeadP\,s.
+
+The cost took the three values the theory predicts and no others: \mtPaths{} evaluations ---
+caps only, caps plus a floor check, or both bisections --- with a maximum of \mtEvalsMax, which
+is exactly the discharge bound of \S\ref{sec:theory}. It was not tuned to match; it is the same
+code counting the same probes on a different plant.
+
+\paragraph{What this changes.} The contribution is not a battery result that happens to
+generalise. It is a statement about a class of control problems --- \emph{scalar input, monotone
+constraints, a known-safe anchor} --- of which fast charging is one instance and a traction
+motor is another. That class is not small: winding and junction temperatures, hydraulic
+pressures, RF transmit power and any actuator whose limits are $I^2R$-driven all sit inside it.
+The battery is where the problem was found, not where the method ends.
+
+We claim only what is demonstrated: two instances, one of them not a cell, both certified by the
+same code at the same proved cost. Whether every member of that class is as well behaved is a
+question this paper opens rather than closes.
+
+
 \section{External validation: the assumptions against measured cells}\label{sec:external}
 
 Everything to this point is simulation. The filter is checked against a reduced-order model,
@@ -2542,6 +2610,10 @@ V4-8  & \ref{sec:space} & no ground loop costs charge, not safety & costs \sNoGr
 V4-9$^\dagger$ & \ref{sec:space} & array decay shrinks the window, not the certificate & never becomes binding in \sArrayYears{} years \\
 V4-10$^\dagger$ & \ref{sec:space} & radiator loss degrades gracefully & it \emph{improves} charge: cold-limited \\
 V4-11 & \ref{sec:space} & the eclipse bus load is a nonzero anchor & null-input browns out every case \\
+\addlinespace
+\multicolumn{4}{@{}l}{\textit{T1, L1 --- The method without a battery, and the proof audited}}\\
+T1  & \ref{sec:motor} & the theorem is about monotone structure, not cells & a \mtPower\,kW motor: \mtDisc{} disconnected, \mtBreach/\mtRuns{} breaches \\
+L1$^\dagger$ & \ref{sec:formal} & every theorem depends on no axiom at all & \leanFreeWord{} of \leanThms{} do; \leanUsing{} need \leanAxioms \\
 \addlinespace
 \multicolumn{4}{@{}l}{\textit{N3 --- The floor family, externally}}\\
 N3  & \ref{sec:dfndischarge} & the floor family holds against DFN physics & \dcBreach/\dcSteps{} breaches; \dcPrecision\,\% of refusals correct \\

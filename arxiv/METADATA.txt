@@ -52,17 +52,28 @@ meets it -- 1.0 % of characterisation episodes -- and then violates in
 on the expectation of violations over one distribution is not a per-step guarantee on
 another, and no amount of compute converts one into the other.
 
+Two results sharpen what the theorem is. Writing the Lean proofs showed the hypothesis is not
+merely sufficient but necessary: with monotonicity the bisection provably brackets
+the true edge, so a fixed iteration count is a fixed accuracy; without it, a constraint feasible
+at 0 and at 4 and nowhere between is proved to make the search return 0 at every budget,
+safe and unboundedly suboptimal. And the generality the proof asserts is demonstrated rather
+than assumed: the identical filter code, unmodified, certifies a 150 kW permanent-magnet
+traction motor -- no state of charge, no plating, no open-circuit voltage -- with every channel
+monotone, a single interval in 3,000 of 3,000 states, 0 breaches in
+600 climbing grades, and a cost bounded by the same 40 the theory proves.
+The battery is where the problem was found, not where the method ends.
+
 Three things make the guarantee checkable rather than asserted. It is machine-checked in
-Lean~4 -- nine theorems, no sorry, no dependency on any axiom -- and the
+Lean~4 -- 15 theorems, no sorry, twelve of them depending on no axiom at all -- and the
 proof needs less than we claimed: safety holds for an arbitrary predicate, so monotonicity
 buys optimality, not safety. The two assumptions it consumes are tested against 33 cells
 measured by another laboratory, and the filter itself against a Doyle-Fuller-Newman plant, a
 different model class, where the affine plating proxy kept the DFN's actual electrode
-potential above the deposition onset in every session. And it ships: 2,064 B of compiled code,
+potential above the deposition onset in every session. And it ships: 2,604 B of compiled code,
 68 B of RAM, worst-case 123.9 micros -- 1.24 % of a 10 ms ISO~26262
 slot.
 
-Across 16 platforms in four media, 63 experiments and 512,097
+Across 16 platforms in four media, 66 experiments and 520,657
 episodes, nothing was breached while the certificate reported feasible. Twenty-one of those
 experiments contradicted the hypothesis they were written to test and are reported as findings
 -- among them the two media of four where the incumbent rule is not beaten, and a
@@ -71,7 +82,7 @@ DFN degradation do not support.
 
 NOTES FOR THE SUBMISSION FORM
 -----------------------------
-Comments field:  44 pages, 10 figures, 63 experiments. Theorem machine-checked
+Comments field:  46 pages, 10 figures, 66 experiments. Theorem machine-checked
                  in Lean 4 (no sorry, no axioms); proof scripts and all
                  experiment code included in the repository.
 

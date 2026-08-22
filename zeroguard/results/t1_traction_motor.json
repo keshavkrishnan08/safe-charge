@@ -1,0 +1,59 @@
+{
+  "motor": {
+    "kt": 1.05,
+    "R_ph": 0.012,
+    "alpha_Cu": 0.00393,
+    "L_q": 0.00022,
+    "poles": 8,
+    "C_th": 14000.0,
+    "hA": 140.0,
+    "k_fe": 0.0016,
+    "T_max": 150.0,
+    "V_dc": 400.0,
+    "I_max": 520.0,
+    "I_demag0": 600.0,
+    "beta_demag": 0.0042
+  },
+  "dt_s": 0.1,
+  "monotone": {
+    "states": 4000,
+    "worst": {
+      "V": 0.0,
+      "T": 0.0,
+      "demag": 0.0,
+      "P": 0.0
+    },
+    "monotone": true
+  },
+  "interval": {
+    "states": 3000,
+    "disconnected": 0,
+    "worst_dev_A": 1.3018661154840174,
+    "scan_step_A": 1.3032581453634084,
+    "within_scan": true,
+    "evals_min": 4,
+    "evals_max": 40,
+    "evals_unique": [
+      4,
+      22,
+      40
+    ]
+  },
+  "grade": {
+    "runs": 600,
+    "breaches": 0,
+    "cp95_upper_pct": 0.4980443380361299,
+    "closed_runs": 600,
+    "no_warning": 0,
+    "lead_median_s": 0.75,
+    "lead_p05_s": 0.30000000000000004
+  },
+  "same_filter_unmodified": true,
+  "fixed_cost": true,
+  "evals_max_matches_theory": true,
+  "cost_paths": [
+    4,
+    22,
+    40
+  ]
+}

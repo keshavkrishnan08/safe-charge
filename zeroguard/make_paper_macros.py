@@ -16,7 +16,7 @@ RES = os.path.join(HERE, "results")
 OUT = os.path.join(os.path.dirname(HERE), "paper", "vehicle_macros.tex")
 
 D = {}
-for k, f in (("lean", "l1_lean_audit.json"), ("n3", "n3_dfn_discharge.json"), ("b6", "b6_constrained_rl.json"), ("s2", "s2_cycle_life.json"), ("e14", "e14_firmware.json"), ("s1", "s1_plating.json"), ("b5", "b5_domain_transfer.json"), ("n2", "n2_dfn.json"), ("b4", "b4_cbf.json"), ("p1", "p1_policy_filter.json"), ("p2", "p2_pack_dynamic.json"),
+for k, f in (("t1", "t1_traction_motor.json"), ("lean", "l1_lean_audit.json"), ("n3", "n3_dfn_discharge.json"), ("b6", "b6_constrained_rl.json"), ("s2", "s2_cycle_life.json"), ("e14", "e14_firmware.json"), ("s1", "s1_plating.json"), ("b5", "b5_domain_transfer.json"), ("n2", "n2_dfn.json"), ("b4", "b4_cbf.json"), ("p1", "p1_policy_filter.json"), ("p2", "p2_pack_dynamic.json"),
              ("m1", "m1_duration_margin.json"), ("d1", "d1_drive_cycles.json"), ("emb", "e13_embedded.json"),
              ("b3", "b3_tuned_derate.json"), ("b2", "b2_domain_baselines.json"), ("b", "b1_baselines.json"), ("n", "n1_nasa_validation.json"), ("g", "v1_ground.json"), ("a", "v2_aerial.json"), ("u", "v3_underwater.json"),
              ("s", "v4_space.json"), ("x", "x_crossdomain.json"),
@@ -58,8 +58,9 @@ _E14, _S1 = 20_000, 3 * 3 * 8
 _B6 = 8 * 600 + 400
 _S2 = 3 * 50
 _N3 = 960          # filtered discharge steps on the DFN
-m("vTotalEpisodes", f"{470_923 + _P1 + _P2 + _B4 + _N2 + _B5 + _E14 + _S1 + _B6 + _S2 + _N3:,}".replace(",", "{,}"))
-m("vExperiments", "64")
+_T1 = 4000 + 3000 + 600   # motor: monotonicity, interval scans, climbing grades
+m("vTotalEpisodes", f"{470_923 + _P1 + _P2 + _B4 + _N2 + _B5 + _E14 + _S1 + _B6 + _S2 + _N3 + _T1:,}".replace(",", "{,}"))
+m("vExperiments", "66")
 m("vPlatforms", "16")
 m("vClaims", "76")
 m("vFigures", "8")
@@ -722,6 +723,27 @@ if "p2" in D:
     m("qSpreadT", num(us["spread_T_K"], 1))
     m("qSpreadSoc", num(100 * us["spread_soc"], 1))
     m("qSwitchRate", num(100 * us["switch_rate"], 0))
+
+# ---- the same filter on something that is not a battery ---------------------------------
+if "t1" in D:
+    q = D["t1"]
+    mo, iv, gr = q["monotone"], q["interval"], q["grade"]
+    m("mtStates", num(mo["states"], 0, True))
+    m("mtMonotone", "yes" if mo["monotone"] else "no")
+    m("mtScan", num(iv["states"], 0, True))
+    m("mtDisc", str(iv["disconnected"]))
+    m("mtDev", num(iv["worst_dev_A"], 3))
+    m("mtStep", num(iv["scan_step_A"], 3))
+    m("mtEvalsMax", str(iv["evals_max"]))
+    m("mtPaths", ", ".join(str(x) for x in iv["evals_unique"]))
+    m("mtRuns", str(gr["runs"]))
+    m("mtBreach", str(gr["breaches"]))
+    m("mtCP", num(gr["cp95_upper_pct"], 2))
+    m("mtClosed", str(gr["closed_runs"]))
+    m("mtWarned", str(gr["closed_runs"] - gr["no_warning"]))
+    m("mtLead", num(gr["lead_median_s"], 2))
+    m("mtLeadP", num(gr["lead_p05_s"], 2))
+    m("mtPower", num(150, 0))
 
 # ---- the Lean audit, read from the build --------------------------------------------------
 if "lean" in D:

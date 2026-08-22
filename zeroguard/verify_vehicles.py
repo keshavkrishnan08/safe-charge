@@ -64,7 +64,29 @@ B3 = "b3_tuned_derate.json"
 D1 = "d1_drive_cycles.json"
 EMB = "e13_embedded.json"
 M1 = "m1_duration_margin.json"
+T1 = "t1_traction_motor.json"
 LEAN = "l1_lean_audit.json"
+
+# ---- the generality the Lean proof has, demonstrated on a plant with no cell in it ---------
+pred("T1    every constraint on a traction motor is monotone in current",
+     lambda: dig(T1, "monotone", "monotone"),
+     "a channel is not monotone, so the motor is outside the theorem's hypothesis")
+eq("T1    the admissible set is one interval there too",
+   lambda: dig(T1, "interval", "disconnected"), 0)
+pred("T1    and the bisection finds its edges to the scan resolution",
+     lambda: dig(T1, "interval", "within_scan"),
+     "the bisection edges disagree with a dense scan by more than the scan step")
+eq("T1    the filter breaches nothing while certified on a climbing grade",
+   lambda: dig(T1, "grade", "breaches"), 0)
+pred("T1    the reserve warns before the envelope closes",
+     lambda: dig(T1, "grade", "no_warning") == 0 and dig(T1, "grade", "lead_p05_s") > 0.0,
+     "the envelope closed with no warning, so the reserve is not a usable trigger here")
+pred("T1    the cost is bounded by the 40 evaluations the discharge case is proved to need",
+     lambda: dig(T1, "evals_max_matches_theory"),
+     "the motor needs a different number of evaluations than the theorem allows")
+pred("T1    and it is the same filter code, not a reimplementation",
+     lambda: dig(T1, "same_filter_unmodified"),
+     "the motor result came from adapted code, which weakens the generality claim")
 N3 = "n3_dfn_discharge.json"
 
 # ---- the Lean development, audited from the build rather than the manuscript --------------
