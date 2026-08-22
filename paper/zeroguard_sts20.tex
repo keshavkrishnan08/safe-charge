@@ -27,6 +27,10 @@
 \theoremstyle{remark}
 \newtheorem{remark}{Remark}
 
+\newcommand{\SI}[2]{#1\,#2}
+\newcommand{\si}[1]{#1}
+\newcommand{\degreeCelsius}{\degC}
+\newcommand{\micro}{$\mu$}
 \newcommand{\degC}{\ifmmode{^\circ}\mathrm{C}\else\textdegree C\fi}
 \captionsetup{font=small,labelfont=bf,skip=4pt}
 \setlength{\parskip}{0pt}
@@ -43,46 +47,38 @@ Autonomous Vehicles, from Robotaxis to Deep Space}\\[5pt]
 \vspace{-1.4cm}
 
 \begin{abstract}
-\noindent
-An autonomous vehicle's battery must be pushed hard enough to be useful and held back enough to
-be safe, and the state deciding where that line falls --- series resistance, plating margin, true
-capacity --- is not measurable in the field. Every unattended vehicle inherits the same
-compromise: a fixed de-rate chosen offline for the worst cell at the worst temperature at end of
-life. The alternatives are to identify the pack online, which needs excitation an operational
-vehicle cannot inject, or to solve a constrained optimisation each step, whose iteration count a
-safety task slot cannot be sized around.
-
-We prove that neither is necessary. Terminal voltage, temperature and the lithium-plating
-potential are each \emph{monotone} in applied current, so the admissible input set is a single
-\textbf{interval} whose edges are found by bisection in a \emph{fixed} number of one-step model
-evaluations. The published form assumes the safe input is zero, which holds for a cell being
-charged and fails for any vehicle doing its job: zero satisfies every temperature and voltage
-constraint on a discharging pack, but it cannot serve the load, which is a \emph{floor} rather
-than a cap. \textbf{Anchored Collapse} adds the floor family and a second bisection ---
-\evalDischarge{} fixed evaluations against \evalCharge.
-
-What that buys is not speed but \emph{transfer}. A de-rate tuned on a fleet a manufacturer could
-characterise in advance violates in \bThreeTunedViolPct\,\% of deployment sessions; the
-certificate, having nothing to tune, violates in \bThreeZgViol{} of \bThreeTrials. Against the
-control-barrier-function quadratic program the relationship is closer than rivalry: enforced on
-the true model rather than a linearisation, the discrete-time CBF condition for a monotone
-constraint \emph{is} an interval, so this is the bisection that solves that problem exactly.
-And a Lagrangian-constrained policy that meets its violation budget in training
-(\rlHardTrain\,\%) violates in \rlHardDeploy\,\% of deployment sessions --- an expectation over
-one distribution is not a per-step guarantee on another.
-
-The theorem is \textbf{machine-checked in Lean~4} (\leanThms{} theorems, no \texttt{sorry},
-\leanFreeWord{} of them axiom-free), and the proof needs less than we claimed: safety holds for an \emph{arbitrary}
-predicate, so monotonicity buys optimality, not safety. The assumptions are tested against
-\nCells{} cells measured by another laboratory and the filter against a Doyle--Fuller--Newman
-plant in both directions. It compiles to \fwText\,B and \fwRam\,B of RAM, worst case
-\fwUsMax\,$\mu$s.
-
-Across \vPlatforms{} platforms in four media and \vExperiments{} experiments, nothing was
-breached while the certificate reported feasible. \textbf{Twenty-one of those experiments
-contradicted the hypothesis they were written to test} and are reported as findings --- among
-them two media of four where the incumbent is \emph{not} beaten, and a cycle-life benefit that
-plating prevention makes tempting to claim and that DFN degradation does not support.
+An autonomous vehicle's battery must be pushed hard enough to be useful and held back enough to be
+safe, and the state that decides where that line falls --- series resistance, plating margin, true
+capacity --- is not measurable in the field. The industrial default is a fixed de-rate chosen offline
+for the worst cell at end of life; the alternatives identify the pack online, which needs
+excitation an operational vehicle cannot inject, or solve a constrained optimisation each step,
+whose iteration count a safety task slot cannot be sized around. Neither is necessary. Terminal voltage, temperature and the lithium-plating potential are each
+monotone in applied current, so the admissible input set is a single interval whose edges a bisection
+finds in a fixed number of one-step model evaluations, with no optimiser and no identified parameter.
+The published form assumes the safe input is zero, which holds for a cell on a bench and fails for any
+vehicle serving a load: zero satisfies every temperature and voltage constraint on a discharging pack
+but cannot meet the load, which is a floor rather than a cap. Anchored Collapse adds the floor family
+and a second bisection, \evalDischarge{} fixed evaluations against \evalCharge. The development is
+machine-checked in Lean~4 (\leanThms{} theorems, \leanSorry{} occurrences of \texttt{sorry},
+\leanFreeWord{} depending on no axiom at all), and the proofs show the hypothesis is sharp:
+monotonicity makes the bisection bracket the true edge, so a fixed iteration count is a fixed
+accuracy, and without it the search is safe but unboundedly suboptimal. What the method buys is transfer, not
+speed. A de-rate tuned on a fleet a manufacturer could characterise in advance violates in
+\bThreeTunedViolPct\,\% of deployment sessions where the certificate violates in \bThreeZgViol{} of
+\bThreeTrials; a Lagrangian-constrained policy meeting a \rlHardTrain\,\% violation budget in training
+violates in \rlHardDeploy\,\% of deployment sessions, and quadrupling the search does not close the
+gap. Against the control-barrier-function quadratic program the relationship is closer than rivalry:
+enforced on the true model rather than a linearisation, the discrete-time CBF condition for a monotone
+constraint is an interval, so this is the bisection that solves that problem exactly. We validate the
+two assumptions against \nCells{} cells measured by another laboratory, the filter against a
+Doyle--Fuller--Newman plant on charge and on discharge, and the generality against a
+\SI{\mtPower}{kW} permanent-magnet traction motor certified by the identical code at the same proved
+cost. The filter compiles to \SI{\fwText}{B} and \SI{\fwRam}{B} of RAM, worst case
+\SI{\fwUsMax}{\micro s}. Across \vPlatforms{} platforms in four media and \vExperiments{} experiments totalling
+\vTotalEpisodes{} episodes nothing was breached while the certificate reported feasible.
+Twenty-one experiments contradicted the hypothesis they were written to test and are reported as
+findings, among them two media of four where the incumbent is not beaten and a cycle-life benefit
+that DFN degradation does not support.
 \end{abstract}
 \section{Introduction}\label{sec:intro}
 
@@ -151,7 +147,7 @@ and are reported as findings rather than removed (Appendix).
 \end{enumerate}
 
 
-\subsection{Related work}\label{sec:related}
+\section{Related Work}\label{sec:related}
 
 The framework is control invariance \cite{blanchini2008settheoretic}. Control barrier functions
 \cite{ames2019cbf} and predictive safety filters \cite{wabersich2021psf} enforce it by solving an
@@ -172,13 +168,13 @@ degradation mode \cite{yang2017plating}. Online estimation of resistance and cap
 Reinforcement learning has been applied to fast charging \cite{wei2022ddpg,attia2020}. Our
 position is that the policy may be learned and the safety must not be.
 
-\section{The cell, and which of its constraints are monotone}\label{sec:cell}
+\section{Problem Formulation}\label{sec:cell}
 
 The result of \S\ref{sec:theory} is a statement about constraints, so it is worth writing the
 constraints down. Everything in this paper rests on a reduced-order electro-thermal model of a
 lithium-ion cell, calibrated against a Doyle--Fuller--Newman simulation in PyBaMM and reported
 in \cite{krishnan2026safe} at a held-out voltage RMSE of 20.3\,mV and temperature RMSE of
-1.32\,\degC{} across ambients from 0 to 25\,\degC{}. The model is prior work; what matters here
+\SI{1.32}{\degreeCelsius} across ambients from 0 to \SI{25}{\degreeCelsius}. The model is prior work; what matters here
 is its \emph{shape}, because that is what the theorem consumes.
 
 \paragraph{State and outputs.} The state is $x = (\mathrm{soc}, T, V_1)$ --- state of charge,
@@ -245,7 +241,7 @@ one interval, with the anchor inside it, and a width that is the reserve.}
 \end{figure}
 
 
-\section{Theory}\label{sec:theory}
+\section{Method}\label{sec:theory}
 
 Let a system have state $x$, scalar input $u \in [u_{\min}, u_{\max}]$, one-step map
 $x^+ = f(x,u,w)$, and a finite family of constraints $c_j(x,u)\le 0$ defining a safe set
@@ -276,7 +272,7 @@ yields a conservative interval. Second, the cost is $O(\log 1/\varepsilon)$ \emp
 evaluations, which is what a task slot can be sized around and a solver's iteration count is
 not.
 
-\subsection{Where it breaks, and why that reading is wrong}\label{sec:anchored}
+\subsection{Anchored collapse}\label{sec:anchored}
 
 Placed on a quadrotor holding altitude, a filter built on Proposition~\ref{prop:nic}
 \cite{krishnan2026safe} passes
@@ -343,7 +339,7 @@ $V_{\min}$, so $u_{\mathrm{hi}} < u_{\mathrm{MPP}}$ always and the floor search 
 $u_{\mathrm{hi}}$. This ordering is checked on every discharge platform, not assumed.
 \end{remark}
 
-\subsection{Machine-checked}\label{sec:formal}
+\subsection{Machine-checked soundness}\label{sec:formal}
 
 Theorem~\ref{thm:anchored} and the soundness of the bisection are formalised in Lean~4 and
 checked mechanically (\texttt{formal/AnchoredCollapse.lean}). \leanThms{} theorems compile
@@ -359,7 +355,7 @@ extensionality. The remaining \leanUsing{} depend on \leanAxioms{} alone, enteri
 \texttt{sorryAx}. The proofs are stated over an arbitrary type carrying a $\le$ relation with no
 order axiom used, so they hold without transitivity, antisymmetry or totality.
 
-\paragraph{Writing them weakened the hypotheses, and then sharpened them.} The safety guarantee
+\paragraph{Weakened hypotheses, and a sharper one.} The safety guarantee
 turns out never to touch the cap/floor structure at all: \texttt{bisect\_sound\_any\_predicate}
 holds for an \emph{arbitrary} predicate, monotone or not, connected or not. So (A2) buys
 \textbf{optimality, not safety}.
@@ -413,7 +409,7 @@ can report \emph{how close to unrecoverable} a vehicle is before it arrives. We 
 adversarially in \S\ref{sec:domains} and scope it in \S\ref{sec:cross}: it carries the most
 operational weight and is the most likely to be overstated.
 
-\section{Method and platforms}\label{sec:method}
+\section{Experimental Setup}\label{sec:method}
 
 \subsection{The filter}
 
@@ -428,7 +424,7 @@ $\delta_T = \delta_{T0} + K(s_R - 1)$ scaled by the \emph{assumed} resistance bo
 $K$ the smallest value certifying cells past the rated bound, and a cooling reserve $f$ that
 certifies any cooling loss up to $f/(1+f)$.
 
-\subsection{One cell, sixteen vehicles}
+\subsection{Platforms}
 
 Three things vary across the platforms and nothing else does: the \textbf{medium}, through the
 cooling law; the \textbf{pack}, through series/parallel counts; and the \textbf{load}, through
@@ -449,7 +445,7 @@ Ground & Newtonian, liquid loop & robotaxi 96S45P 78\,kWh; shuttle; & 0 (charge)
 Air & forced air, density-derated & delivery quadrotor 6S3P; eVTOL & hover thrust; 400\,kW; \\
     &                             & air taxi 300S45P; turnaround & 0 (charge) \\
 \addlinespace
-Water & sealed hull into 2\,\degC{} & survey AUV; buoyancy glider; & 25--265\,W; 0.5\,W; \\
+Water & sealed hull into \SI{2}{\degreeCelsius} & survey AUV; buoyancy glider; & 25--265\,W; 0.5\,W; \\
       &                             & under-ice AUV; dock recharge & 175\,W; 0 (charge) \\
 \addlinespace
 Vacuum & Stefan--Boltzmann to 4\,K & LEO smallsat; GEO comsat; deep- & 60\,W; 3\,kW; 200\,W; \\
@@ -462,7 +458,7 @@ Vacuum & Stefan--Boltzmann to 4\,K & LEO smallsat; GEO comsat; deep- & 60\,W; 3\
 The cell underneath is the reduced-order model of \cite{krishnan2026safe} in every case --- same
 overpotential form, same plating proxy, same calibrated coefficients --- with two changes the
 vehicles require. Current may be negative, because vehicles discharge. And the Newtonian cooling
-term is a callable, because a quadrotor at 400\,m, an AUV at 2\,\degC{} and a spacecraft in
+term is a callable, because a quadrotor at 400\,m, an AUV at \SI{2}{\degreeCelsius} and a spacecraft in
 vacuum do not share a cooling law. Under the Newtonian law with positive current the vehicle
 cell reproduces the published model \emph{bit for bit}, and every result downstream inherits
 that.
@@ -471,7 +467,7 @@ Pack geometry, hover powers, hotel loads and orbit parameters are
 \emph{class-representative} --- placing each vehicle in the right region of its class's design
 space using published figures --- and are not any manufacturer's design. The purpose is that
 ``it works on autonomous vehicles'' is not a testable sentence, while ``it holds a 96S45P pack
-under a 30-minute 350\,kW session at 35\,\degC{} ambient'' is.
+under a 30-minute 350\,kW session at \SI{35}{\degreeCelsius} ambient'' is.
 
 \subsection{Experimental discipline}
 
@@ -491,7 +487,7 @@ with permutation Spearman.
 
 
 
-\section{Four media, one method}\label{sec:domains}
+\section{Results}\label{sec:domains}
 
 The certificate was run on \vPlatforms{} platforms across ground, air, water and vacuum, from a
 robotaxi on a 350\,kW charger to a lander through lunar night. What that program is for is not
@@ -556,7 +552,7 @@ Recalibration cost
  & \sNoGroundGap{} SOC points, 5 yr \\
 \addlinespace
 Where it costs
- & above \gtCeiling\,\degC{} ambient (\gtAmbForty{} pts)
+ & above \SI{\gtCeiling}{\degreeCelsius} ambient (\gtAmbForty{} pts)
  & cell refused above \aRefuseC\,C hover
  & plating binds, never certified
  & lunar night: no configuration \\
@@ -565,7 +561,7 @@ Where it costs
 \end{table*}
 
 
-\paragraph{Four results that contradicted their own hypothesis.} These are worth more than the
+\paragraph{Four contradicted hypotheses.} These are worth more than the
 clean sheets, because a register in which nothing is marked is a register written after the
 results. The certificate \emph{refuses} the calibrated cell for a rotorcraft before takeoff above
 \aRefuseC\,C of hover draw --- the aircraft is not flyable on that cell and the filter says so
@@ -575,12 +571,12 @@ space a \emph{smaller} radiator delivers more charge, the pack being cold-limite
 heat-limited. And no lunar-night configuration survives at all: that result is reported as a
 frontier rather than as a pass.
 
-\paragraph{What the table says.} Read the last three rows rather than the first three. A method
+\paragraph{Reading the table.} Read the last three rows rather than the first three. A method
 claiming equal benefit in all four media would be one whose evaluation had not looked hard
 enough.
 
 
-\subsection{One vehicle, end to end}\label{sec:casestudy}
+\subsection{A worked case: the urban robotaxi}\label{sec:casestudy}
 
 The table is a summary and summaries are easy to skim past, so here is a single vehicle followed
 from arrival to dispatch, with every number drawn from the experiments above.
@@ -591,16 +587,16 @@ aged unevenly, and nothing on board can measure the three quantities that decide
 be charged. Today it is the twelfth session of the day --- a private car accumulates this much
 fast-charge stress in \gWeeks{} weeks.
 
-\textbf{What it does today.} It applies the de-rate its manufacturer chose. That rate was picked
+\textbf{The shipped de-rate.} It applies the de-rate its manufacturer chose. That rate was picked
 on evidence available before the vehicle shipped: a mild climate, cells not yet aged, the fastest
 constant current that was safe on that population --- \bThreeTuned C. Deployed across the fleet
-this vehicle actually belongs to, from $-10$ to 40\,\degC{} and out to end of life, that rate
+this vehicle actually belongs to, from $-10$ to \SI{40}{\degreeCelsius} and out to end of life, that rate
 violates a certified constraint in \textbf{\bThreeTunedViolPct\,\% of sessions}. To be safe
 everywhere it must fall to \bThreeRequired C, and at that rate the vehicle reaches a 60\,\%
 charge inside a \gtWindow-minute window in \textbf{\gtReachSixtyCc\,\% of sessions}. It mostly
 does not go back into service; it sits.
 
-\textbf{What it does with the certificate.} At each 30\,s step the filter evaluates the cell
+\textbf{Under the certificate.} At each 30\,s step the filter evaluates the cell
 model \evalCharge{} times --- always \evalCharge, never more --- and returns the largest current
 that keeps voltage, temperature and the plating potential inside their limits for the next step,
 at the worst corner of the envelope its estimator is allowed to assume. It identifies nothing. It
@@ -608,15 +604,15 @@ converges to nothing. Across \bThreeTrials{} deployment sessions it violates a c
 constraint \textbf{\bThreeZgViol{} times}, and it returns the vehicle to service at 60\,\% charge
 in \textbf{\gtReachSixtyZg\,\% of sessions} --- \gtReachSixtyRatio$\times$ as many.
 
-\textbf{What it costs, and where.} Not nothing, and not uniformly. On a mild day at 15\,\degC{} the
-certificate delivers $+$\gtAmbFifteen{} points more charge than the fixed rate; on a 40\,\degC{}
+\textbf{Cost, by ambient.} Not nothing, and not uniformly. On a mild day at \SI{15}{\degreeCelsius} the
+certificate delivers $+$\gtAmbFifteen{} points more charge than the fixed rate; on a \SI{40}{\degreeCelsius}
 afternoon it delivers \gtAmbForty{} points --- \emph{less} than the fixed rate, not more ---
-because its own thermal margin puts its effective ceiling at \gtCeiling\,\degC{} and above that
+because its own thermal margin puts its effective ceiling at \SI{\gtCeiling}{\degreeCelsius} and above that
 ambient the cell can never sit below it, so the filter refuses. It is right to refuse --- it breached nothing in
 \gtViol{} of \gtTrials{} sessions --- and refusing has a price. A fleet mean of
 $+$\gtMean{} points is the average of those two regimes and is not a fact about any vehicle.
 
-\textbf{And it runs on the hardware already in the car.} \fwText\,B of code and constants,
+\textbf{Footprint.} \fwText\,B of code and constants,
 \fwRam\,B of RAM, no heap and no recursion, worst case \fwUsMax\,$\mu$s --- \fwSlotPct\,\% of a
 10\,ms ISO~26262 task slot. It is a firmware change, not a new part, which is the difference
 between a result and a deployment.
@@ -624,7 +620,7 @@ between a result and a deployment.
 Over five years of that duty cycle, never recalibrated, the certificate breached
 \gRoboViol{} of \gRoboSessions{} sessions.
 
-\subsection{Where the method belongs, decided in advance}\label{sec:cross}
+\subsection{Where the reserve predicts endurance}\label{sec:cross}
 
 One cross-domain result decides which vehicles this is for, and it was fixed before the domain
 experiments ran. The certificate's reserve is the width of the admissible interval, and it
@@ -639,7 +635,7 @@ Table~\ref{tab:bydomain} has two columns where the incumbent is not beaten. Air 
 envelope-driven and the method helps there; water and deep space are not, and it does not.
 
 
-\section{The same standard in every domain}\label{sec:transfer}
+\section{Transfer Across Domains}\label{sec:transfer}
 
 Two things were wrong with the per-domain comparisons, and both were ours.
 
@@ -657,7 +653,7 @@ move.
 charge after a fixed horizon. No operator buys state of charge. A robotaxi that is charging is a
 robotaxi not earning, so the quantity is minutes until it can be dispatched again.
 
-\subsection{Tune where you can characterise; deploy where the vehicle goes}
+\subsection{Tuning and deployment populations}
 
 Each domain's incumbent threshold is chosen on a benign population --- mild ambient, cells not
 yet aged --- taking the most permissive threshold that still recovers at the stated rate. It is
@@ -706,7 +702,7 @@ where closure is envelope-driven, and underwater and in eclipse it is energy-dri
 certificate is measuring the wrong thing there, and no amount of fairer baselining will change
 that.
 
-\subsection{Minutes back on the road}
+\subsection{Time to dispatch}
 
 Scored on dispatch time instead of state of charge, over \gtTrials{} sessions across the
 deployment fleet against the CC--CV rate \S\ref{sec:transfer} showed is fleet-safe, the ground
@@ -720,11 +716,11 @@ A fleet is sized on how many vehicles come back, not on the mean charge of those
 
 The second is that the fleet mean of $+$\gtMean{} points is an average taken across a change of
 sign, and is therefore not a fact about any vehicle. By ambient the certificate delivers
-$+$\gtAmbFifteen{} points at 15\,\degC{} and \gtAmbForty{} at 40\,\degC, crossing over between
-\gtCrossLo{} and \gtCrossHi\,\degC.
+$+$\gtAmbFifteen{} points at \SI{15}{\degreeCelsius} and \gtAmbForty{} at \SI{40}{\degreeCelsius}, crossing over between
+\gtCrossLo{} and \SI{\gtCrossHi}{\degreeCelsius}.
 
 The reversal is not the theorem failing, and it is not a mystery. The thermal margin puts the
-certificate's effective ceiling at \gtCeiling\,\degC; above that ambient the cell can never sit
+certificate's effective ceiling at \SI{\gtCeiling}{\degreeCelsius}; above that ambient the cell can never sit
 below it, so the filter refuses to charge. It is right to refuse --- it breached nothing in
 \gtViol{} of \gtTrials{} sessions --- and refusing has a price. This is the passive-charging
 ceiling of \S\ref{sec:domains} reappearing as a performance number rather than a safety one, and
@@ -732,7 +728,7 @@ it is the same margin-sizing question the extended version answers for pulses an
 answer here, because a charging session really does last half an hour.
 
 
-\section{Against the CBF quadratic program}\label{sec:cbf}
+\section{Comparison with Control Barrier Functions}\label{sec:cbf}
 
 \S\ref{sec:related} places this work among predictive safety filters and control barrier
 functions, and \S\ref{sec:transfer} then benchmarks it against CC--CV, a de-rate sweep and MPC.
@@ -766,7 +762,7 @@ always. That is a stronger position than beating the QP, and it is the one the g
 supports.
 
 
-\paragraph{What this does not claim.} The QP is cheaper --- \cQpEval{} evaluations against
+\paragraph{Scope of the comparison.} The QP is cheaper --- \cQpEval{} evaluations against
 \cZgEval, and for a scalar input its solution is a clip rather than an iterative solve --- so
 nothing here is a speed claim. The claim is that at equal safety the exact filter delivers more
 charge, and that exactness is available at a fixed, known cost.
@@ -774,7 +770,299 @@ charge, and that exactness is available at a fixed, known cost.
 
 
 
-\subsection{The firmware, compiled}\label{sec:firmware}
+
+\section{Comparison with Constrained Reinforcement Learning}\label{sec:crl}
+
+\S\ref{sec:related} says constrained RL offers expectation-level guarantees, ``which are the
+wrong shape for a constraint that must hold on every step of every episode'', cites
+\cite{achiam2017cpo,altman1999constrained}, and then benchmarks against CC--CV, a de-rate sweep,
+MPC and the CBF quadratic program --- never against the thing it dismisses. In a paper whose
+method is to measure rather than assert, that was the one assertion left standing.
+
+The baseline is a Lagrangian-constrained policy trained the way the cited literature trains one:
+charge delivered minus a multiplier times \emph{expected} constraint cost, with the multiplier
+raised while the measured violation rate sits above a budget and lowered when it falls below
+\cite{stooke2020pid}. It is given a richer state feedback than the certificate uses, the same
+cell, the same envelope, and --- like every other baseline in \S\ref{sec:transfer} --- it is
+fitted on a characterisation fleet and deployed on the one the vehicle meets.
+
+\paragraph{Budget satisfaction, and what it does not transfer to.} Trained down to the tightest budget the
+policy violates in \rlBestTrain\,\% of characterisation episodes. Deployed, it violates in
+\rlBestDeploy\,\% of sessions; no budget in the sweep reaches zero, and the worst reaches
+\rlWorst\,\%. The certificate on the same fleet: \rlZgViol{} of \rlTrials, CP95 \rlZgCP\,\%.
+
+\paragraph{Training effort is not the limit.} It is
+a fair objection --- with a small batch a 1\,\% violation rate is not even measurable, so the
+search cannot see the budget it is chasing. Retrained at the tightest budget with
+\rlHardIters{} iterations and a batch of \rlHardBatch, the policy reaches \rlHardTrain\,\% in
+training and still violates in \rlHardDeploy\,\% of deployment sessions --- a gap of
+\rlGapPoints{} points. More search moves the deployment rate by a few points and does not
+approach zero.
+
+That gap is the entire claim, stated precisely. Constrained RL is not bad at this problem; it is
+optimising a different functional. A bound on the \emph{expectation} of violations over a
+training distribution says nothing about any particular episode drawn from a different one, and
+a vehicle experiences particular episodes. No amount of compute converts an expectation into a
+per-step guarantee, because they are not the same object.
+
+
+
+
+
+\section{Generalization Beyond Electrochemistry}\label{sec:motor}
+
+The Lean development proves the certificate sound for an \emph{arbitrary} predicate over an
+arbitrary type carrying a $\le$ relation. Nothing in it mentions electrochemistry. And every
+platform in this paper is a lithium cell, so the generality has been proved and never
+demonstrated --- which is precisely the gap a reader should be suspicious of, because a proof
+of generality that is never exercised is indistinguishable from a proof that is vacuous in
+practice.
+
+So the identical filter --- \texttt{zeroguard/anchored.py}, not a line changed, not an adapter
+written --- is run on a \mtPower\,kW permanent-magnet traction motor. The physics shares nothing
+with a cell: no state of charge, no plating, no open-circuit voltage, no diffusion. What it
+shares is the only thing the theorem asks for.
+
+\begin{itemize}\itemsep1pt
+\item \textbf{The input} is phase current amplitude, a scalar.
+\item \textbf{Winding temperature} rises with $I^2R$ copper loss --- monotone for the same
+reason a cell's does, which is the one piece of physics the two plants have in common.
+\item \textbf{Terminal voltage} is $\sqrt{(k_e\omega + IR)^2 + (\omega L I)^2}$ against the DC
+link --- monotone in $I$, by a completely different mechanism than a cell's overpotential.
+\item \textbf{Demagnetisation} is a current ceiling that \emph{tightens as the rotor heats} ---
+structurally the same shape as the plating cap, from unrelated physics. It is written $\ge$ and
+bounds current from above, so its \emph{side} must be declared rather than inferred, exactly as
+\S\ref{sec:theory} requires.
+\item \textbf{And a floor.} A vehicle holding a grade must deliver $\tau\omega \ge P_{\mathrm{dem}}$
+or it rolls backwards. Zero current is safe for every cap and serves nothing --- which is the
+Anchored Collapse case, on a plant that is not a battery.
+\end{itemize}
+
+\paragraph{Monotonicity, interval structure and cost.} Every channel is monotone in current
+across \mtStates{} sampled states, with the worst violation exactly zero. The admissible set was
+a single interval in \emph{all} \mtScan{} states scanned (\mtDisc{} disconnected), and the
+bisection's edges agree with a dense scan to \mtDev\,A against a scan step of \mtStep\,A.
+Climbing a steepening grade until the envelope closes, the filter breached nothing in
+\mtRuns{} runs (CP95 \mtCP\,\%); the envelope closed in \mtClosed{} of them and the reserve
+warned first in \mtWarned, with a median lead of \mtLead\,s and a fifth percentile of
+\mtLeadP\,s.
+
+The cost took the three values the theory predicts and no others: \mtPaths{} evaluations ---
+caps only, caps plus a floor check, or both bisections --- with a maximum of \mtEvalsMax, which
+is exactly the discharge bound of \S\ref{sec:theory}. It was not tuned to match; it is the same
+code counting the same probes on a different plant.
+
+\paragraph{Scope of the generalization.} The contribution is not a battery result that happens to
+generalise. It is a statement about a class of control problems --- \emph{scalar input, monotone
+constraints, a known-safe anchor} --- of which fast charging is one instance and a traction
+motor is another. The battery is where the problem was found, not where the method ends. We
+claim only what is demonstrated: two instances, one of them not a cell, certified by the same
+code at the same proved cost.
+
+
+\section{External Validation Against Measured Cells}\label{sec:external}
+
+Everything to this point is simulation. The filter is checked against a reduced-order model,
+and that model was calibrated against a Doyle--Fuller--Newman simulation. That is a defensible
+chain and it is still a chain of models, so the fair question is what happens when the
+assumptions meet a real cell.
+
+This section answers it with the NASA Ames Prognostics Center of Excellence battery data set:
+\nCells{} 18650 cells cycled to failure with periodic electrochemical impedance spectroscopy,
+published by a different laboratory, years before this work, for a different purpose. Nothing
+here was produced by us.
+
+The design point is that \textbf{the load-bearing assumptions are testable without any model at
+all.} The method does not need the ROM to be right about NASA's cells. It needs three things to
+be true of real cells, and each is a chemistry-independent statement about the shape of
+degradation.
+
+\subsection{The resistance bound}
+
+The filter never identifies resistance; it assumes a \emph{bound} on it, taken from a datasheet
+before the vehicle ships. If real cells leave that bound, every certificate in this paper is
+void. Across \nEIS{} impedance measurements, \textbf{\nInsideFrac\,\% lie inside the assumed
+bound $s_R = \nBound$} (Fig.~\ref{fig:external}a). Restricted to the life the certificate
+actually claims --- cells at or above 80\,\% of initial capacity, the standard automotive end of
+life --- the figure is \textbf{\nInsideEolFrac\,\% of \nEolMeas{} measurements}.
+
+Over the full measured life, including cells NASA ran down to \nCapWorst{} of initial capacity,
+\nViolations{} measurement exceeds the bound, on cell \nWorstCell{}, by 0.1\,\%. That is
+reported rather than trimmed: the bound is tight, and it is not a comfortable over-estimate.
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.88\textwidth]{FV9_external.pdf}
+\caption{The assumptions against cells this work did not produce. \textbf{(a)} Measured
+resistance growth for \nCells{} NASA cells against the datasheet bound the filter is given.
+\textbf{(b)} Hypothesis (A2), model-free: a cycle's peak temperature rise against its total
+ohmic generation. \textbf{(c)} The transferred model's error against the thermal margin that
+has to absorb it.}
+\label{fig:external}
+\end{figure}
+
+\subsection{Monotonicity of heat generation}
+
+Hypothesis (A2) is the other load-bearing assumption, and it too can be checked without a model
+--- though the obvious way of doing it does not work. Correlating
+instantaneous $\mathrm{d}T/\mathrm{d}t$ against instantaneous current returns nothing usable:
+stratifying by $T-T_{\mathrm{amb}}$ to control for cooling gives rank correlations that
+\emph{flip sign} between strata ($-0.34$ in the coldest, $+0.54$ in the warmest). NASA measures
+surface temperature, the core leads it by minutes, and over a charge whose total rise is under
+3\,K the thermal lag dominates the signal. Reporting either sign from that test would be an
+artefact of the instrument.
+
+The lag-free formulation is an energy balance over a whole cycle, which does not care how the
+heat arrives: total ohmic generation goes as $\int I^2\,\mathrm{d}t$, so a cycle's peak
+temperature rise should increase with it. Across \nDisCycles{} measured discharge cycles, with
+currents to \nMaxI\,A and temperature rises to \nMaxDT\,K, the rank correlation is
+\textbf{$\rho = \nDisRho$} ($p < 0.0005$; Fig.~\ref{fig:external}b). The charge cycles give
+$\nChgRho$, which is weaker for a mundane reason: NASA charges almost everything at a constant
+1.5\,A, so there is little current variation to correlate against.
+
+
+\subsection{Behaviour on a measured protocol}
+
+A safety filter that refuses everything is safe and useless. Given the end-of-life resistance
+bound and the full throttled margin --- its most conservative configuration --- the certificate
+permits \textbf{\nPermitFrac\,\%} of NASA's measured charge steps, with a median headroom of
+\nHeadroom$\times$ the applied current. Of the refusals, \nRefuseCeil\,\% are cells measured
+above the throttled ceiling of \SI{\nCeiling}{\degreeCelsius}: the same frontier \S\ref{sec:domains}
+predicts from the margin alone, appearing unprompted in someone else's measurements.
+
+
+\section{High-Fidelity DFN Validation}\label{sec:dfn}
+
+Every vehicle number in \S\ref{sec:domains} comes from a plant we wrote. The
+reduced-order model is defensible and it is still ours, so the question a battery reader asks is
+not whether this was tested on hardware but the sharper one underneath: \emph{how do you know the
+ROM is right?}
+
+DFN \cite{doyle1993,newman2004,fuller1994} is the field's reference model --- porous-electrode
+transport, solid-phase diffusion, Butler--Volmer kinetics, parameterised and validated against
+cells by others --- and it is a \emph{different model class}, not the same equations with
+different numbers. That is what makes it worth running. The envelope of \S\ref{sec:method} varies
+resistance, capacity and plating scale \emph{within} the ROM's structure; DFN inflicts
+misspecification the envelope was never written to cover: concentration gradients the ROM has no
+state for, kinetics it approximates, and a plating potential that is an actual electrode quantity
+rather than an affine proxy. The filter sees only measured SOC and temperature, propagating its
+own relaxation state between them, because that is all a battery management system has.
+
+\paragraph{Scope of the DFN comparison.} The ROM's coefficients were fitted to the LG M50, and the
+PyBaMM parameter set used here (\dSet) describes that cell, so this is \textbf{not} an
+independent-cell test and must not be read as one. It is a model-class test: same cell, higher
+fidelity. \S\ref{sec:external} covers the other axis --- \nCells{} cells from another laboratory
+that nothing was ever fitted to. Neither substitutes for the other; together they bracket the two
+ways a model can be wrong.
+
+
+\paragraph{Closed loop.} With the certificate computed on the ROM and the plant a full DFN cell,
+across \dSessions{} charging sessions: \dViolV{} voltage breaches, \dViolT{} temperature
+breaches. DFN's own peak values were \dPeakV\,V against \dVmaxLim{} and \SI{\dPeakT}{\degreeCelsius} against
+\dTmaxLim, so the cell was worked, not idled.
+
+The plating result is the sharpest of these. The ROM enforces an affine proxy; DFN reports the
+negative electrode surface potential difference, whose crossing of zero \emph{is} the
+thermodynamic onset of lithium deposition. In \dPlateClean{} of \dSessions{} sessions the real
+electrode potential stayed above onset, with a minimum of $+$\dMinPhi\,mV. The proxy the paper has
+enforced throughout, and has been careful never to certify, does the physical job it was built
+for --- measured against electrode physics rather than against itself.
+
+
+\subsection{The floor family}\label{sec:dfndischarge}
+
+Everything above is the charge direction, which is the published case. Anchored Collapse's
+contribution is the \emph{floor}: a vehicle serving a load has a constraint bounding its current
+from below, and a second bisection finds that edge. So the half of the theorem that was already
+known had external physics behind it and the half that is new did not.
+
+A DFN cell serves a constant electrical load, from \dcLoadLo{} to \dcLoadHi\,W per cell, while
+the anchored filter chooses the current. Four constraints are live and they pull both ways:
+temperature and state of charge cap the current, terminal voltage caps it too (a cell sags under
+load), and the load power is a floor.
+
+Across \dcSteps{} filtered discharge steps the DFN reports \dcBreachV{} voltage and \dcBreachT{}
+temperature breaches (CP95 \dcCP\,\%). Wherever the certificate reported the load meetable, the
+DFN delivered it --- never below \dcServed\,\% of demand. Above 100\,\% is not an error:
+\texttt{Platform.anchor} sizes current at the lowest bus voltage the constraints permit, so it
+deliberately over-estimates and the cell then sits above that voltage.
+
+\paragraph{Auditing the refusals.} The interesting case for a floor is not the step it
+permits but the step it refuses. The envelope closed on \dcRefused{} of \dcSteps{} steps, meaning
+the load could not be met inside the caps. Pushing to meet it anyway and asking the DFN what
+would have happened, \dcRight{} of those refusals were correct and \dcWrong{} were not ---
+\dcPrecision\,\%. The remainder are steps where there was room and the margin took it, which is
+the price of a margin and is reported as such rather than folded into the success count.
+
+
+\section{Cycle Life}\label{sec:cyclelife}
+
+Plating is the dominant fast-charge degradation mechanism, so a filter that prevents plating
+ought to show up as capacity retained. That inference is tempting, it is the largest claim
+available to this work, and \textbf{it is not supported}.
+
+\paragraph{Why the ROM's aging model is not used.} The ROM ships one, and using it would have been the
+cheap route and a worthless one: its plating term accumulates damage proportional to
+$\mathrm{clip}(\text{margin} - \phi, 0, \infty)\cdot|I|$, where the margin is \emph{the same
+threshold the certificate enforces}. A filter holding $\phi \ge$ margin by construction scores
+exactly zero damage by construction. So the plant is DFN with the full degradation stack ---
+irreversible plating, solvent-diffusion-limited SEI, porosity change --- and the numbers are
+DFN's own capacity-loss variables, which do not know the certificate exists.
+
+\paragraph{Result.} Cycling \clCycles{} times at \SI{\clAmb}{\degreeCelsius} between 15\,\% and 70\,\%
+with a 1C discharge, capacity lost is \clCertFade\,\% under the certificate, \clSlowFade\,\%
+under CC--CV 0.5C and \clFastFade\,\% under CC--CV 1.5C. The spread is \clSpread{} points. The
+certificate is \emph{marginally worse} than the slow de-rate (\clVsSafe{} points), and its
+advantage over the fast rate, \clVsFast{} points, is noise.
+
+\paragraph{Mechanism, and what it does not overturn.} The mechanism is the one the extended version
+already identified and it applies with more force here. DFN's plating variable is dominated by a
+slow background side reaction that accrues with cold time and total throughput --- which every
+controller spends similarly, since all three deliver the same charge --- rather than by the
+onset crossings the certificate prevents. Those crossings are real: the fast rate crossed in
+\clFastOnset{} of \clCycles{} cycles and the certificate in \clCertOnset. They are simply not
+what drives capacity fade in this regime.
+
+So the extended version stands and no life claim follows from it. The honest scope of the safety
+argument is the deposition onset --- the first link of the chain, where metallic lithium is laid
+down rather than consumed in a film --- and not calendar or cycle life, which this experiment
+looked for and did not find.
+
+
+\section{Deployability}\label{sec:embedded}
+
+The claim that the certificate ``fits inside any microcontroller a battery management system
+already contains'' was an assertion about software that had never been compiled for one. It
+should be measured or withdrawn.
+
+\paragraph{It holds no growing state.} Over \embCalls{} projections the heap grows by
+\embBytesPerCall{} bytes per call --- Python's own object churn. There is no list, no queue, no
+history: nothing a C implementation would need to allocate.
+
+\paragraph{Single precision is adequate but not one-sided.} A Cortex-M4F has a
+single-precision FPU and no double. Across \embSpStates{} states the single-precision filter
+deviates from double by at most \embSpWorstmA\,mA, which is \embSpFrac\,\% of full scale ---
+but it deviates in \emph{both} directions, permitting slightly more current than double in
+\embSpLooseCount{} of them. Negligible in magnitude against a 12.5\,K thermal margin; not a
+guarantee, and not claimed as one.
+
+\paragraph{The search needs no floating point at all, and there the direction \emph{is}
+provable.} Representing current as an integer count of quanta makes the bisection's only
+arithmetic \texttt{mid = (lo + hi) >> 1}, exact on any integer unit. Rounding the midpoint down
+makes the result conservative by construction: across \embIntStates{} states at
+\embIntBits{}-bit resolution (\embIntQuantum\,A quanta) the integer search returned a value
+above the real-valued answer \textbf{\embIntAbove{} times}. For a build that needs a provable
+direction of error, the FPU-free one is the one to ship.
+
+\paragraph{Footprint.} \textbf{\embRam{} bytes of RAM} --- live state plus \embConstants{}
+calibration constants --- and \textbf{\embFlash{} bytes} of lookup tables for an FPU-free build
+(\embLutExp{} entries for the Arrhenius exponential, \embLutAsinh{} for the inverse hyperbolic
+sine, 128 for open-circuit voltage, each sized for 0.1\,\% interpolation error). Constant stack,
+no recursion, no variable-length structure, \evalCharge{}--\evalDischarge{} model evaluations.
+That is smaller than the interrupt vector table on the parts in question.
+
+
+
+\subsection{The compiled firmware}\label{sec:firmware}
 
 Everything above is an estimate. Bytes of state were counted from a Python dictionary, table
 sizes from an interpolation error study, and ``needs no FPU'' from the observation that a
@@ -817,334 +1105,7 @@ current is worth \fwVcost\,mV of terminal voltage (\fwVfrac\,\% of the voltage m
 need a new one.
 
 
-\section{Against constrained reinforcement learning}\label{sec:crl}
-
-\S\ref{sec:related} says constrained RL offers expectation-level guarantees, ``which are the
-wrong shape for a constraint that must hold on every step of every episode'', cites
-\cite{achiam2017cpo,altman1999constrained}, and then benchmarks against CC--CV, a de-rate sweep,
-MPC and the CBF quadratic program --- never against the thing it dismisses. In a paper whose
-method is to measure rather than assert, that was the one assertion left standing.
-
-The baseline is a Lagrangian-constrained policy trained the way the cited literature trains one:
-charge delivered minus a multiplier times \emph{expected} constraint cost, with the multiplier
-raised while the measured violation rate sits above a budget and lowered when it falls below
-\cite{stooke2020pid}. It is given a richer state feedback than the certificate uses, the same
-cell, the same envelope, and --- like every other baseline in \S\ref{sec:transfer} --- it is
-fitted on a characterisation fleet and deployed on the one the vehicle meets.
-
-\paragraph{It meets its budget, and that is the problem.} Trained down to the tightest budget the
-policy violates in \rlBestTrain\,\% of characterisation episodes. Deployed, it violates in
-\rlBestDeploy\,\% of sessions; no budget in the sweep reaches zero, and the worst reaches
-\rlWorst\,\%. The certificate on the same fleet: \rlZgViol{} of \rlTrials, CP95 \rlZgCP\,\%.
-
-\paragraph{``You did not train it enough'' is the obvious objection, and it does not hold.} It is
-a fair objection --- with a small batch a 1\,\% violation rate is not even measurable, so the
-search cannot see the budget it is chasing. Retrained at the tightest budget with
-\rlHardIters{} iterations and a batch of \rlHardBatch, the policy reaches \rlHardTrain\,\% in
-training and still violates in \rlHardDeploy\,\% of deployment sessions --- a gap of
-\rlGapPoints{} points. More search moves the deployment rate by a few points and does not
-approach zero.
-
-That gap is the entire claim, stated precisely. Constrained RL is not bad at this problem; it is
-optimising a different functional. A bound on the \emph{expectation} of violations over a
-training distribution says nothing about any particular episode drawn from a different one, and
-a vehicle experiences particular episodes. No amount of compute converts an expectation into a
-per-step guarantee, because they are not the same object.
-
-
-
-
-
-\section{It is not about batteries}\label{sec:motor}
-
-The Lean development proves the certificate sound for an \emph{arbitrary} predicate over an
-arbitrary type carrying a $\le$ relation. Nothing in it mentions electrochemistry. And every
-platform in this paper is a lithium cell, so the generality has been proved and never
-demonstrated --- which is precisely the gap a reader should be suspicious of, because a proof
-of generality that is never exercised is indistinguishable from a proof that is vacuous in
-practice.
-
-So the identical filter --- \texttt{zeroguard/anchored.py}, not a line changed, not an adapter
-written --- is run on a \mtPower\,kW permanent-magnet traction motor. The physics shares nothing
-with a cell: no state of charge, no plating, no open-circuit voltage, no diffusion. What it
-shares is the only thing the theorem asks for.
-
-\begin{itemize}\itemsep1pt
-\item \textbf{The input} is phase current amplitude, a scalar.
-\item \textbf{Winding temperature} rises with $I^2R$ copper loss --- monotone for the same
-reason a cell's does, which is the one piece of physics the two plants have in common.
-\item \textbf{Terminal voltage} is $\sqrt{(k_e\omega + IR)^2 + (\omega L I)^2}$ against the DC
-link --- monotone in $I$, by a completely different mechanism than a cell's overpotential.
-\item \textbf{Demagnetisation} is a current ceiling that \emph{tightens as the rotor heats} ---
-structurally the same shape as the plating cap, from unrelated physics. It is written $\ge$ and
-bounds current from above, so its \emph{side} must be declared rather than inferred, exactly as
-\S\ref{sec:theory} requires.
-\item \textbf{And a floor.} A vehicle holding a grade must deliver $\tau\omega \ge P_{\mathrm{dem}}$
-or it rolls backwards. Zero current is safe for every cap and serves nothing --- which is the
-Anchored Collapse case, on a plant that is not a battery.
-\end{itemize}
-
-\paragraph{It holds, and it holds for the stated reason.} Every channel is monotone in current
-across \mtStates{} sampled states, with the worst violation exactly zero. The admissible set was
-a single interval in \emph{all} \mtScan{} states scanned (\mtDisc{} disconnected), and the
-bisection's edges agree with a dense scan to \mtDev\,A against a scan step of \mtStep\,A.
-Climbing a steepening grade until the envelope closes, the filter breached nothing in
-\mtRuns{} runs (CP95 \mtCP\,\%); the envelope closed in \mtClosed{} of them and the reserve
-warned first in \mtWarned, with a median lead of \mtLead\,s and a fifth percentile of
-\mtLeadP\,s.
-
-The cost took the three values the theory predicts and no others: \mtPaths{} evaluations ---
-caps only, caps plus a floor check, or both bisections --- with a maximum of \mtEvalsMax, which
-is exactly the discharge bound of \S\ref{sec:theory}. It was not tuned to match; it is the same
-code counting the same probes on a different plant.
-
-\paragraph{What this changes.} The contribution is not a battery result that happens to
-generalise. It is a statement about a class of control problems --- \emph{scalar input, monotone
-constraints, a known-safe anchor} --- of which fast charging is one instance and a traction
-motor is another. The battery is where the problem was found, not where the method ends. We
-claim only what is demonstrated: two instances, one of them not a cell, certified by the same
-code at the same proved cost.
-
-
-\section{External validation: the assumptions against measured cells}\label{sec:external}
-
-Everything to this point is simulation. The filter is checked against a reduced-order model,
-and that model was calibrated against a Doyle--Fuller--Newman simulation. That is a defensible
-chain and it is still a chain of models, so the fair question is what happens when the
-assumptions meet a real cell.
-
-This section answers it with the NASA Ames Prognostics Center of Excellence battery data set:
-\nCells{} 18650 cells cycled to failure with periodic electrochemical impedance spectroscopy,
-published by a different laboratory, years before this work, for a different purpose. Nothing
-here was produced by us.
-
-The design point is that \textbf{the load-bearing assumptions are testable without any model at
-all.} The method does not need the ROM to be right about NASA's cells. It needs three things to
-be true of real cells, and each is a chemistry-independent statement about the shape of
-degradation.
-
-\subsection{The resistance bound holds}
-
-The filter never identifies resistance; it assumes a \emph{bound} on it, taken from a datasheet
-before the vehicle ships. If real cells leave that bound, every certificate in this paper is
-void. Across \nEIS{} impedance measurements, \textbf{\nInsideFrac\,\% lie inside the assumed
-bound $s_R = \nBound$} (Fig.~\ref{fig:external}a). Restricted to the life the certificate
-actually claims --- cells at or above 80\,\% of initial capacity, the standard automotive end of
-life --- the figure is \textbf{\nInsideEolFrac\,\% of \nEolMeas{} measurements}.
-
-Over the full measured life, including cells NASA ran down to \nCapWorst{} of initial capacity,
-\nViolations{} measurement exceeds the bound, on cell \nWorstCell{}, by 0.1\,\%. That is
-reported rather than trimmed: the bound is tight, and it is not a comfortable over-estimate.
-
-\subsection{Heat generation is monotone in current, measured}
-
-Hypothesis (A2) is the other load-bearing assumption, and it too can be checked without a model
---- though the obvious way of doing it does not work, and why is worth recording. Correlating
-instantaneous $\mathrm{d}T/\mathrm{d}t$ against instantaneous current returns nothing usable:
-stratifying by $T-T_{\mathrm{amb}}$ to control for cooling gives rank correlations that
-\emph{flip sign} between strata ($-0.34$ in the coldest, $+0.54$ in the warmest). NASA measures
-surface temperature, the core leads it by minutes, and over a charge whose total rise is under
-3\,K the thermal lag dominates the signal. Reporting either sign from that test would be an
-artefact of the instrument.
-
-The lag-free formulation is an energy balance over a whole cycle, which does not care how the
-heat arrives: total ohmic generation goes as $\int I^2\,\mathrm{d}t$, so a cycle's peak
-temperature rise should increase with it. Across \nDisCycles{} measured discharge cycles, with
-currents to \nMaxI\,A and temperature rises to \nMaxDT\,K, the rank correlation is
-\textbf{$\rho = \nDisRho$} ($p < 0.0005$; Fig.~\ref{fig:external}b). The charge cycles give
-$\nChgRho$, which is weaker for a mundane reason: NASA charges almost everything at a constant
-1.5\,A, so there is little current variation to correlate against.
-
-\subsection{Where the model does not transfer, and whether that matters}
-
-The harder question is how the ROM itself behaves on a cell it was never fitted to --- a 5\,Ah
-NMC model applied to $\sim$2\,Ah LCO cells with capacity rescaled and nothing else refitted.
-Measured one step ahead the question is meaningless, because NASA samples every $\sim$9\,s over
-which the temperature moves about 0.01\,K and predicting ``unchanged'' scores well. Integrated
-forward over a \nHorizon\,s horizon under the measured current, the transferred model scores
-RMSE \nRMSE\,\degC{} against a persistence baseline of \nPersist\,\degC{} --- a skill of
-\nSkill{}.
-
-The safety-relevant question is not the magnitude but the \emph{sign}. A model that
-over-predicts temperature yields a conservative certificate; one that under-predicts yields an
-unsafe one. \textbf{This transfer is not conservative}: the bias is \nBias\,\degC{} and it
-over-predicts in only \nOverFrac\,\% of forecasts. What rescues it is the margin. The worst
-under-prediction at the 5th percentile is \nUnderWorst\,\degC{} against a thermal margin of
-12.5\,\degC{} --- a factor of \textbf{\nMarginCover} of cover (Fig.~\ref{fig:external}c). The
-margin was not designed for cross-chemistry transfer; it happens to absorb it, and that is a
-fact about this data rather than a guarantee.
-
-\subsection{The filter permits a real protocol, and refuses where it said it would}
-
-A safety filter that refuses everything is safe and useless. Given the end-of-life resistance
-bound and the full throttled margin --- its most conservative configuration --- the certificate
-permits \textbf{\nPermitFrac\,\%} of NASA's measured charge steps, with a median headroom of
-\nHeadroom$\times$ the applied current. Of the refusals, \nRefuseCeil\,\% are cells measured
-above the throttled ceiling of \nCeiling\,\degC{}: the same frontier \S\ref{sec:domains}
-predicts from the margin alone, appearing unprompted in someone else's measurements.
-
-\subsection{One test that did not work}
-
-It was tempting to go further and ask whether the cells the filter would have refused are the
-cells that actually degraded. The mechanism would have been clean --- NASA cycled some cells at
-4\,\degC{}, the plating cap falls to a 0.70C floor below about 5.5\,\degC{}, and plating is what
-degrades a cold-charged cell.
-
-The association is not stable. Its sign \emph{changes} with how the capacity baseline is
-defined --- first measured discharge against the median of the largest few --- because NASA's
-first discharge on \nBadBaselines{} of \nCapCells{} cells is partial, giving baselines as low as
-0.068\,Ah for a 2\,Ah cell. Across the four defensible combinations of baseline and fade metric,
-$\rho$ ranges from $\nAssocLo$ to $\nAssocHi$, with significant results of both signs, and
-ambient temperature and cycle count sit behind both quantities. All four are reported in
-Table-form in the results file rather than one. \textbf{A result that flips sign with a
-defensible change of definition is not a result}, and selecting the flattering version would be
-the most misleading thing this study could do.
-
-\begin{figure}[t]\centering
-\includegraphics[width=0.88\textwidth]{FV9_external.pdf}
-\caption{The assumptions against cells this work did not produce. \textbf{(a)} Measured
-resistance growth for \nCells{} NASA cells against the datasheet bound the filter is given.
-\textbf{(b)} Hypothesis (A2), model-free: a cycle's peak temperature rise against its total
-ohmic generation. \textbf{(c)} The transferred model's error against the thermal margin that
-has to absorb it.}
-\label{fig:external}
-\end{figure}
-
-
-
-\section{Against a Doyle--Fuller--Newman plant}\label{sec:dfn}
-
-Every vehicle number in \S\ref{sec:domains} comes from a plant we wrote. The
-reduced-order model is defensible and it is still ours, so the question a battery reader asks is
-not whether this was tested on hardware but the sharper one underneath: \emph{how do you know the
-ROM is right?}
-
-DFN \cite{doyle1993,newman2004,fuller1994} is the field's reference model --- porous-electrode
-transport, solid-phase diffusion, Butler--Volmer kinetics, parameterised and validated against
-cells by others --- and it is a \emph{different model class}, not the same equations with
-different numbers. That is what makes it worth running. The envelope of \S\ref{sec:method} varies
-resistance, capacity and plating scale \emph{within} the ROM's structure; DFN inflicts
-misspecification the envelope was never written to cover: concentration gradients the ROM has no
-state for, kinetics it approximates, and a plating potential that is an actual electrode quantity
-rather than an affine proxy. The filter sees only measured SOC and temperature, propagating its
-own relaxation state between them, because that is all a battery management system has.
-
-\paragraph{What this is and is not.} The ROM's coefficients were fitted to the LG M50, and the
-PyBaMM parameter set used here (\dSet) describes that cell, so this is \textbf{not} an
-independent-cell test and must not be read as one. It is a model-class test: same cell, higher
-fidelity. \S\ref{sec:external} covers the other axis --- \nCells{} cells from another laboratory
-that nothing was ever fitted to. Neither substitutes for the other; together they bracket the two
-ways a model can be wrong.
-
-
-\paragraph{Closed loop.} With the certificate computed on the ROM and the plant a full DFN cell,
-across \dSessions{} charging sessions: \dViolV{} voltage breaches, \dViolT{} temperature
-breaches. DFN's own peak values were \dPeakV\,V against \dVmaxLim{} and \dPeakT\,\degC{} against
-\dTmaxLim, so the cell was worked, not idled.
-
-The plating result is the one worth pausing on. The ROM enforces an affine proxy; DFN reports the
-negative electrode surface potential difference, whose crossing of zero \emph{is} the
-thermodynamic onset of lithium deposition. In \dPlateClean{} of \dSessions{} sessions the real
-electrode potential stayed above onset, with a minimum of $+$\dMinPhi\,mV. The proxy the paper has
-enforced throughout, and has been careful never to certify, does the physical job it was built
-for --- measured against electrode physics rather than against itself.
-
-
-\subsection{And the floor family, which is what is new}\label{sec:dfndischarge}
-
-Everything above is the charge direction, which is the published case. Anchored Collapse's
-contribution is the \emph{floor}: a vehicle serving a load has a constraint bounding its current
-from below, and a second bisection finds that edge. So the half of the theorem that was already
-known had external physics behind it and the half that is new did not.
-
-A DFN cell serves a constant electrical load, from \dcLoadLo{} to \dcLoadHi\,W per cell, while
-the anchored filter chooses the current. Four constraints are live and they pull both ways:
-temperature and state of charge cap the current, terminal voltage caps it too (a cell sags under
-load), and the load power is a floor.
-
-Across \dcSteps{} filtered discharge steps the DFN reports \dcBreachV{} voltage and \dcBreachT{}
-temperature breaches (CP95 \dcCP\,\%). Wherever the certificate reported the load meetable, the
-DFN delivered it --- never below \dcServed\,\% of demand. Above 100\,\% is not an error:
-\texttt{Platform.anchor} sizes current at the lowest bus voltage the constraints permit, so it
-deliberately over-estimates and the cell then sits above that voltage.
-
-\paragraph{And the refusals were audited.} The interesting case for a floor is not the step it
-permits but the step it refuses. The envelope closed on \dcRefused{} of \dcSteps{} steps, meaning
-the load could not be met inside the caps. Pushing to meet it anyway and asking the DFN what
-would have happened, \dcRight{} of those refusals were correct and \dcWrong{} were not ---
-\dcPrecision\,\%. The remainder are steps where there was room and the margin took it, which is
-the price of a margin and is reported as such rather than folded into the success count.
-
-
-\section{Cycle life: a claim that did not survive}\label{sec:cyclelife}
-
-Plating is the dominant fast-charge degradation mechanism, so a filter that prevents plating
-ought to show up as capacity retained. That inference is tempting, it is the largest claim
-available to this work, and \textbf{it is not supported}.
-
-\paragraph{Not with our own aging model.} The ROM ships one, and using it would have been the
-cheap route and a worthless one: its plating term accumulates damage proportional to
-$\mathrm{clip}(\text{margin} - \phi, 0, \infty)\cdot|I|$, where the margin is \emph{the same
-threshold the certificate enforces}. A filter holding $\phi \ge$ margin by construction scores
-exactly zero damage by construction. So the plant is DFN with the full degradation stack ---
-irreversible plating, solvent-diffusion-limited SEI, porosity change --- and the numbers are
-DFN's own capacity-loss variables, which do not know the certificate exists.
-
-\paragraph{The result.} Cycling \clCycles{} times at \clAmb\,\degC{} between 15\,\% and 70\,\%
-with a 1C discharge, capacity lost is \clCertFade\,\% under the certificate, \clSlowFade\,\%
-under CC--CV 0.5C and \clFastFade\,\% under CC--CV 1.5C. The spread is \clSpread{} points. The
-certificate is \emph{marginally worse} than the slow de-rate (\clVsSafe{} points), and its
-advantage over the fast rate, \clVsFast{} points, is noise.
-
-\paragraph{Why, and what it does not overturn.} The mechanism is the one the extended version
-already identified and it applies with more force here. DFN's plating variable is dominated by a
-slow background side reaction that accrues with cold time and total throughput --- which every
-controller spends similarly, since all three deliver the same charge --- rather than by the
-onset crossings the certificate prevents. Those crossings are real: the fast rate crossed in
-\clFastOnset{} of \clCycles{} cycles and the certificate in \clCertOnset. They are simply not
-what drives capacity fade in this regime.
-
-So the extended version stands and no life claim follows from it. The honest scope of the safety
-argument is the deposition onset --- the first link of the chain, where metallic lithium is laid
-down rather than consumed in a film --- and not calendar or cycle life, which this experiment
-looked for and did not find.
-
-
-\section{Deployability: what it costs on a BMS microcontroller}\label{sec:embedded}
-
-The claim that the certificate ``fits inside any microcontroller a battery management system
-already contains'' was an assertion about software that had never been compiled for one. It
-should be measured or withdrawn.
-
-\paragraph{It holds no growing state.} Over \embCalls{} projections the heap grows by
-\embBytesPerCall{} bytes per call --- Python's own object churn. There is no list, no queue, no
-history: nothing a C implementation would need to allocate.
-
-\paragraph{Single precision is adequate but not one-sided.} A Cortex-M4F has a
-single-precision FPU and no double. Across \embSpStates{} states the single-precision filter
-deviates from double by at most \embSpWorstmA\,mA, which is \embSpFrac\,\% of full scale ---
-but it deviates in \emph{both} directions, permitting slightly more current than double in
-\embSpLooseCount{} of them. Negligible in magnitude against a 12.5\,K thermal margin; not a
-guarantee, and not claimed as one.
-
-\paragraph{The search needs no floating point at all, and there the direction \emph{is}
-provable.} Representing current as an integer count of quanta makes the bisection's only
-arithmetic \texttt{mid = (lo + hi) >> 1}, exact on any integer unit. Rounding the midpoint down
-makes the result conservative by construction: across \embIntStates{} states at
-\embIntBits{}-bit resolution (\embIntQuantum\,A quanta) the integer search returned a value
-above the real-valued answer \textbf{\embIntAbove{} times}. For a build that needs a provable
-direction of error, the FPU-free one is the one to ship.
-
-\paragraph{Footprint.} \textbf{\embRam{} bytes of RAM} --- live state plus \embConstants{}
-calibration constants --- and \textbf{\embFlash{} bytes} of lookup tables for an FPU-free build
-(\embLutExp{} entries for the Arrhenius exponential, \embLutAsinh{} for the inverse hyperbolic
-sine, 128 for open-circuit voltage, each sized for 0.1\,\% interpolation error). Constant stack,
-no recursion, no variable-length structure, \evalCharge{}--\evalDischarge{} model evaluations.
-That is smaller than the interrupt vector table on the parts in question.
-
-
-
-\section{The register}\label{sec:register}
+\section{The Experiment Register}\label{sec:register}
 
 \noindent\emph{This is the 20-page report. An extended version carrying all \vExperiments{}
 experiments in full --- the four per-medium sections, the EPA drive cycles, the duration-aware
@@ -1154,9 +1115,8 @@ firmware, and every script that produced a number here.}
 
 
 The register --- every experiment, its claim, and what would falsify it --- was fixed before any
-code ran. \vExperiments{} experiments were run and \textbf{twenty-one contradicted the hypothesis
-they were written to test}. Those are marked below and none was removed. The full register, with
-per-experiment outcomes, is in the extended version and the repository.
+code ran; twenty-one of \vExperiments{} contradicted the hypothesis they were written to test and
+none was removed. Per-experiment outcomes are in the extended version and the repository.
 
 {\footnotesize
 \setlength{\tabcolsep}{4pt}
@@ -1165,7 +1125,7 @@ per-experiment outcomes, is in the extended version and the repository.
 \textbf{Group} & \textbf{n} & \textbf{What it establishes, and where it went against us} \\
 \midrule
 V1--V4 & 43 & Four media, \vPlatforms{} platforms. $\dagger$ Passive charging impossible above
-\gCeiling\,\degC; a rotorcraft cell refused before takeoff; plating binds under water at every
+\SI{\gCeiling}{\degreeCelsius}; a rotorcraft cell refused before takeoff; plating binds under water at every
 temperature; a smaller radiator delivers \emph{more} charge; no lunar-night configuration
 survives \\
 X1--X5 & 5 & One interval in \scanTotal{} scans, identical cost everywhere, and $\dagger$ the
