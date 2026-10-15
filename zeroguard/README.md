@@ -7,13 +7,13 @@ An extension of the IECON work in `../safe_charge/`, which asks a question the o
 did not: *is any of this actually about batteries?*
 
 The answer is no, and the consequences are the subject here. The IECON filter needs exactly
-two things from a system — a null input that is safe, and constraints that are monotone in
-that input — and neither is electrochemical. Stated that way it is a theorem about a class of
+two things from a system, a null input that is safe, and constraints that are monotone in
+that input, and neither is electrochemical. Stated that way it is a theorem about a class of
 control problems, and the battery is one instance.
 
 Then a second question, which the answer to the first made unavoidable: *if it is not about
 batteries, is it about vehicles?* The theorem as stated needs `u = 0` to be safe, and on a
-vehicle that is doing its job it usually is not — cut the current to a quadrotor and it falls,
+vehicle that is doing its job it usually is not, cut the current to a quadrotor and it falls,
 to an AUV and it loses its computer, to a spacecraft in eclipse and the bus browns out. That is
 the subject of the second half.
 
@@ -36,7 +36,7 @@ python zeroguard/verify_vehicles.py          # re-read every vehicle claim out o
 | `anchored.py` | the generalisation: an anchor that need not be zero, and a two-sided certificate |
 | `platforms.py` | sixteen vehicles across four media, sharing one cell and one interface |
 | `vexp.py` | the three mission loops every vehicle experiment runs |
-| `stats.py` | Clopper–Pearson, bootstrap, Wilcoxon with effect sizes, permutation Spearman |
+| `stats.py` | Clopper-Pearson, bootstrap, Wilcoxon with effect sizes, permutation Spearman |
 | `exp/` | one script per experiment; each writes JSON to `results/` |
 | `figures.py`, `figures_vehicles.py` | eighteen figures, each redrawn from a results file |
 | `verify_claims.py`, `verify_vehicles.py` | fail loudly if the manuscript and the data disagree |
@@ -49,12 +49,12 @@ one-step transitions, zero violations. Instantiated on the battery it reproduces
 `project_current` **bit for bit** across 60,000 states.
 
 **Its two hypotheses fail differently.** Break the safe null input and every one-step check
-still passes — for a mean of 22.3 steps — and then 100 % of episodes violate. Break
+still passes, for a mean of 22.3 steps, and then 100 % of episodes violate. Break
 monotonicity and the bisection never once returns an infeasible input; it just gives up 23.7 %
 of the available charge. (A1) is about safety, (A2) is about performance.
 
 **The certificate does not depend on how heat leaves the cell.** Replacing Newtonian
-convection with Stefan–Boltzmann radiation leaves every monotonicity intact and produces zero
+convection with Stefan-Boltzmann radiation leaves every monotonicity intact and produces zero
 violations in 20,000 vacuum draws. Removing the radiator entirely degrades delivered charge
 from 0.607 to 0.168 and never violates.
 
@@ -74,12 +74,12 @@ with nothing fitted.
 were closed rather than dropped: a six-channel vacuum envelope including radiation drift
 (0/20,000), the sample-adequacy check that `stats.n_required` was written for and never
 called, and the latency evidence that never reached a figure. The adequacy check then found a
-fourth problem of its own — the adversarial claim rested on 40 cells, bounding the violation
-rate only below 7.2 % — so the attack was re-run against 320 cells and 256,000 sequences,
+fourth problem of its own, the adversarial claim rested on 40 cells, bounding the violation
+rate only below 7.2 %, so the attack was re-run against 320 cells and 256,000 sequences,
 bringing it to 0.93 % with zero violations.
 
 **Two things in the original method were described wrongly**, and the ablations found both.
-The *I* = 0 short-circuit is not a safety mechanism — the bisection is self-correcting when
+The *I* = 0 short-circuit is not a safety mechanism, the bisection is self-correcting when
 every input is infeasible, and returns zero regardless; what the check buys is 17 model
 evaluations. And the throttle *K* = 15, which looked over-conservative on cells inside the
 rated bound, turns out to be the *smallest* value that certifies cells past it.
@@ -88,7 +88,7 @@ rated bound, turns out to be the *smallest* value that certifies cells past it.
 
 **The failure was misdiagnosed, and that is the whole second paper.** E2 concluded that a
 hovering quadrotor breaks (A1) because `u = 0` stops being safe. It does not: cut the current
-and nothing heats, nothing sags, nothing discharges — every *cap* is satisfied. What zero
+and nothing heats, nothing sags, nothing discharges, every *cap* is satisfied. What zero
 cannot do is fly the aircraft, and that is a **floor**, a constraint the original theorem has
 no vocabulary for. Every vehicle has one, because every vehicle has an irreducible load.
 Charging is the special case where it is zero.
@@ -102,19 +102,19 @@ disconnected admissible set anywhere. Twelve headline claims, 69,389 pooled tria
 violations, every one past the 299 needed to certify below 1 %.
 
 **The certificate refuses designs, not just commands.** With the ROM's own calibrated cell it
-reports the interval empty *before takeoff* above 1.2C of hover draw — the right engineering
+reports the interval empty *before takeoff* above 1.2C of hover draw, the right engineering
 answer to flying a rotorcraft on an energy cell. A 1.75× takeoff transient is refused on 6S2P,
 allowed on 6S3P, and completes 78.5 % of sorties on 6S4P.
 
 **Three results that inverted the hypothesis they were written to test.** In a sealed hull the
-binding constraint is plating at *every* water temperature — the one the theorem enforces but
+binding constraint is plating at *every* water temperature, the one the theorem enforces but
 does not certify. In deep space, shrinking the radiator *increases* delivered charge, because
 the pack is cold-limited rather than heat-limited. And on the lunar surface a bigger battery
 buys almost nothing while insulation takes survival from 5.3 h to 54.3 h, against a 61.3 h
 energy ceiling.
 
 **One negative result, kept.** Under an ice shelf, closure leaves a median of 7 minutes before
-an actual breach — and the vehicle needs 20 to reach a hole in the ice, so it covers the return
+an actual breach, and the vehicle needs 20 to reach a hole in the ice, so it covers the return
 in 0 % of episodes. Closure is the wrong trigger. Aborting instead at 8 A of remaining reserve
 gives 31 minutes of warning *ahead of* closure at the 5th percentile and covers it every time: a
 design rule the null-input certificate could not have produced, because it has no reserve to
@@ -128,8 +128,8 @@ rule is to act on the minimum.
 ## Scope
 
 Every number here is reduced-order-model level or model-versus-model. The PyBaMM
-Doyle–Fuller–Newman pipeline behind the IECON paper is not part of this release, so its
+Doyle-Fuller-Newman pipeline behind the IECON paper is not part of this release, so its
 evidence is cited rather than re-derived. Section 5 of `PAPER.md` states the limits in full,
 including the two the original paper already carried: the certified set is {*T*, *V*} and
-plating is enforced rather than certified, and the certificate is conditional on the sensor —
+plating is enforced rather than certified, and the certificate is conditional on the sensor,
 Section 4.7 quantifies exactly how conditional.

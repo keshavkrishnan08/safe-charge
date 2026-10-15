@@ -1,7 +1,7 @@
 # Machine-checked Anchored Collapse
 
 Lean 4 formalisation of the two properties the safety filter rests on. No `sorry`, no mathlib,
-and — as Lean's own axiom audit reports — **no dependency on any axiom at all**.
+and, as Lean's own axiom audit reports, **no dependency on any axiom at all**.
 
 ```bash
 curl -sSL -o /tmp/elan.tar.gz \
@@ -12,7 +12,7 @@ cd formal && lake build          # prints the axiom audit for all seven theorems
 
 | theorem | what it says |
 |---|---|
-| `admissible_ordConvex` | intersecting caps and floors leaves an **interval** — the collapse theorem |
+| `admissible_ordConvex` | intersecting caps and floors leaves an **interval**: the collapse theorem |
 | `admissible_isCap_of_no_floors` | with no floors it is downward closed: Null-Input Collapse recovered |
 | `between_admissible` | everything between two admissible inputs is admissible |
 | `bisect_sound` | **every reachable bisection state has a feasible lower endpoint** |
@@ -22,7 +22,7 @@ cd formal && lake build          # prints the axiom audit for all seven theorems
 
 `bisect_sound` is the one worth having machine-checked. Convergence is a claim about how *good*
 the answer is; this is a claim about whether it is *safe*, and it holds independent of iteration
-count, of the midpoint rule, and of floating-point behaviour — the proof never assumes the
+count, of the midpoint rule, and of floating-point behaviour, the proof never assumes the
 midpoint is the arithmetic mean, only that it lies between the endpoints. A filter interrupted
 by a deadline still returns an admissible input.
 

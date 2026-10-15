@@ -1,4 +1,4 @@
-# ZEROGUARD — Vehicle Design Register
+# ZEROGUARD: Vehicle Design Register
 
 **Anchored Collapse and the four media: ground, air, water, vacuum**
 
@@ -8,9 +8,9 @@ happened, with divergences recorded rather than quietly corrected.
 
 The first register asked whether the IECON filter is about batteries and answered no. This one
 asks a harder question that the answer exposed: **the theorem needs `u = 0` to be safe, and on
-a vehicle that is doing its job, it usually is not.** E2 measured that failure precisely — a
+a vehicle that is doing its job, it usually is not.** E2 measured that failure precisely, a
 hovering quadrotor passed 22.3 consecutive one-step checks and then violated in 100 % of
-episodes — and stopped there. Stopping there was correct and it was also the end of the
+episodes, and stopped there. Stopping there was correct and it was also the end of the
 vehicle story, because a certificate that only holds while the vehicle is parked is not a
 vehicle certificate.
 
@@ -20,7 +20,7 @@ vehicle certificate.
 
 Carried unchanged from `DESIGN.md`:
 
-- No Doyle–Fuller–Newman pipeline in this repository. Everything is ROM-level or
+- No Doyle-Fuller-Newman pipeline in this repository. Everything is ROM-level or
   ROM-versus-ROM, and the DFN evidence behind the IECON paper is cited, not re-derived.
 - The certified set is `{T, V}` on charge. Plating is enforced and monitored, never certified.
 
@@ -34,7 +34,7 @@ below:
 - **One cell, sixteen vehicles.** Every platform uses the M50 coefficients from
   `rom_params.json`, because that is the cell the ROM was calibrated against and substituting
   uncalibrated coefficients would trade a real limitation for a fake result. Where a class
-  would really use a different cell — the eVTOL, which needs a power cell — the actuator
+  would really use a different cell, the eVTOL, which needs a power cell, the actuator
   ceiling is raised to match and the mismatch is recorded. The M50's resistance is *higher*
   than a power cell's, so those certificates are conservative for the aircraft rather than
   tuned to it.
@@ -50,11 +50,11 @@ below:
 > u_max]`, and constraints each satisfied on one side of a threshold in `u`: the *caps* on
 > `[u_min, u_c]`, the *floors* on `[u_c, u_max]`. If there is a known anchor `u_a`, feasible
 > from every state in the safe set, then the admissible set is the interval `[u_lo, u_hi] ∋
-> u_a`, and both edges are found by bisection in `O(log 1/ε)` one-step evaluations — no
+> u_a`, and both edges are found by bisection in `O(log 1/ε)` one-step evaluations, no
 > optimizer, no convergence test, no identification.
 
 Null-Input Collapse is the case `u_a = 0` with no floors. **Every vehicle has an irreducible
-load** — hover thrust, hotel load, bus load, survival heater — and that load is the anchor.
+load**, hover thrust, hotel load, bus load, survival heater, and that load is the anchor.
 Charging is the special case where it is zero, which is exactly why the IECON filter could
 anchor at zero without ever saying so.
 
@@ -84,20 +84,20 @@ result at vehicle scale; discharge-mode platforms have `u_a > 0` and test the ge
 
 | domain | case | pack | mode | anchor source |
 |---|---|---|---|---|
-| ground | `robotaxi-urban` | 96S45P, 78 kWh | charge | — |
-| ground | `autonomous-shuttle` | 72S18P, 24 kWh | charge | — |
-| ground | `haul-truck` | 288S115P, 601 kWh | charge | — |
+| ground | `robotaxi-urban` | 96S45P, 78 kWh | charge | - |
+| ground | `autonomous-shuttle` | 72S18P, 24 kWh | charge | - |
+| ground | `haul-truck` | 288S115P, 601 kWh | charge | - |
 | aerial | `delivery-quadrotor` | 6S1P, 0.11 kWh | discharge | hover thrust (momentum theory) |
 | aerial | `evtol-air-taxi` | 300S30P, 163 kWh | discharge | 400 kW hover |
-| aerial | `quadrotor-turnaround` | 6S1P | charge | — |
+| aerial | `quadrotor-turnaround` | 6S1P | charge | - |
 | underwater | `survey-auv` | 14S6P, 1.5 kWh | discharge | hotel + thrust, 115 W |
 | underwater | `buoyancy-glider` | 10S4P, 0.73 kWh | discharge | 0.5 W hotel |
 | underwater | `under-ice-auv` | 14S6P | discharge | 175 W, no abort-to-surface |
-| underwater | `survey-auv-dock` | 14S6P | charge | — |
-| space | `leo-smallsat` | 8S3P, 0.44 kWh | charge | — |
+| underwater | `survey-auv-dock` | 14S6P | charge | - |
+| space | `leo-smallsat` | 8S3P, 0.44 kWh | charge | - |
 | space | `geo-comsat` | 100S8P, 14.5 kWh | discharge | 3 kW payload in eclipse |
-| space | `deep-space-cruiser` | 24S16P, 7 kWh | charge | — |
-| space | `mars-rover` | 8S12P, 1.7 kWh | charge | — |
+| space | `deep-space-cruiser` | 24S16P, 7 kWh | charge | - |
+| space | `mars-rover` | 8S12P, 1.7 kWh | charge | - |
 | space | `lunar-night-lander` | 8S20P, 2.9 kWh | discharge | 45 W survival heater |
 | space | `high-radiation-orbiter` | 16S24P, 6 kWh | charge | 300 krad TID |
 
@@ -108,7 +108,7 @@ result at vehicle scale; discharge-mode platforms have `u_a > 0` and test the ge
 Eleven experiments per domain, each attacking a different part, plus five cross-domain. Each
 row states the claim, what would falsify it, and the decision rule. All seeds fixed.
 
-### V1 — Ground: autonomous cars, robotaxis, shuttles, trucks
+### V1: Ground: autonomous cars, robotaxis, shuttles, trucks
 
 | ID | Claim | Falsifier | Decision rule |
 |----|-------|-----------|---------------|
@@ -124,7 +124,7 @@ row states the claim, what would falsify it, and the decision rule. All seeds fi
 | **V1-10** | Thermistor bias/dropout is survivable up to the derived breakpoint | violation below the breakpoint | matches the E9 closed form |
 | **V1-11** | V2G discharge needs a nonzero anchor even on the ground | anchored and null-input agree | null-input must under-serve the load |
 
-### V2 — Aerial: delivery rotorcraft and eVTOL
+### V2: Aerial: delivery rotorcraft and eVTOL
 
 | ID | Claim | Falsifier | Decision rule |
 |----|-------|-----------|---------------|
@@ -140,13 +140,13 @@ row states the claim, what would falsify it, and the decision rule. All seeds fi
 | **V2-10** | eVTOL hover at 2.5C certifies, and the reserve converts to endurance | violation, or non-monotone endurance | 0 violations; endurance monotone in reserve |
 | **V2-11** | An adversary optimising the power profile against the two-sided filter cannot break it | any violation | 0 violations at n ≥ 299 (certifies < 1 %) |
 
-### V3 — Underwater: survey AUVs, gliders, under-ice
+### V3: Underwater: survey AUVs, gliders, under-ice
 
 | ID | Claim | Falsifier | Decision rule |
 |----|-------|-----------|---------------|
 | **V3-1** | A sealed hull (UA ≈ 1/10 of a car's) still certifies | violation | 0 / n |
 | **V3-2** | In 2 °C water the binding constraint on recharge switches from temperature to plating | temperature still binds | report binding fraction; plating > 50 % |
-| **V3-3** | A nonzero anchor arises with nothing moving — hotel load alone forces it | null-input serves the load | null-input must brown out |
+| **V3-3** | A nonzero anchor arises with nothing moving, hotel load alone forces it | null-input serves the load | null-input must brown out |
 | **V3-4** | A 6-month deployment of dock recharges holds with no recalibration | violation | 0 violations over ≥ 4 000 cycles |
 | **V3-5** | Dormancy between missions (calendar ageing) is another monotone channel | violation | 0 / n |
 | **V3-6** | Depth (colder water, worse hull coupling) degrades gracefully | violation, or non-monotone SOC | 0 violations; Spearman monotone |
@@ -156,7 +156,7 @@ row states the claim, what would falsify it, and the decision rule. All seeds fi
 | **V3-10** | A glider at 0.5 W and an AUV at 175 W are the same certificate | different structure | both single-interval; reserve ratio reported |
 | **V3-11** | The buoyancy pump's burst load is absorbed by the anchor | violation on a burst | 0 / n |
 
-### V4 — Space: LEO, GEO, deep space, Mars, lunar night, high radiation
+### V4: Space: LEO, GEO, deep space, Mars, lunar night, high radiation
 
 | ID | Claim | Falsifier | Decision rule |
 |----|-------|-----------|---------------|
@@ -172,7 +172,7 @@ row states the claim, what would falsify it, and the decision rule. All seeds fi
 | **V4-10** | Radiator degradation degrades gracefully to the vacuum limit | violation as `εA → 0` | 0 at every point |
 | **V4-11** | The bus-load anchor in eclipse is nonzero and the null-input filter cannot represent it | null-input serves the bus | null-input must brown out |
 
-### X — Cross-domain connectedness
+### X: Cross-domain connectedness
 
 | ID | Claim | Falsifier | Decision rule |
 |----|-------|-----------|---------------|
@@ -193,10 +193,10 @@ one moved is recorded here rather than edited into agreement above.
 **The theorem statement got weaker and truer.** The register above states Anchored Collapse as
 requiring "a known anchor `u_a`, feasible from every state in the safe set". Implementing it
 showed that neither bisection needs the anchor at all. The caps are satisfied on a prefix and
-`u = 0` is in that prefix from any safe state — that is the *original* (A1), unchanged, applied
+`u = 0` is in that prefix from any safe state, that is the *original* (A1), unchanged, applied
 to the cap family only. The floors are satisfied on a suffix and the actuator ceiling is in
 that one. So each edge has its own known-good endpoint and the anchor is a *physical*
-quantity — the current the load demands, which is where the lower edge lands — rather than an
+quantity, the current the load demands, which is where the lower edge lands, rather than an
 algorithmic seed. The shipped statement is (A1′): `u = u_min` is safe **for every cap**. This
 is strictly weaker than (A1) and it is what the vehicles satisfy: cutting a quadrotor's current
 does not heat it, sag it or discharge it. What zero cannot do is fly the aircraft, and that is
@@ -218,7 +218,7 @@ surfaced only when the rotorcraft's actuator ceiling was raised to a power cell'
 pushed `u_max` past the peak for the first time.
 
 **Cost is 40 evaluations, not 39.** Two probes to bracket each family plus 18 halvings each.
-The register's arithmetic was wrong; the property — fixed, data-independent — is unchanged.
+The register's arithmetic was wrong; the property, fixed, data-independent, is unchanged.
 
 **The estimator has to be pessimistic in every channel, not the interesting one.** The first
 run of V1-2 returned 719 excursions in 4 000 sessions. The cause was that `vexp.pessimistic`
@@ -230,7 +230,7 @@ would have produced a paper full of unexplained violations.
 **Certified against enforced, carried forward.** The IECON paper certifies `S = {T, V}` and
 *enforces* plating, because `u = 0` does not clear the plating margin above ~0.82 SOC. The
 first vehicle harness counted plating excursions as violations, which made the V1-8 regen
-experiment report 183 failures that were all `u = 0` at high SOC — exactly the corner the
+experiment report 183 failures that were all `u = 0` at high SOC, exactly the corner the
 original paper says cannot be certified. The distinction is now explicit in
 `vexp.certified_idx` and every result reports the two separately.
 
@@ -238,23 +238,23 @@ original paper says cannot be certified. The distinction is now explicit in
 
 | what | where |
 |---|---|
-| The calibrated M50 — an energy cell — is **refused before takeoff** above ~1.1C of hover draw. The filter is acting as a design tool, not a runtime guard, and the refusal is the correct engineering answer. The remaining aerial experiments therefore use a power cell, which is the register's largest single modelling liberty. | V2-1 |
-| With the pack coupled to ambient air, the throttled margin makes fast charging **impossible above 32.5 °C** — `T_max − δ_T` exactly. This is why production EV packs have chillers rather than radiators, and it was found by a sweep written to look for something else. | V1-3 |
+| The calibrated M50, an energy cell, is **refused before takeoff** above ~1.1C of hover draw. The filter is acting as a design tool, not a runtime guard, and the refusal is the correct engineering answer. The remaining aerial experiments therefore use a power cell, which is the register's largest single modelling liberty. | V2-1 |
+| With the pack coupled to ambient air, the throttled margin makes fast charging **impossible above 32.5 °C**: `T_max − δ_T` exactly. This is why production EV packs have chillers rather than radiators, and it was found by a sweep written to look for something else. | V1-3 |
 | A lander on 2.9 kWh does **not** survive 354 hours of lunar night on a 45 W heater, and neither do most real ones. V4-5's decision rule changed from "zero violations across the night" to "report the survivable frontier", because the pass/fail version would have been a claim about a spacecraft nobody builds. | V4-5 |
 | A sealed hull's conductance is **0.086×** a car's, not the 0.8× the first parameter set gave. The experiment printed the ratio next to the sentence asserting an order of magnitude, and they disagreed. | V3-1 |
 
 **Two experiments were re-scoped because the first version could not fail.** V1-4 asked for
-80 % SOC in thirty minutes; under the throttled margin this pack delivers 40–50 points in that
+80 % SOC in thirty minutes; under the throttled margin this pack delivers 40-50 points in that
 time, so every cell of the grid returned zero and the sweep could not distinguish graceful
 degradation from a cliff. The target is now 60 %. The same experiment's ambient-monotonicity
-test was replaced: delivered charge is **not** monotone in ambient and was never going to be —
+test was replaced: delivered charge is **not** monotone in ambient and was never going to be,
 it peaks near 20 °C, with series resistance limiting the cold limb and the thermal margin the
-hot one — so the two limbs are tested separately rather than pooled into a non-significant
+hot one, so the two limbs are tested separately rather than pooled into a non-significant
 correlation that would have meant nothing.
 
 **A rank-correlation bug that manufactured a result.** `stats.spearman_perm` used
 `argsort(argsort(x))` as its rank transform, which breaks ties by array position. V3-5 swept
-ten years of dormancy and every node returned the same delivered charge — and the function
+ten years of dormancy and every node returned the same delivered charge, and the function
 reported `ρ = +1.000, p = 0.0002` for a flat line. Mid-ranks (`stats._rank`) fix it, and a
 constant series now returns `ρ = nan` with `degenerate: True` rather than a perfect
 relationship. Two vehicle results were affected and both changed meaning, not just precision.
@@ -267,21 +267,21 @@ plating binds in 100 % of states from −1.8 °C to 25 °C. A sealed hull charge
 the pack never approaches its thermal limit. What does change with temperature is which
 plating mechanism binds. This has a consequence worth stating plainly: on this vehicle, in
 this medium, **the binding constraint is the one the IECON paper enforces but does not
-certify.** V3-5 and V3-6 inherit it — delivered charge does not move across a decade of
+certify.** V3-5 and V3-6 inherit it, delivered charge does not move across a decade of
 dormancy or 6 000 m of depth, because neither acts on the channel that is limiting. The
 certificate is not tolerant of those channels so much as blind to them.
 
 *Under-ice warning time.* V3-7's decision rule was that the closure warning must cover a
 20-minute transit. It does not: the median is about seven minutes, and it covers the transit in
 essentially no episodes. Rather than soften the rule, the experiment now reports the negative
-and then does the thing the negative implies — closure is the wrong trigger, so it sweeps an
+and then does the thing the negative implies, closure is the wrong trigger, so it sweeps an
 abort threshold on the *reserve* and reports the smallest one that buys the transit at the 5th
 percentile. That design rule is only available because the two-sided certificate has a reserve
 to threshold; the null-input version has nothing to sweep.
 
 *Continuity of the deadline service.* V1-4 asked whether the 30-minute service degrades
 continuously. Delivered charge does. The binary hit-rate against a fixed target does not and
-cannot — thresholding a smooth quantity produces a threshold. The claim now separates the two
+cannot, thresholding a smooth quantity produces a threshold. The claim now separates the two
 and reports the operational reading: plan on the continuous curve the filter already computes,
 not on the binary derived from it.
 
@@ -289,7 +289,7 @@ not on the binary derived from it.
 landed at up to 44 °C and reported that it reached 0.195 SOC. True, and uninteresting: the
 throttled margin puts the admissible ceiling at 32.5 °C, so the certificate correctly refuses
 to put any current in at all. It now cools at zero current until the interval opens, and
-reports the wait, the charge, and the sorties per day that survive it — which is the question
+reports the wait, the charge, and the sorties per day that survive it, which is the question
 a delivery operator actually has.
 
 **A harness bug that fabricated 76 violations.** V4-4 drew the Mars rover's initial temperature
@@ -304,7 +304,7 @@ on the Moon (+0.87) and it does not underwater (+0.02 and −0.12), because an i
 for two different reasons: the edges converging, or the state of charge reaching its floor with
 the interval still wide open. Only the first is a countdown. The pooled, anchor-normalised
 correlation is +0.916, and reporting that alone would have been the most flattering presentation
-available. X4 now reports both clocks — the width and `(soc − soc_floor)·Q / u_lo` — per
+available. X4 now reports both clocks, the width and `(soc − soc_floor)·Q / u_lo`: per
 platform, notes that every platform has one of them significantly positive with the GEO
 satellite weakest at +0.367, and recommends acting on the minimum.
 

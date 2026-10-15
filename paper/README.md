@@ -32,7 +32,7 @@ scripts under [`../reproduce/`](../reproduce/) regenerate the headline results.
 ## The 20-page vehicle paper
 
 `zeroguard_sts.tex` is the long-form manuscript: the theory, and then four application
-domains — ground, air, water, vacuum — across sixteen platforms. Applications are the bulk of
+domains, ground, air, water, vacuum, across sixteen platforms. Applications are the bulk of
 it by design.
 
 ```bash

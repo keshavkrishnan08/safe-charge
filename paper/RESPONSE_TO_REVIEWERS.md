@@ -1,4 +1,4 @@
-# Response to Reviewers — IECON26-001272
+# Response to Reviewers: IECON26-001272
 
 **Safe Fast Charging Robust to Battery Aging: A Solver-Free Safety Filter Without a Health Oracle**
 
@@ -15,16 +15,16 @@ the final section of this letter.
 
 ## Reviewer 1
 
-> **R1.1 — The authors should add numerical findings in the abstract section.**
+> **R1.1, The authors should add numerical findings in the abstract section.**
 
 Added. The abstract now carries the headline quantities: the peak DFN-replayed temperature
-(40.4 °C against the 45 °C limit), the delivered SOC matching CC–CV at 1C (0.773) while removing
-that protocol's 22% plating rate, the aged-draw safety record (156/156, Clopper–Pearson 1.9%) across
-SOH 1.0–0.8, the cross-chemistry recalibration (100/100, voltage RMSE 26.5 mV), and the per-projection
+(40.4 °C against the 45 °C limit), the delivered SOC matching CC-CV at 1C (0.773) while removing
+that protocol's 22% plating rate, the aged-draw safety record (156/156, Clopper-Pearson 1.9%) across
+SOH 1.0-0.8, the cross-chemistry recalibration (100/100, voltage RMSE 26.5 mV), and the per-projection
 cost (at most 20 model evaluations, 904 B). The original wording is otherwise unchanged; the numbers
 were inserted into the existing sentences rather than replacing them.
 
-> **R1.2 — The authors should add a nomenclature in order to clarify the symbols.**
+> **R1.2, The authors should add a nomenclature in order to clarify the symbols.**
 
 Added a Nomenclature section before the Introduction, covering all 13 symbol groups used in the
 paper: the constrained signals and their limits, the plating overpotential, the current variants,
@@ -33,7 +33,7 @@ three control margins, both aging channels and their estimated and rated values,
 gains, the control step and RC time constant, the heat-generation decomposition, the lumped thermal
 parameters, the resistance terms, and the bisection resolution.
 
-> **R1.3 — The quality of figures 1, 4, and 5 is poor.**
+> **R1.3, The quality of figures 1, 4, and 5 is poor.**
 
 All three are rebuilt or re-typeset:
 
@@ -47,20 +47,20 @@ All three are rebuilt or re-typeset:
 - **Fig. 4, panel (a)**: the legend previously occluded the rising "no adaptation" curve and
   overhung the axes frame. It has been repositioned inside the axes and now clears the data.
 
-> **R1.4 — The authors should add future work in the conclusion section.**
+> **R1.4, The authors should add future work in the conclusion section.**
 
 The conclusion now orders the next steps and says what each one buys: hardware validation (which
 converts a ROM-relative certificate into a rated one), a predictive plating constraint (which would
 move plating from enforced to certified), an age-aware current cap, and a pack-level extension.
 
-> **R1.5 — What is the computational complexity of the proposed approach?**
+> **R1.5, What is the computational complexity of the proposed approach?**
 
 Stated explicitly in Sec. VI-E. The projection costs `O(log(1/ε))` one-step model evaluations for
 current resolution `ε`. Because the iteration count is fixed rather than convergence-tested, that
 bound is met on *every* input: at most 20 closed-form evaluations, ~800 flops, and 904 B of state and
 constants with no dynamic allocation. See also R2.1 for measured timings.
 
-> **R1.6 — The authors should explain in detail the robustness of the proposed approach, because a
+> **R1.6, The authors should explain in detail the robustness of the proposed approach, because a
 > filter that operates without an SoH oracle may pose problems in terms of resilience to the
 > uncertainties of battery aging.**
 
@@ -75,12 +75,12 @@ estimate:
 - We quantify the margin beyond the bound: the first violation appears only when the true resistance
   scale reaches 3.0, i.e. 1.7× the rated end-of-life bound the filter is given.
 - The certificate is validated over a 5-channel uncertainty envelope (resistance, cooling, thermal
-  mass, plating, ambient) at 50 000 draws with zero violations, a Clopper–Pearson 95% upper bound of
+  mass, plating, ambient) at 50 000 draws with zero violations, a Clopper-Pearson 95% upper bound of
   0.006%, and the monotone corner empirically dominating the interior.
 - The gains are shown to be a region, not a tuned point: sweeping `K ∈ [5,25]` and `f ∈ [0.1,0.4]`
   gives zero violations in 27 027 runs against aged, cooling-faulted cells.
 
-> **R1.7 — The authors should mention how the constraints are chosen and what the limitations of the
+> **R1.7, The authors should mention how the constraints are chosen and what the limitations of the
 > proposed approach are.**
 
 Both are now explicit. On provenance (Sec. IV-C): `T_max`, `V_max` and the rated end-of-life scale
@@ -99,7 +99,7 @@ and plating is enforced and monitored rather than certified.
 We are grateful for the detailed and accurate summary of the contribution, and for the recommendation
 to accept.
 
-> **R2.1 — Report the average computation time, worst case computation time, and memory requirements
+> **R2.1, Report the average computation time, worst case computation time, and memory requirements
 > of the one-dimensional bisection on a representative embedded processor.**
 
 Added to Sec. VI-E, backed by a new benchmark (`bench/timing.py`). The key point is that average and
@@ -108,13 +108,13 @@ call performs identical work and the spread across calls is host scheduling nois
 algorithmic variance. We report 56 µs per projection in the reference implementation, 904 B of state
 and constants, and no dynamic allocation, against a 30 s control step.
 
-We deliberately report the hardware-independent unit of work as the number that ports — at most 20
-one-step model evaluations, ~800 flops plus 40 transcendentals — and give the embedded figure as an
+We deliberately report the hardware-independent unit of work as the number that ports, at most 20
+one-step model evaluations, ~800 flops plus 40 transcendentals, and give the embedded figure as an
 explicit order-of-magnitude estimate (of order 100 µs on a 100 MHz Cortex-M4F) rather than presenting
 an unmeasured board number as data. We would rather understate than report a device measurement we
 did not take.
 
-> **R2.2 — The influence of the bisection tolerance on the resulting safety margin and charging
+> **R2.2, The influence of the bisection tolerance on the resulting safety margin and charging
 > performance should also be briefly discussed.**
 
 Added to Sec. VI-E, with a supporting sweep (`reproduce/tolerance_sweep.py`). The tolerance after `k`
@@ -123,7 +123,7 @@ that **safety is independent of `k`**: the bisection maintains `lo ≤ I*` throu
 tolerance can only under-command the current, never over-command it. Tolerance therefore trades only
 delivered charge, and that saturates by `k ≈ 12`; the deployed 18 iterations sit well past the knee.
 
-> **R2.3 — Explain the engineering basis for selecting a 30 s control interval, and discuss whether
+> **R2.3, Explain the engineering basis for selecting a 30 s control interval, and discuss whether
 > the safety result remains valid when the sampling interval is shorter or longer than the RC time
 > constant.**
 
@@ -139,21 +139,21 @@ the released ROM now offers an exact zero-order-hold branch (`BatteryROM(rc="exa
 explicit one used for every published number; the explicit branch now raises rather than silently
 oscillating if given `Δt > τ_RC`.
 
-> **R2.4 — Clarify the sources and selection principles of the thermal margin parameters, so that
+> **R2.4, Clarify the sources and selection principles of the thermal margin parameters, so that
 > readers can distinguish theoretically derived design parameters from parameters tuned through
 > simulation.**
 
 Addressed in Sec. IV-C; see R1.7 above for the full breakdown. In short: two constants are
 manufacturer data, one is derived in closed form from the fault to be covered, and exactly one (`K`)
-is chosen by simulation — and that one is selected on delivered charge, not on safety.
+is chosen by simulation, and that one is selected on delivered charge, not on safety.
 
-> **R2.5 — Further clarification of the scope of the safety certificate.**
+> **R2.5, Further clarification of the scope of the safety certificate.**
 
 The scope is now stated wherever the certificate is claimed. The certified set is exactly
 `S = {T ≤ T_max, V ≤ V_max}`. Plating is *not* in it: plating is history-dependent, and the `I = 0`
 backup does not clear the plating margin at the cold, aged, high-SOC corner, so no one-step condition
-can certify it. Plating is enforced — by the one-step margin together with the temperature-dependent
-current cap — and monitored, and we report it as enforced rather than proven. The released code
+can certify it. Plating is enforced, by the one-step margin together with the temperature-dependent
+current cap, and monitored, and we report it as enforced rather than proven. The released code
 carries the same scoping, and the test suite reports the SOC above which the `I = 0` backup stops
 clearing the plating margin rather than concealing it.
 
@@ -171,9 +171,9 @@ text says so.
 The conclusion the sentence supports is unaffected, and is in fact established more directly in the
 revision: we verified numerically that `∂_I g_T ≥ 0` holds for every current above 0.08 C, far below
 the 0.70 C floor imposed by the plating cap, and that the admissible current set is a single interval
-anchored at zero on the whole test grid — which is the property the bisection actually requires.
+anchored at zero on the whole test grid, which is the property the bisection actually requires.
 
-**Second correction — Fig. 4 caption.** The submitted caption reported *"55% of episodes at SOH 0.9,
+**Second correction, Fig. 4 caption.** The submitted caption reported *"55% of episodes at SOH 0.9,
 100% at 0.8"* for the non-adaptive filter. The series plotted in Fig. 4(a) is 0, 0, 100, 100, 100
 across SOH 1.00 to 0.80, so the caption and its own figure disagreed. The body text of Sec. VI-B
 ("without adaptation it rises to 100.0% at SOH 0.8") agrees with the figure. We have therefore
